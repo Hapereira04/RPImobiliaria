@@ -1,0 +1,661 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace RPImobiliaria.Migrations
+{
+    /// <inheritdoc />
+    public partial class AtualizarParaFicheirosLocais : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CategoriasImovel",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoriasImovel", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CertificadosEnergeticos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CertificadosEnergeticos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Clientes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Telemovel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NIF = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentityUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaminhoFotoPerfil = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clientes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Consultores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Telemovel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LicencaAMI = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaminhoFotoPerfil = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContentTypeFoto = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentityUserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Consultores", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EstadosImovel",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EstadosImovel", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GruposCaracteristicas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GruposCaracteristicas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StatusImoveis",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StatusImoveis", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TiposNegocio",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TiposNegocio", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FichasClientes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClienteId = table.Column<int>(type: "int", nullable: false),
+                    PerfilComprador = table.Column<bool>(type: "bit", nullable: false),
+                    PerfilVendedor = table.Column<bool>(type: "bit", nullable: false),
+                    PerfilArrendatario = table.Column<bool>(type: "bit", nullable: false),
+                    PerfilInvestidor = table.Column<bool>(type: "bit", nullable: false),
+                    OrcamentoMaximo = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    ZonasPreferencia = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TipologiasProcuradas = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NotasRequisitos = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UltimaAtualizacao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PreenchidoPeloCliente = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FichasClientes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FichasClientes_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaracteristicasCatalogo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GrupoCaracteristicaId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaracteristicasCatalogo", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CaracteristicasCatalogo_GruposCaracteristicas_GrupoCaracteristicaId",
+                        column: x => x.GrupoCaracteristicaId,
+                        principalTable: "GruposCaracteristicas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Imoveis",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Preco = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Quartos = table.Column<int>(type: "int", nullable: false),
+                    CasasBanho = table.Column<int>(type: "int", nullable: false),
+                    Estacionamento = table.Column<int>(type: "int", nullable: false),
+                    AreaUtil = table.Column<double>(type: "float", nullable: false),
+                    AreaBruta = table.Column<double>(type: "float", nullable: false),
+                    Piso = table.Column<int>(type: "int", nullable: false),
+                    AnoConstrucao = table.Column<int>(type: "int", nullable: false),
+                    NumeroFrentes = table.Column<int>(type: "int", nullable: false),
+                    Distrito = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Concelho = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Freguesia = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Zona = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MoradaExata = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NumeroContrato = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ObservacoesInternas = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ValorComissao = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    DataRegisto = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CategoriaImovelId = table.Column<int>(type: "int", nullable: true),
+                    TipoNegocioId = table.Column<int>(type: "int", nullable: true),
+                    EstadoImovelId = table.Column<int>(type: "int", nullable: true),
+                    StatusImovelId = table.Column<int>(type: "int", nullable: true),
+                    CertificadoEnergeticoId = table.Column<int>(type: "int", nullable: true),
+                    ConsultorId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Imoveis", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Imoveis_CategoriasImovel_CategoriaImovelId",
+                        column: x => x.CategoriaImovelId,
+                        principalTable: "CategoriasImovel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Imoveis_CertificadosEnergeticos_CertificadoEnergeticoId",
+                        column: x => x.CertificadoEnergeticoId,
+                        principalTable: "CertificadosEnergeticos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Imoveis_Consultores_ConsultorId",
+                        column: x => x.ConsultorId,
+                        principalTable: "Consultores",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Imoveis_EstadosImovel_EstadoImovelId",
+                        column: x => x.EstadoImovelId,
+                        principalTable: "EstadosImovel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Imoveis_StatusImoveis_StatusImovelId",
+                        column: x => x.StatusImovelId,
+                        principalTable: "StatusImoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Imoveis_TiposNegocio_TipoNegocioId",
+                        column: x => x.TipoNegocioId,
+                        principalTable: "TiposNegocio",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Fotos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaminhoImagem = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ordem = table.Column<int>(type: "int", nullable: false),
+                    ImovelId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fotos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Fotos_Imoveis_ImovelId",
+                        column: x => x.ImovelId,
+                        principalTable: "Imoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ImoveisCaracteristicas",
+                columns: table => new
+                {
+                    ImovelId = table.Column<int>(type: "int", nullable: false),
+                    CaracteristicaId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImoveisCaracteristicas", x => new { x.ImovelId, x.CaracteristicaId });
+                    table.ForeignKey(
+                        name: "FK_ImoveisCaracteristicas_CaracteristicasCatalogo_CaracteristicaId",
+                        column: x => x.CaracteristicaId,
+                        principalTable: "CaracteristicasCatalogo",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ImoveisCaracteristicas_Imoveis_ImovelId",
+                        column: x => x.ImovelId,
+                        principalTable: "Imoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ImoveisFavoritos",
+                columns: table => new
+                {
+                    ImovelId = table.Column<int>(type: "int", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: false),
+                    DataAdicionado = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImoveisFavoritos", x => new { x.ImovelId, x.ClienteId });
+                    table.ForeignKey(
+                        name: "FK_ImoveisFavoritos_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ImoveisFavoritos_Imoveis_ImovelId",
+                        column: x => x.ImovelId,
+                        principalTable: "Imoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ImoveisProprietarios",
+                columns: table => new
+                {
+                    ImovelId = table.Column<int>(type: "int", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImoveisProprietarios", x => new { x.ImovelId, x.ClienteId });
+                    table.ForeignKey(
+                        name: "FK_ImoveisProprietarios_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ImoveisProprietarios_Imoveis_ImovelId",
+                        column: x => x.ImovelId,
+                        principalTable: "Imoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CaracteristicasCatalogo_GrupoCaracteristicaId",
+                table: "CaracteristicasCatalogo",
+                column: "GrupoCaracteristicaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FichasClientes_ClienteId",
+                table: "FichasClientes",
+                column: "ClienteId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Fotos_ImovelId",
+                table: "Fotos",
+                column: "ImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_CategoriaImovelId",
+                table: "Imoveis",
+                column: "CategoriaImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_CertificadoEnergeticoId",
+                table: "Imoveis",
+                column: "CertificadoEnergeticoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_ConsultorId",
+                table: "Imoveis",
+                column: "ConsultorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_EstadoImovelId",
+                table: "Imoveis",
+                column: "EstadoImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_StatusImovelId",
+                table: "Imoveis",
+                column: "StatusImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_TipoNegocioId",
+                table: "Imoveis",
+                column: "TipoNegocioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImoveisCaracteristicas_CaracteristicaId",
+                table: "ImoveisCaracteristicas",
+                column: "CaracteristicaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImoveisFavoritos_ClienteId",
+                table: "ImoveisFavoritos",
+                column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImoveisProprietarios_ClienteId",
+                table: "ImoveisProprietarios",
+                column: "ClienteId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "FichasClientes");
+
+            migrationBuilder.DropTable(
+                name: "Fotos");
+
+            migrationBuilder.DropTable(
+                name: "ImoveisCaracteristicas");
+
+            migrationBuilder.DropTable(
+                name: "ImoveisFavoritos");
+
+            migrationBuilder.DropTable(
+                name: "ImoveisProprietarios");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "CaracteristicasCatalogo");
+
+            migrationBuilder.DropTable(
+                name: "Clientes");
+
+            migrationBuilder.DropTable(
+                name: "Imoveis");
+
+            migrationBuilder.DropTable(
+                name: "GruposCaracteristicas");
+
+            migrationBuilder.DropTable(
+                name: "CategoriasImovel");
+
+            migrationBuilder.DropTable(
+                name: "CertificadosEnergeticos");
+
+            migrationBuilder.DropTable(
+                name: "Consultores");
+
+            migrationBuilder.DropTable(
+                name: "EstadosImovel");
+
+            migrationBuilder.DropTable(
+                name: "StatusImoveis");
+
+            migrationBuilder.DropTable(
+                name: "TiposNegocio");
+        }
+    }
+}

@@ -1,0 +1,139 @@
+﻿@model IEnumerable<RPImobiliaria.Models.Imovel>
+
+@{
+    ViewData["Title"] = "Gestão de Imóveis";
+}
+
+<div class="container mt-4 mb-5">
+
+    @if (TempData["MensagemErro"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mt-3" role="alert">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>
+            <strong>Aviso do Sistema:</strong> @TempData["MensagemErro"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-house-door-fill me-2 text-primary"></i> Gestão de Imóveis</h2>
+            <p class="text-muted mb-0 small">Catálogo completo de propriedades, preços e estados.</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm w-100">
+                <i class="bi bi-plus-lg me-1"></i> Adicionar Imóvel
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 bg-body-tertiary text-body">
+        <div class="card-body p-4">
+
+            <div>
+                <table class="table table-hover table-striped align-middle tabela-admin w-100">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3 d-none d-md-table-cell" style="width: 80px;">Foto</th>
+                            <th>Imóvel</th>
+                            <th class="d-none d-lg-table-cell" style="width: 150px;">Detalhes</th>
+                            <th style="width: 120px;">Preço</th>
+                            <th class="d-none d-sm-table-cell" style="width: 120px;">Estado</th>
+                            <th class="text-end pe-4" style="width: 140px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+
+                            string corEstado = "secondary";
+                            if (item.EstadoImovel != null && !string.IsNullOrEmpty(item.EstadoImovel.Nome))
+                            {
+                                string estadoNome = item.EstadoImovel.Nome.ToLower();
+                                if (estadoNome.Contains("vendid")) corEstado = "danger";
+                                else if (estadoNome.Contains("dispon")) corEstado = "success";
+                                else if (estadoNome.Contains("reserv")) corEstado = "warning";
+                                else corEstado = "primary";
+                            }
+
+                            // NOVA LÓGICA: Ler a Foto de Capa diretamente do caminho
+                            var fotoCapa = item.Fotos.OrderBy(f => f.Ordem).FirstOrDefault();
+                            string imagemSrc = "";
+                            bool temFoto = false;
+
+                            if (fotoCapa != null && !string.IsNullOrEmpty(fotoCapa.CaminhoImagem))
+                            {
+                                imagemSrc = fotoCapa.CaminhoImagem;
+                                temFoto = true;
+                            }
+
+                            <tr>
+                                <td class="ps-3 d-none d-md-table-cell">
+                                    @if (temFoto)
+                                    {
+                                        <img src="@imagemSrc" class="rounded shadow-sm object-fit-cover" width="60" height="45" alt="Foto" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 60px; height: 45px;">
+                                            <i class="bi bi-camera-fill text-secondary"></i>
+                                        </div>
+                                    }
+                                </td>
+
+                                <td class="fw-bold">
+                                    <div class="mb-1">
+                                        <span class="d-inline-block border border-secondary-subtle rounded px-2 py-1 text-body-secondary small">
+                                            REF: @item.Id.ToString("D4")
+                                        </span>
+
+                                        <span class="d-inline-block d-sm-none ms-1 border border-@corEstado bg-@corEstado bg-opacity-10 rounded px-2 py-1 text-body-emphasis small">
+                                            @(item.EstadoImovel?.Nome ?? "Sem Estado")
+                                        </span>
+                                    </div>
+
+                                    <div class="text-break line-clamp-2 mt-1 text-body-emphasis">@item.Titulo</div>
+
+                                    <div class="small text-body-secondary fw-normal mt-1">
+                                        <i class="bi bi-geo-alt-fill opacity-75 me-1"></i>@(item.Concelho ?? "N/A")
+
+                                        <span class="d-lg-none ms-1 fw-bold text-body-emphasis">
+                                            | @(item.CategoriaImovel?.Nome ?? "-") • @(item.TipoNegocio?.Nome ?? "-")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="d-none d-lg-table-cell">
+                                    <div class="fw-bold small text-body-emphasis">@(item.CategoriaImovel?.Nome ?? "-")</div>
+
+                                    <span class="d-inline-block border border-secondary-subtle rounded px-2 py-1 text-body-secondary small mt-1">
+                                        @(item.TipoNegocio?.Nome ?? "-")
+                                    </span>
+                                </td>
+
+                                <td class="fw-bold fs-6 text-body-emphasis">
+                                    @item.Preco.ToString("C0")
+                                </td>
+
+                                <td class="d-none d-sm-table-cell">
+                                    <span class="d-inline-block border border-@corEstado bg-@corEstado bg-opacity-10 rounded px-2 py-1 text-body-emphasis small">
+                                        @(item.EstadoImovel?.Nome ?? "Sem Estado")
+                                    </span>
+                                </td>
+
+                                <td class="text-end pe-3">
+                                    <div class="d-flex justify-content-end gap-3">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Detalhes"><i class="bi bi-eye"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Apagar"><i class="bi bi-trash3"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>

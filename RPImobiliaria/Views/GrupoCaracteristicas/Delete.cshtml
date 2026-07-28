@@ -1,0 +1,77 @@
+﻿@model RPImobiliaria.Models.GrupoCaracteristica
+
+@{
+    ViewData["Title"] = "Eliminar Grupo";
+    int totalCaracteristicas = ViewBag.TotalCaracteristicas ?? 0;
+}
+
+<div class="container mt-4 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> @ViewData["Title"]</h2>
+            <p class="text-body-secondary mb-0">Esta ação requer confirmação manual absoluta.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 border-top border-5 border-danger">
+            <div class="card-body p-4 p-md-5 text-center">
+
+                <h4 class="fw-bold text-danger mb-3">Tem a certeza que deseja apagar?</h4>
+
+                @if (totalCaracteristicas > 0)
+                {
+                    <div class="alert alert-warning border-warning shadow-sm d-flex align-items-center text-start gap-3 mb-4">
+                        <i class="bi bi-exclamation-diamond-fill fs-2 text-warning flex-shrink-0"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Aviso de Impacto Crítico!</h6>
+                            <span>Este grupo contém <strong>@totalCaracteristicas</strong> característica(s) lá dentro! O sistema não permite apagar grupos com características associadas.</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success border-success shadow-sm d-flex align-items-center text-start gap-3 mb-4">
+                        <i class="bi bi-shield-check fs-2 text-success flex-shrink-0"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Eliminação Segura</h6>
+                            <span>Não existem características associadas a este grupo.</span>
+                        </div>
+                    </div>
+                }
+
+                <div class="bg-light p-3 rounded border text-start mb-4 text-dark">
+                    <span class="badge bg-danger mb-2">ID: #@Model?.Id</span>
+                    <h5 class="fw-bold mb-0">@Model?.Nome</h5>
+                </div>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="form-check text-start mb-4 bg-light p-3 rounded border border-danger-subtle">
+                        <input class="form-check-input ms-0 me-2 border-danger" type="checkbox" id="chkConfirmar" @(totalCaracteristicas > 0 ? "disabled" : "")>
+                        <label class="form-check-label small text-danger fw-bold" for="chkConfirmar">
+                            Estou ciente do impacto e confirmo que desejo eliminar permanentemente o grupo "@Model?.Nome".
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" id="btnEliminar" class="btn btn-danger fw-bold px-4 shadow" disabled>
+                            <i class="bi bi-trash3-fill me-1"></i> Sim, Eliminar Permanentemente
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById('chkConfirmar').addEventListener('change', function() {
+        document.getElementById('btnEliminar').disabled = !this.checked;
+    });
+</script>

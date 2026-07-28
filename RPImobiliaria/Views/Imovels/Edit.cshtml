@@ -1,0 +1,503 @@
+﻿@model RPImobiliaria.Models.Imovel
+
+@{
+    ViewData["Title"] = "Editar Imóvel";
+    var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
+    var caracsAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
+}
+
+<style>
+    /* CSS Premium com Suporte a Dark Mode / Light Mode */
+    .dropzone-area {
+        border: 2px dashed var(--bs-primary);
+        border-radius: 8px;
+        background-color: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .dropzone-area:hover, .dropzone-area.dragover {
+            background-color: var(--bs-secondary-bg);
+            border-color: var(--bs-success);
+        }
+
+    .gallery-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .photo-thumbnail {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        cursor: grab; /* Mãozinha aberta para agarrar */
+        background: var(--bs-secondary-bg);
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+        .photo-thumbnail.dragging {
+            opacity: 0.4;
+            transform: scale(0.9);
+            cursor: grabbing; /* Mãozinha fechada para arrastar */
+        }
+
+        .photo-thumbnail.drag-over {
+            border: 2px solid var(--bs-warning);
+            transform: scale(1.05);
+        }
+
+        .photo-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-thumbnail .photo-actions {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5; /* Garante que os botões ficam em cima do badge */
+        }
+
+        .photo-thumbnail:hover .photo-actions {
+            opacity: 1;
+        }
+
+    .photo-badge {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: var(--bs-primary);
+        color: white;
+        font-weight: bold;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        z-index: 2;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-body-emphasis mb-1"><i class="bi bi-pencil-square text-primary me-2"></i> @ViewData["Title"]</h2>
+            <p class="text-body-secondary mb-0">Referência SHARP-@Model.Id.ToString("D5") - Atualizar Angariação</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <button type="submit" form="formEdit" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-save me-1"></i> Guardar Alterações
+            </button>
+        </div>
+    </div>
+
+    <form asp-action="Edit" enctype="multipart/form-data" id="formEdit">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
+
+        <input type="hidden" asp-for="Id" />
+
+        <input type="hidden" name="existingPhotoOrder" id="existingPhotoOrder" />
+
+        <div class="row">
+            <div class="col-lg-8">
+
+                <div class="card shadow-sm border border-secondary-subtle bg-body-tertiary mb-4">
+                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary">
+                        <i class="bi bi-info-circle me-1"></i> Dados Base
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Titulo" class="form-control" placeholder="Título" />
+                            <label asp-for="Titulo">Título do Anúncio (Vendido ao cliente)</label>
+                            <span asp-validation-for="Titulo" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Descricao" class="form-label text-body-secondary fw-bold small text-uppercase mb-1">Descrição Detalhada</label>
+                            <textarea asp-for="Descricao" class="form-control" rows="5"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border border-secondary-subtle bg-body-tertiary mb-4">
+                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary">
+                        <i class="bi bi-camera me-1"></i> Galeria de Fotografias (Arraste para ordenar)
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="photoTrack" class="gallery-container">
+                            @if (Model.Fotos != null && Model.Fotos.Any())
+                            {
+                                @foreach (var foto in Model.Fotos.OrderBy(f => f.Ordem))
+                                {
+                                    if (!string.IsNullOrEmpty(foto.CaminhoImagem))
+                                    {
+                                        <div class="photo-thumbnail rounded draggable-element" draggable="true" data-foto-id="@foto.Id">
+                                            <div class="photo-badge bg-primary"></div>
+                                            <img src="@foto.CaminhoImagem" alt="Foto Existente" />
+                                            <div class="photo-actions">
+                                                <button type="button" class="btn btn-sm btn-light rounded-circle btn-zoom" title="Ver Maior" onclick="abrirZoom('@foto.CaminhoImagem')"><i class="bi bi-search"></i></button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                        <hr class="border-secondary-subtle my-4" />
+                        <div class="mb-3">
+                            <label class="form-label text-body-secondary fw-bold small text-uppercase mb-2">Adicionar Novas Fotos</label>
+                            <input type="file" id="fotosInputReal" name="novasFotos" multiple accept="image/*" class="d-none" />
+                            <div id="dropzone" class="dropzone-area">
+                                <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
+                                <h5 class="mt-2 text-body-emphasis">Clique ou arraste novas fotos para aqui</h5>
+                                <p class="text-body-secondary small mb-0">Serão adicionadas no final da galeria visual.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border border-secondary-subtle bg-body-tertiary mb-4">
+                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary">
+                        <i class="bi bi-pennant me-1"></i> Localização e Dimensões
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3 form-floating"><input asp-for="AreaUtil" class="form-control" type="number" step="0.01" placeholder="Área Útil" /><label asp-for="AreaUtil">Área Útil (m²)</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="AreaBruta" class="form-control" type="number" step="0.01" placeholder="Área Bruta" /><label asp-for="AreaBruta">Área Bruta (m²)</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="Quartos" class="form-control" type="number" placeholder="Quartos" /><label asp-for="Quartos">Quartos</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="CasasBanho" class="form-control" type="number" placeholder="WC" /><label asp-for="CasasBanho">WC</label></div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4 form-floating"><input asp-for="Distrito" class="form-control" placeholder="Distrito" /><label asp-for="Distrito">Distrito</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Concelho" class="form-control" placeholder="Concelho" /><label asp-for="Concelho">Concelho</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Freguesia" class="form-control" placeholder="Freguesia" /><label asp-for="Freguesia">Freguesia</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (grupos != null && grupos.Any())
+                {
+                    <div class="card shadow-sm border border-secondary-subtle bg-body-tertiary mb-4">
+                        <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary">
+                            <i class="bi bi-ui-checks-grid me-1"></i> Outras Características
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                @foreach (var grupo in grupos)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="fw-bold text-body-emphasis border-bottom border-secondary-subtle pb-2 mb-3">
+                                            <i class="bi bi-tag text-primary me-2"></i>@grupo.Nome
+                                        </h6>
+                                        <div class="row">
+                                            @foreach (var carac in grupo.Caracteristicas)
+                                            {
+                                                bool isChecked = caracsAtuais.Contains(carac.Id);
+                                                <div class="col-12 mb-2">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id" @(isChecked ? "checked" : "")>
+                                                        <label class="form-check-label text-body-secondary" for="carac_@carac.Id">@carac.Nome</label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card shadow-sm border border-warning-subtle bg-warning bg-opacity-10 mb-4">
+                    <div class="card-header bg-transparent fw-bold text-warning py-3 border-bottom border-warning-subtle">
+                        <i class="bi bi-eye-slash-fill me-1"></i> Dados Privados (Apenas Equipa)
+                    </div>
+                    <div class="card-body p-4 text-body-emphasis">
+                        <div class="form-floating mb-3">
+                            <input asp-for="MoradaExata" class="form-control border-warning-subtle bg-body" placeholder="Morada" />
+                            <label asp-for="MoradaExata">Morada Exata</label>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="NumeroContrato" class="form-control border-warning-subtle bg-body" placeholder="Nº Contrato" />
+                                <label asp-for="NumeroContrato">Nº Contrato</label>
+                            </div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="ValorComissao" class="form-control text-success fw-bold border-warning-subtle bg-body" type="number" step="0.01" placeholder="Comissão" />
+                                <label asp-for="ValorComissao">Comissão Prevista (€)</label>
+                            </div>
+                        </div>
+                        <div class="form-floating">
+                            <textarea asp-for="ObservacoesInternas" class="form-control border-warning-subtle bg-body" placeholder="Notas" style="height: 100px"></textarea>
+                            <label asp-for="ObservacoesInternas">Observações Internas (Não partilhar)</label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-lg border-primary mb-4 position-sticky" style="top: 1rem;">
+                    <div class="card-body bg-primary text-white text-center rounded pb-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-cash-stack me-2"></i> Preço de Venda</h5>
+                        <div class="input-group input-group-lg mb-4">
+                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center text-success bg-white border-white" placeholder="0.00" />
+                            <span class="input-group-text fw-bold border-white">€</span>
+                        </div>
+
+                        <div class="bg-body rounded p-3 text-start text-body-emphasis mb-4 shadow-sm">
+                            <label asp-for="TipoNegocioId" class="form-label small fw-bold">Tipo Negócio <span class="text-danger">*</span></label>
+                            <select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 border-primary" asp-items="ViewBag.TipoNegocioId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold">Categoria <span class="text-danger">*</span></label>
+                            <select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3" asp-items="ViewBag.CategoriaImovelId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="EstadoImovelId" class="form-label small fw-bold">Estado</label>
+                            <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3" asp-items="ViewBag.EstadoImovelId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold">Certificado Energético</label>
+                            <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3" asp-items="ViewBag.CertificadoEnergeticoId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="StatusImovelId" class="form-label small fw-bold text-success">Status do Anúncio</label>
+                            <select asp-for="StatusImovelId" class="form-select form-select-sm border-success mb-3" asp-items="ViewBag.StatusImovelId"></select>
+
+                            <label class="form-label small fw-bold text-success">Proprietário (Cliente)</label>
+                            <select name="clienteProprietarioId" class="form-select form-select-sm border-success mb-3" asp-items="ViewBag.ListaClientes"><option value="">-- Selecionar Proprietário --</option></select>
+
+                            <label asp-for="ConsultorId" class="form-label small fw-bold text-danger">Consultor Responsável</label>
+                            <select asp-for="ConsultorId" class="form-select form-select-sm border-danger-subtle" asp-items="ViewBag.ConsultorId"><option value="">-- Sem Consultor --</option></select>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark mt-2">
+                            <i class="bi bi-save-fill me-2"></i> Guardar Alterações
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center position-relative p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10;"></button>
+                <img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;" alt="Zoom">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const photoTrack = document.getElementById('photoTrack');
+        let ficheirosEmMemoria = [];
+        let fotoIdCounter = 0;
+        const dropzone = document.getElementById('dropzone');
+        const inputReal = document.getElementById('fotosInputReal');
+        const form = document.getElementById('formEdit');
+        const zoomImagem = document.getElementById('zoomImagem');
+        const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
+
+        document.addEventListener("DOMContentLoaded", () => {
+            inicializarDraggablesUnificados();
+            updateAllBadges();
+            updateSubmissionData();
+        });
+
+        function inicializarDraggablesUnificados() {
+            const allDraggables = photoTrack.querySelectorAll('.draggable-element');
+            allDraggables.forEach(thumb => {
+                thumb.removeEventListener('dragstart', handleDragStart);
+                thumb.removeEventListener('dragover', handleDragOver);
+                thumb.removeEventListener('dragleave', handleDragLeave);
+                thumb.removeEventListener('drop', handleDrop);
+                thumb.removeEventListener('dragend', handleDragEnd);
+
+                thumb.addEventListener('dragstart', handleDragStart);
+                thumb.addEventListener('dragover', handleDragOver);
+                thumb.addEventListener('dragleave', handleDragLeave);
+                thumb.addEventListener('drop', handleDrop);
+                thumb.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        dropzone.addEventListener('click', () => inputReal.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            processarNovosFicheiros(e.dataTransfer.files);
+        });
+        inputReal.addEventListener('change', (e) => {
+            processarNovosFicheiros(e.target.files);
+            inputReal.value = '';
+        });
+
+        function processarNovosFicheiros(files) {
+            Array.from(files).forEach(file => {
+                if(file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e) => {
+                        criarThumbnailNova(fotoIdCounter++, file, e.target.result);
+                    };
+                }
+            });
+        }
+
+        function criarThumbnailNova(id, file, dataUrl) {
+            ficheirosEmMemoria.push({ id: id, file: file, dataUrl: dataUrl });
+            const thumb = document.createElement('div');
+            thumb.className = 'photo-thumbnail draggable-element';
+            thumb.draggable = true;
+            thumb.dataset.novoId = id;
+            thumb.innerHTML = `
+                <div class="photo-badge bg-primary"></div>
+                <img src="${dataUrl}" alt="Nova Foto">
+                <div class="photo-actions">
+                    <button type="button" class="btn btn-sm btn-light rounded-circle btn-zoom" title="Ver Maior" onclick="abrirZoom('${dataUrl}')"><i class="bi bi-search"></i></button>
+                    <button type="button" class="btn btn-sm btn-danger rounded-circle btn-delete" title="Remover" onclick="removerFotoNova(${id})"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
+            photoTrack.appendChild(thumb);
+            inicializarDraggablesUnificados();
+            updateAllBadges();
+            updateSubmissionData();
+        }
+
+        function removerFotoNova(id) {
+            ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id);
+            const thumb = photoTrack.querySelector(`.photo-thumbnail[data-novo-id="${id}"]`);
+            if(thumb) thumb.remove();
+            updateAllBadges();
+            updateSubmissionData();
+        }
+
+        function abrirZoom(srcData) {
+            zoomImagem.src = srcData;
+            zoomModal.show();
+        }
+
+        function updateAllBadges() {
+            const allDraggables = photoTrack.querySelectorAll('.draggable-element');
+            allDraggables.forEach((thumb, index) => {
+                const badge = thumb.querySelector('.photo-badge');
+                if(!badge) return;
+                if (index === 0) {
+                    badge.innerHTML = '<i class="bi bi-star-fill text-warning"></i> Capa';
+                    badge.className = 'photo-badge bg-primary';
+                } else {
+                    badge.innerHTML = (index + 1);
+                    badge.className = 'photo-badge bg-secondary';
+                }
+            });
+        }
+
+        function updateSubmissionData() {
+            const finalOrder = [];
+            let newFileIndex = 0;
+            const dt = new DataTransfer();
+
+            const allDraggables = photoTrack.querySelectorAll('.draggable-element');
+
+            allDraggables.forEach(thumb => {
+                if (thumb.dataset.fotoId) {
+                    finalOrder.push('old_' + thumb.dataset.fotoId);
+                } else if (thumb.dataset.novoId) {
+                    finalOrder.push('new_' + newFileIndex);
+                    newFileIndex++;
+
+                    const novoId = parseInt(thumb.dataset.novoId);
+                    const itemData = ficheirosEmMemoria.find(item => item.id === novoId);
+                    if(itemData && itemData.file) {
+                        dt.items.add(itemData.file);
+                    }
+                }
+            });
+
+            document.getElementById('existingPhotoOrder').value = finalOrder.join(',');
+            document.getElementById('fotosInputReal').files = dt.files;
+            console.log("Mapa Gerado: ", finalOrder.join(',')); // Para debug se for preciso!
+        }
+
+        let itemArrastado = null;
+
+        function handleDragStart(e) {
+            itemArrastado = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if(itemArrastado !== this) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            if (itemArrastado !== this) {
+                // A NOVA MATEMÁTICA DE TROCA (Mais robusta)
+                const all = Array.from(photoTrack.querySelectorAll('.draggable-element'));
+                const arrastadoIndex = all.indexOf(itemArrastado);
+                const alvoIndex = all.indexOf(this);
+
+                if (arrastadoIndex < alvoIndex) {
+                    this.after(itemArrastado); // Move para a frente
+                } else {
+                    this.before(itemArrastado); // Move para trás
+                }
+
+                updateAllBadges();
+                updateSubmissionData();
+            }
+            return false;
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            photoTrack.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        // O SEGURO DE VIDA: Força a atualização do mapa no momento do clique no botão Guardar!
+        form.addEventListener('submit', function() {
+            updateSubmissionData();
+        });
+    </script>
+}

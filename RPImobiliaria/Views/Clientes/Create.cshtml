@@ -1,0 +1,126 @@
+﻿@model RPImobiliaria.Models.Cliente
+
+@{
+    ViewData["Title"] = "Registar Novo Cliente";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1"><i class="bi bi-person-plus-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+        <p class="text-body-secondary mb-0">Insira os dados de identificação e os requisitos de qualificação do cliente.</p>
+    </div>
+
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm mb-4"></div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-card-heading text-primary me-2"></i> Dados de Identificação</h5>
+                        <hr class="my-2">
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Nome" class="form-control border-secondary-subtle shadow-sm" placeholder="Nome Completo" autofocus />
+                            <label asp-for="Nome" class="fw-bold text-body-secondary">Nome Completo <span class="text-danger">*</span></label>
+                            <span asp-validation-for="Nome" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" type="email" class="form-control border-secondary-subtle shadow-sm" placeholder="E-mail" />
+                            <label asp-for="Email" class="fw-bold text-body-secondary">Endereço de E-mail</label>
+                            <span asp-validation-for="Email" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Telemovel" class="form-control border-secondary-subtle shadow-sm" placeholder="Telemóvel" />
+                            <label asp-for="Telemovel" class="fw-bold text-body-secondary">Contacto Telefónico</label>
+                            <span asp-validation-for="Telemovel" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="NIF" class="form-control border-secondary-subtle shadow-sm" placeholder="NIF" />
+                            <label asp-for="NIF" class="fw-bold text-body-secondary">NIF (Contribuinte)</label>
+                            <span asp-validation-for="NIF" class="text-danger small fw-bold"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-sliders text-primary me-2"></i> Ficha de Qualificação e Perfis</h5>
+                        <hr class="my-2">
+                    </div>
+                    <div class="card-body px-4 pb-4">
+
+                        <label class="fw-bold text-secondary small text-uppercase mb-2 d-block">Tipo de Perfil de Cliente</label>
+                        <div class="row g-2 mb-4">
+                            <div class="col-sm-6">
+                                <div class="p-2 border rounded bg-light d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilComprador" />
+                                    <label class="form-check-label fw-bold text-success small" asp-for="Ficha.PerfilComprador">Procura Comprar</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border rounded bg-light d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilVendedor" />
+                                    <label class="form-check-label fw-bold text-danger small" asp-for="Ficha.PerfilVendedor">Quer Vender</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border rounded bg-light d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilArrendatario" />
+                                    <label class="form-check-label fw-bold text-warning-emphasis small" asp-for="Ficha.PerfilArrendatario">Procura Arrendar</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border rounded bg-light d-flex align-items-center">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilInvestidor" />
+                                    <label class="form-check-label fw-bold text-info-emphasis small" asp-for="Ficha.PerfilInvestidor">Investidor</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.OrcamentoMaximo" type="number" step="0.01" class="form-control border-secondary-subtle shadow-sm" placeholder="Orçamento" />
+                            <label asp-for="Ficha.OrcamentoMaximo" class="fw-bold text-body-secondary">Orçamento Máximo (€)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.ZonasPreferencia" class="form-control border-secondary-subtle shadow-sm" placeholder="Zonas" />
+                            <label asp-for="Ficha.ZonasPreferencia" class="fw-bold text-body-secondary">Zonas de Preferência (Ex: Ovar, Aveiro)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.TipologiasProcuradas" class="form-control border-secondary-subtle shadow-sm" placeholder="Tipologias" />
+                            <label asp-for="Ficha.TipologiasProcuradas" class="fw-bold text-body-secondary">Tipologias Procuradas (Ex: T2, T3)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Ficha.NotasRequisitos" class="form-control border-secondary-subtle shadow-sm" placeholder="Notas" style="height: 100px;"></textarea>
+                            <label asp-for="Ficha.NotasRequisitos" class="fw-bold text-body-secondary">Notas de Qualificação / Requisitos Extra</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
+                <i class="bi bi-person-check-fill me-1"></i> Guardar Ficha e Cliente
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

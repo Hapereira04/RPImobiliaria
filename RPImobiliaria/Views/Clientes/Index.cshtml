@@ -1,0 +1,206 @@
+﻿@model IEnumerable<RPImobiliaria.Models.Cliente>
+
+@{
+    ViewData["Title"] = "Gestão de Clientes";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-people-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+            <p class="text-body-secondary mb-0">Base de dados e qualificação de clientes/CRM.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="btn-group shadow-sm" role="group">
+                <button type="button" onclick="switchView('list')" id="btnList" class="btn btn-outline-primary active" title="Visualizar em Lista">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+                <button type="button" onclick="switchView('grid')" id="btnGrid" class="btn btn-outline-primary" title="Visualizar em Grelha">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </button>
+            </div>
+            <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i> Adicionar Cliente
+            </a>
+        </div>
+    </div>
+
+    <div id="listView" class="card shadow-sm border-0 border-secondary-subtle">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-body-tertiary border-bottom">
+                    <tr>
+                        <th class="py-3 ps-4" style="width: 70px;">Foto</th>
+                        <th class="py-3">Nome</th>
+                        <th class="py-3">Contactos</th>
+                        <th class="py-3">Perfis Ativos</th>
+                        <th class="py-3 pe-4 text-end" style="width: 140px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-body-secondary">
+                                <i class="bi bi-person-x fs-2 d-block mb-2"></i> Nenhum cliente registado.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="border-bottom border-secondary-subtle">
+                                <td class="ps-4">
+                                    <!-- NOVA LÓGICA DE IMAGEM DA LISTA -->
+                                    @if (!string.IsNullOrEmpty(item.CaminhoFotoPerfil))
+                                    {
+                                        <img src="@item.CaminhoFotoPerfil" class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold border" style="width: 45px; height: 45px;">
+                                            @item.Nome.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-body-emphasis">@item.Nome</span>
+                                    @if (!string.IsNullOrEmpty(item.NIF))
+                                    {
+                                        <small class="text-muted d-block">NIF: @item.NIF</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block"><i class="bi bi-envelope me-1"></i> @item.Email</small>
+                                    <small class="d-block text-muted"><i class="bi bi-phone me-1"></i> @item.Telemovel</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @if (item.Ficha?.PerfilComprador == true)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2">Comprador</span>
+                                        }
+                                        @if (item.Ficha?.PerfilVendedor == true)
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2">Vendedor</span>
+                                        }
+                                        @if (item.Ficha?.PerfilArrendatario == true)
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2">Arrendatário</span>
+                                        }
+                                        @if (item.Ficha?.PerfilInvestidor == true)
+                                        {
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2">Investidor</span>
+                                        }
+                                        @if (item.Ficha == null || (!item.Ficha.PerfilComprador && !item.Ficha.PerfilVendedor && !item.Ficha.PerfilArrendatario && !item.Ficha.PerfilInvestidor))
+                                        {
+                                            <span class="badge bg-light text-muted border px-2">Sem Ficha/Perfil</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" title="Ver Perfil/CRM"><i class="bi bi-eye-fill"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm" title="Apagar"><i class="bi bi-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="gridView" class="row g-3 d-none">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center py-5 text-body-secondary card border-0 shadow-sm">
+                <div><i class="bi bi-person-x fs-2 d-block mb-2"></i> Nenhum cliente registado.</div>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary p-3 text-center position-relative">
+                        <div class="mb-3 position-relative d-inline-block mx-auto">
+                            <!-- NOVA LÓGICA DE IMAGEM DA GRELHA -->
+                            @if (!string.IsNullOrEmpty(item.CaminhoFotoPerfil))
+                            {
+                                <img src="@item.CaminhoFotoPerfil" class="rounded-circle border shadow-sm" style="width: 75px; height: 75px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm mx-auto" style="width: 75px; height: 75px; font-size: 24px;">
+                                    @item.Nome.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                        </div>
+                        <h5 class="fw-bold mb-1 text-truncate px-2">@item.Nome</h5>
+                        <p class="text-muted small mb-3 text-truncate px-2"><i class="bi bi-envelope me-1"></i>@item.Email</p>
+
+                        <div class="d-flex flex-wrap justify-content-center gap-1 mb-4" style="min-height: 24px;">
+                            @if (item.Ficha?.PerfilComprador == true)
+                            {
+                                <span class="badge rounded-pill bg-success small">CP</span>
+                            }
+                            @if (item.Ficha?.PerfilVendedor == true)
+                            {
+                                <span class="badge rounded-pill bg-danger small">VD</span>
+                            }
+                            @if (item.Ficha?.PerfilArrendatario == true)
+                            {
+                                <span class="badge rounded-pill bg-warning text-dark small">AR</span>
+                            }
+                            @if (item.Ficha?.PerfilInvestidor == true)
+                            {
+                                <span class="badge rounded-pill bg-info text-dark small">IV</span>
+                            }
+                        </div>
+
+                        <div class="mt-auto pt-2 border-top">
+                            <div class="btn-group w-100">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary fw-bold">Ver CRM</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function switchView(viewType) {
+            const list = document.getElementById('listView');
+            const grid = document.getElementById('gridView');
+            const btnList = document.getElementById('btnList');
+            const btnGrid = document.getElementById('btnGrid');
+
+            if (viewType === 'grid') {
+                list.classList.add('d-none');
+                grid.classList.remove('d-none');
+                btnGrid.classList.add('active');
+                btnList.classList.remove('active');
+            } else {
+                grid.classList.add('d-none');
+                list.classList.remove('d-none');
+                btnList.classList.add('active');
+                btnGrid.classList.remove('active');
+            }
+            localStorage.setItem('RPImobiliaria_clientView', viewType);
+        }
+
+        // Recuperar a preferência de visualização guardada no PC do utilizador
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedPref = localStorage.getItem('RPImobiliaria_clientView') || 'list';
+            switchView(savedPref);
+        });
+    </script>
+}

@@ -1,0 +1,99 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using RPImobiliaria.Data
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@{
+    string nomeApresentacao = "";
+    string caminhoFoto = ""; // <-- VARIÁVEL ALTERADA
+    string emailUser = User.Identity?.Name;
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var userId = UserManager.GetUserId(User);
+
+        // 1. Procurar se este Login pertence a um Consultor
+        var consultor = DbContext.Consultores.FirstOrDefault(c => c.IdentityUserId == userId);
+
+        // 2. Se não for Consultor, procurar se é um Cliente
+        var cliente = DbContext.Clientes.FirstOrDefault(c => c.IdentityUserId == userId);
+
+        if (consultor != null)
+        {
+            nomeApresentacao = consultor.Nome.Split(' ')[0]; // Apanha só o primeiro nome!
+
+            // NOVA LÓGICA: Lê a foto diretamente da pasta
+            if (!string.IsNullOrEmpty(consultor.CaminhoFotoPerfil))
+            {
+                caminhoFoto = consultor.CaminhoFotoPerfil;
+            }
+        }
+        else if (cliente != null)
+        {
+            nomeApresentacao = cliente.Nome.Split(' ')[0];
+
+            if (!string.IsNullOrEmpty(cliente.CaminhoFotoPerfil))
+            {
+                caminhoFoto = cliente.CaminhoFotoPerfil;
+            }
+        }
+        else
+        {
+            // Se for o nosso Super Admin (que não está nas tabelas)
+            nomeApresentacao = "Administrador";
+        }
+    }
+}
+
+<ul class="navbar-nav align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-3 rounded-pill" style="background: rgba(255,255,255,0.05);" href="#" id="userProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                @if (!string.IsNullOrEmpty(caminhoFoto))
+                {
+                    <img src="@caminhoFoto" alt="Foto Perfil" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px; border: 2px solid var(--primary-color);" />
+                }
+                else
+                {
+                    <i class="bi bi-person-circle fs-3 text-secondary"></i>
+                }
+
+                <span class="fw-bold d-none d-md-inline text-white">Olá, @nomeApresentacao</span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3" aria-labelledby="userProfileDropdown">
+                <li class="px-3 py-2 text-center border-bottom mb-2">
+                    <span class="d-block fw-bold text-dark">@nomeApresentacao</span>
+                    <small class="text-muted">@emailUser</small>
+                </li>
+
+                <li>
+                    <a class="dropdown-item py-2 fw-medium" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir a sua conta">
+                        <i class="bi bi-person-gear text-primary me-2"></i> Configurações de Conta
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button type="submit" class="dropdown-item py-2 text-danger fw-bold">
+                            <i class="bi bi-box-arrow-right me-2"></i> Terminar Sessão
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link fw-medium" asp-area="Identity" asp-page="/Account/Register">Criar Conta</a>
+        </li>
+        <li class="nav-item ms-2">
+            <a class="nav-link btn btn-primary text-white px-4 rounded-pill fw-bold shadow-sm" asp-area="Identity" asp-page="/Account/Login">Entrar</a>
+        </li>
+    }
+</ul>

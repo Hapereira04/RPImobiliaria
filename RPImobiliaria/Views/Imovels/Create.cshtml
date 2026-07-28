@@ -1,0 +1,412 @@
+﻿@model RPImobiliaria.Models.Imovel
+
+@{
+    ViewData["Title"] = "Angariar Novo Imóvel";
+    var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
+}
+
+<style>
+    /* CSS Premium com Suporte a Dark Mode / Light Mode */
+    .dropzone-area {
+        border: 2px dashed var(--bs-primary);
+        border-radius: 8px;
+        background-color: var(--bs-tertiary-bg); /* Adapta-se ao tema claro/escuro nativamente! */
+        color: var(--bs-body-color);
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .dropzone-area:hover, .dropzone-area.dragover {
+            background-color: var(--bs-secondary-bg);
+            border-color: var(--bs-success);
+        }
+
+    .gallery-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .photo-thumbnail {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        cursor: grab;
+        background: #000;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+        /* Efeito ao agarrar a foto */
+        .photo-thumbnail.dragging {
+            opacity: 0.4;
+            transform: scale(0.9);
+            cursor: grabbing;
+        }
+
+        .photo-thumbnail.drag-over {
+            border: 2px solid var(--bs-warning);
+            transform: scale(1.05);
+        }
+
+        .photo-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-thumbnail .photo-actions {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .photo-thumbnail:hover .photo-actions {
+            opacity: 1;
+        }
+
+    .photo-badge {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: var(--bs-primary);
+        color: white;
+        font-weight: bold;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        z-index: 2;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-house-add-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+
+    <form asp-action="Create" enctype="multipart/form-data" id="imovelForm">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
+
+        <div class="row">
+            <div class="col-lg-8">
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold text-primary py-3">
+                        <i class="bi bi-info-circle me-1"></i> Dados Base
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Titulo" class="form-control" placeholder="Título" />
+                            <label asp-for="Titulo">Título do Anúncio</label>
+                            <span asp-validation-for="Titulo" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Descricao" class="form-label text-muted fw-bold">Descrição</label>
+                            <textarea asp-for="Descricao" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4 form-floating"><input asp-for="Distrito" class="form-control" placeholder="Distrito" /><label asp-for="Distrito">Distrito</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Concelho" class="form-control" placeholder="Concelho" /><label asp-for="Concelho">Concelho</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Freguesia" class="form-control" placeholder="Freguesia" /><label asp-for="Freguesia">Freguesia</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold text-primary py-3">
+                        <i class="bi bi-camera me-1"></i> Galeria de Fotografias (Arraste para ordenar)
+                    </div>
+                    <div class="card-body p-4">
+                        <input type="file" id="fotosInputReal" name="fotosUpload" multiple accept="image/*" class="d-none" />
+
+                        <div id="dropzone" class="dropzone-area">
+                            <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="mt-2 text-dark">Clique ou arraste as fotos para aqui</h5>
+                            <p class="text-muted small mb-0">Pode adicionar mais fotos sem perder as anteriores.</p>
+                        </div>
+
+                        <div id="gallery" class="gallery-container"></div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold text-primary py-3">
+                        <i class="bi bi-rulers me-1"></i> Áreas e Divisões
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-3 form-floating"><input asp-for="AreaUtil" class="form-control" type="number" step="0.01" placeholder="Área Útil" /><label asp-for="AreaUtil">Área Útil (m²)</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="AreaBruta" class="form-control" type="number" step="0.01" placeholder="Área Bruta" /><label asp-for="AreaBruta">Área Bruta (m²)</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="Quartos" class="form-control" type="number" placeholder="Quartos" /><label asp-for="Quartos">Quartos</label></div>
+                            <div class="col-md-3 form-floating"><input asp-for="CasasBanho" class="form-control" type="number" placeholder="WC" /><label asp-for="CasasBanho">WC</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Estacionamento" class="form-control" type="number" placeholder="Garagem" /><label asp-for="Estacionamento">Lugares Garagem</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="Piso" class="form-control" type="number" placeholder="Piso" /><label asp-for="Piso">Andar/Piso</label></div>
+                            <div class="col-md-4 form-floating"><input asp-for="AnoConstrucao" class="form-control" type="number" placeholder="Ano" /><label asp-for="AnoConstrucao">Ano de Construção</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (grupos != null && grupos.Any())
+                {
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white fw-bold text-primary py-3">
+                            <i class="bi bi-ui-checks-grid me-1"></i> Outras Características
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                @foreach (var grupo in grupos)
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">@grupo.Nome</h6>
+                                        <div class="row">
+                                            @foreach (var carac in grupo.Caracteristicas)
+                                            {
+                                                <div class="col-12 mb-2">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id">
+                                                        <label class="form-check-label text-muted" for="carac_@carac.Id">@carac.Nome</label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card shadow-sm border-0 mb-4 bg-light border-start border-5 border-warning">
+                    <div class="card-header bg-transparent fw-bold text-warning py-3">
+                        <i class="bi bi-eye-slash-fill me-1"></i> Dados Privados (Equipa)
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-floating mb-3"><input asp-for="MoradaExata" class="form-control" placeholder="Morada" /><label asp-for="MoradaExata">Morada Exata</label></div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6 form-floating"><input asp-for="NumeroContrato" class="form-control" placeholder="Nº Contrato" /><label asp-for="NumeroContrato">Nº Contrato</label></div>
+                            <div class="col-md-6 form-floating"><input asp-for="ValorComissao" class="form-control text-success fw-bold" type="number" step="0.01" placeholder="Comissão" /><label asp-for="ValorComissao">Comissão Prevista (€)</label></div>
+                        </div>
+                        <div class="form-floating"><textarea asp-for="ObservacoesInternas" class="form-control" placeholder="Notas" style="height: 80px"></textarea><label asp-for="ObservacoesInternas">Notas Internas</label></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-lg border-primary mb-4 position-sticky" style="top: 1rem;">
+                    <div class="card-body bg-primary text-white text-center rounded pb-4">
+                        <h5 class="fw-bold mb-3">Preço de Venda</h5>
+                        <div class="input-group input-group-lg mb-4">
+                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center text-success" placeholder="0.00" />
+                            <span class="input-group-text fw-bold">€</span>
+                        </div>
+
+                        <div class="bg-white rounded p-3 text-start text-dark mb-4">
+                            <label asp-for="TipoNegocioId" class="form-label small fw-bold">Tipo Negócio</label>
+                            <select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 border-primary" asp-items="ViewBag.TipoNegocioId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold">Categoria</label>
+                            <select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3" asp-items="ViewBag.CategoriaImovelId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="EstadoImovelId" class="form-label small fw-bold">Estado</label>
+                            <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3" asp-items="ViewBag.EstadoImovelId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold">Cl. Energética</label>
+                            <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3" asp-items="ViewBag.CertificadoEnergeticoId"><option value="">-- Selecione --</option></select>
+
+                            <label asp-for="StatusImovelId" class="form-label small fw-bold">Status do Anúncio</label>
+                            <select asp-for="StatusImovelId" class="form-select form-select-sm mb-3" asp-items="ViewBag.StatusImovelId"></select>
+
+                            <label class="form-label small fw-bold text-success">Proprietário (Cliente)</label>
+                            <select name="clienteProprietarioId" class="form-select form-select-sm border-success" asp-items="ViewBag.ListaClientes"><option value="">-- Opcional --</option></select>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark">
+                            <i class="bi bi-cloud-arrow-up-fill me-2"></i> Gravar Angariação
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center position-relative p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10;"></button>
+                <img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;" alt="Zoom">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+                // O CÉREBRO CORRIGIDO DO UPLOAD E DRAG & DROP
+        let ficheirosEmMemoria = [];
+        let fotoIdCounter = 0;
+
+        const dropzone = document.getElementById('dropzone');
+        const inputReal = document.getElementById('fotosInputReal');
+        const gallery = document.getElementById('gallery');
+        const form = document.getElementById('imovelForm');
+        const zoomImagem = document.getElementById('zoomImagem');
+        const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
+
+        // Abrir janela de ficheiros
+        dropzone.addEventListener('click', () => inputReal.click());
+
+        // Efeitos visuais Dropzone
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            processarFicheiros(e.dataTransfer.files);
+        });
+
+        inputReal.addEventListener('change', (e) => {
+            processarFicheiros(e.target.files);
+            inputReal.value = '';
+        });
+
+        // AQUI ESTÁ A CORREÇÃO! Lemos o base64 APENAS UMA VEZ e guardamos na RAM.
+        function processarFicheiros(files) {
+            Array.from(files).forEach(file => {
+                if(file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e) => {
+                        ficheirosEmMemoria.push({
+                            id: fotoIdCounter++,
+                            file: file,
+                            dataUrl: e.target.result // O Cache visual!
+                        });
+                        desenharGaleria(); // Redesenha a cada foto carregada na memória
+                    };
+                }
+            });
+        }
+
+        function desenharGaleria() {
+            gallery.innerHTML = '';
+
+            // Agora o desenho é instantâneo e síncrono, respeitando a ordem do Array a 100%!
+            ficheirosEmMemoria.forEach((item, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-thumbnail';
+                thumb.draggable = true;
+                thumb.dataset.id = item.id;
+
+                // Se for a primeira (index 0), escrevemos Capa, senão o número
+                const badgeText = index === 0 ? '<i class="bi bi-star-fill text-warning"></i> Capa' : (index + 1);
+
+                thumb.innerHTML = `
+                    <div class="photo-badge">${badgeText}</div>
+                    <img src="${item.dataUrl}" alt="Thumb">
+                    <div class="photo-actions">
+                        <button type="button" class="btn btn-sm btn-light rounded-circle btn-zoom" title="Ver Maior" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger rounded-circle btn-delete" title="Remover" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button>
+                    </div>
+                `;
+
+                // Eventos de Drag & Drop para ordenar
+                thumb.addEventListener('dragstart', handleDragStart);
+                thumb.addEventListener('dragover', handleDragOver);
+                thumb.addEventListener('dragleave', handleDragLeave);
+                thumb.addEventListener('drop', handleDrop);
+                thumb.addEventListener('dragend', handleDragEnd);
+
+                gallery.appendChild(thumb);
+            });
+        }
+
+        function removerFoto(id) {
+            ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id);
+            desenharGaleria();
+        }
+
+        function abrirZoom(srcData) {
+            zoomImagem.src = srcData;
+            zoomModal.show();
+        }
+
+        // === LÓGICA DE DRAG & DROP VISUAL (TÁTIL) ===
+        let itemArrastado = null;
+
+        function handleDragStart(e) {
+            itemArrastado = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if(itemArrastado !== this) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+
+            if (itemArrastado !== this) {
+                const idArrastado = parseInt(itemArrastado.dataset.id);
+                const idAlvo = parseInt(this.dataset.id);
+
+                const indexArrastado = ficheirosEmMemoria.findIndex(f => f.id === idArrastado);
+                const indexAlvo = ficheirosEmMemoria.findIndex(f => f.id === idAlvo);
+
+                // Remove do sítio antigo e insere no novo sítio
+                const ficheiroMover = ficheirosEmMemoria.splice(indexArrastado, 1)[0];
+                ficheirosEmMemoria.splice(indexAlvo, 0, ficheiroMover);
+
+                desenharGaleria(); // Troca visual instantânea!
+            }
+            return false;
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            // Limpa os hover states caso algum tenha ficado preso
+            document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        // O SEGREDO FINAL: Submissão do form
+        form.addEventListener('submit', (e) => {
+            const dt = new DataTransfer();
+            ficheirosEmMemoria.forEach(item => dt.items.add(item.file));
+            inputReal.files = dt.files;
+        });
+    </script>
+}

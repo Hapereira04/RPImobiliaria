@@ -1,0 +1,143 @@
+﻿@model RPImobiliaria.Models.Consultor
+
+@{
+    ViewData["Title"] = "Perfil do Consultor";
+}
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-person-badge text-primary me-2"></i> @ViewData["Title"]</h2>
+            <p class="text-muted mb-0">Visualização detalhada da ficha de contacto</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-danger fw-bold shadow-sm">
+                <i class="bi bi-trash3 me-1"></i> Apagar
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100 border-0 border-top border-5 border-primary">
+                <div class="card-body p-4 text-center d-flex flex-column align-items-center justify-content-center">
+
+                    <div class="mb-4 position-relative" style="width: 180px; height: 180px;">
+
+                        <!-- NOVA LÓGICA DE IMAGEM: Apenas verifica se o caminho existe -->
+                        @if (!string.IsNullOrEmpty(Model?.CaminhoFotoPerfil))
+                        {
+                            <img src="@Model.CaminhoFotoPerfil" alt="Foto" class="rounded-circle object-fit-cover shadow-sm border border-4" style="width: 100%; height: 100%;">
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center border border-4 shadow-sm" style="width: 100%; height: 100%;">
+                                <i class="bi bi-person-fill text-secondary" style="font-size: 6rem;"></i>
+                            </div>
+                        }
+
+                    </div>
+
+                    <h4 class="fw-bold mb-1 text-body-emphasis">@Model?.Nome</h4>
+                    <span class="badge bg-primary mb-4 px-3 py-2 rounded-pill"><i class="bi bi-briefcase-fill me-1"></i> Consultor Imobiliário</span>
+
+                    <div class="w-100 mt-2">
+                        <a href="mailto:@Model?.Email" class="btn btn-outline-primary w-100 mb-2 fw-bold">
+                            <i class="bi bi-envelope-fill me-2"></i> Enviar Email
+                        </a>
+                        @if (!string.IsNullOrEmpty(Model?.Telemovel))
+                        {
+                            <a href="tel:@Model?.Telemovel" class="btn btn-success w-100 fw-bold">
+                                <i class="bi bi-telephone-fill me-2"></i> Ligar
+                            </a>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-transparent py-3 fw-bold text-primary border-bottom">
+                    <i class="bi bi-card-list me-1"></i> Detalhes Profissionais e de Sistema
+                </div>
+                <div class="card-body p-0">
+
+                    <div class="d-flex flex-column">
+
+                        <div class="p-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <h6 class="text-muted fw-bold mb-1 text-uppercase small">Nome Completo</h6>
+                                <p class="mb-0 fw-bold fs-5 text-body-emphasis">@Model?.Nome</p>
+                            </div>
+                            <div class="mt-2 mt-sm-0 text-muted">
+                                <i class="bi bi-person fs-3"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <h6 class="text-muted fw-bold mb-1 text-uppercase small">Email de Contacto / Login</h6>
+                                <p class="mb-0 fw-bold fs-5 text-primary">@Model?.Email</p>
+                            </div>
+                            <div class="mt-2 mt-sm-0 text-muted">
+                                <i class="bi bi-envelope-at fs-3"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <h6 class="text-muted fw-bold mb-1 text-uppercase small">Telemóvel</h6>
+                                <p class="mb-0 fw-bold fs-5 text-body-emphasis">@(string.IsNullOrEmpty(Model?.Telemovel) ? "Não definido" : Model.Telemovel)</p>
+                            </div>
+                            <div class="mt-2 mt-sm-0 text-muted">
+                                <i class="bi bi-phone fs-3"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <h6 class="text-muted fw-bold mb-1 text-uppercase small">Licença AMI</h6>
+                                @if (!string.IsNullOrEmpty(Model?.LicencaAMI))
+                                {
+                                    <p class="mb-0 fw-bold">
+                                        <span class="badge bg-secondary text-white px-3 py-2 fs-6 shadow-sm">AMI-@Model.LicencaAMI</span>
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 text-muted fst-italic fs-6">Licença geral da agência</p>
+                                }
+                            </div>
+                            <div class="mt-2 mt-sm-0 text-muted">
+                                <i class="bi bi-award fs-3"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                                <h6 class="text-muted fw-bold mb-1 text-uppercase small">ID do Sistema (Identity)</h6>
+                                <p class="mb-0 text-muted font-monospace small">@(string.IsNullOrEmpty(Model?.IdentityUserId) ? "Sem conta associada" : Model.IdentityUserId)</p>
+                            </div>
+                            <div class="mt-2 mt-sm-0 text-muted">
+                                <i class="bi bi-hdd-network fs-3"></i>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

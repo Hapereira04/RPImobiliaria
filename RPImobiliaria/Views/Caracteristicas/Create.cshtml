@@ -1,0 +1,51 @@
+﻿@model RPImobiliaria.Models.Caracteristica
+
+@{
+    ViewData["Title"] = "Adicionar Característica";
+}
+
+<div class="container mt-4 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold mb-1"><i class="bi bi-plus-circle-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+            <p class="text-body-secondary mb-0">Adicione um novo atributo e associe-o a um grupo.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 border-top border-5 border-primary">
+            <div class="card-body p-4 p-md-5">
+
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Nome" class="form-control form-control-lg border-primary shadow-sm" placeholder="Nome" autofocus />
+                        <label asp-for="Nome" class="text-body-secondary fw-bold">Nome da Característica <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Nome" class="text-danger small fw-bold"></span>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <select asp-for="GrupoCaracteristicaId" class="form-select border-primary shadow-sm" asp-items="ViewBag.GrupoCaracteristicaId">
+                            <option value="">-- Selecione o Grupo --</option>
+                        </select>
+                        <label asp-for="GrupoCaracteristicaId" class="text-body-secondary fw-bold">Grupo / Categoria <span class="text-danger">*</span></label>
+                        <span asp-validation-for="GrupoCaracteristicaId" class="text-danger small fw-bold"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm"><i class="bi bi-arrow-left me-1"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm"><i class="bi bi-check-lg me-1"></i> Guardar Registo</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

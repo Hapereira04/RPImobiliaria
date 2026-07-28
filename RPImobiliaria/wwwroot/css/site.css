@@ -1,0 +1,107 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* --- CORREÇÕES DATATABLES: MODO ESCURO E PAGINAÇÃO --- */
+.dataTables_wrapper .form-select,
+.dataTables_wrapper .form-control {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
+
+    .dataTables_wrapper .form-select:focus,
+    .dataTables_wrapper .form-control:focus {
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+
+/* Paginação com aspeto Bootstrap 5 moderno */
+.dataTables_wrapper .page-link {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+    border-radius: 4px;
+    margin: 0 8px; /* Dá um espacinho elegante entre os botões de paginação */
+}
+
+.dataTables_wrapper .page-item.active .page-link {
+    background-color: var(--bs-primary);
+    color: #fff;
+    border-color: var(--bs-primary);
+}
+
+.dataTables_wrapper .page-item.disabled .page-link {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    border-color: var(--bs-border-color);
+}
+
+/* Força as Labels (como o "Procurar") e o texto de Rodapé a herdarem a cor do Tema do Cartão */
+.dataTables_wrapper .dataTables_filter label,
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_info {
+    color: inherit !important;
+}
+
+/* =========================================================
+   BADGE PERSONALIZADO (AMI) - Para garantir leitura
+   ========================================================= */
+
+/* MODO CLARO (Onde estava o problema) */
+.badge-ami {
+    background-color: #cfe2ff; /* Fundo Azul Bebé */
+    color: #0a58ca; /* Texto Azul Forte (Alto Contraste) */
+    border: 1px solid #9ec5fe;
+}
+
+/* MODO ESCURO (Adaptação automática) */
+[data-bs-theme="dark"] .badge-ami {
+    background-color: #031633; /* Fundo Azul Noite */
+    color: #6ea8fe; /* Texto Azul Neon */
+    border-color: #084298;
+}
+
+/* =========================================================
+   FORÇAR TABELA SEM SCROLL (LAYOUT FIXO)
+   ========================================================= */
+
+/* 1. Obriga a tabela a respeitar a largura do ecrã */
+table.dataTable {
+    width: 100% !important;
+    margin: 0 !important;
+    table-layout: fixed !important; /* O Segredo: Colunas fixas */
+}
+
+    /* 2. Obriga o texto a partir para a linha de baixo (ex: emails longos) */
+    table.dataTable td,
+    table.dataTable th {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+/* 3. Garante que o contentor não cria barra de scroll */
+.dataTables_wrapper {
+    width: 100%;
+    overflow-x: hidden;
+}

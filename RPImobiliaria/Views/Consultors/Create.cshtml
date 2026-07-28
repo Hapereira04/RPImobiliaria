@@ -1,0 +1,68 @@
+﻿@model RPImobiliaria.Models.Consultor
+
+@{
+    ViewData["Title"] = "Criar Consultor";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="bi bi-person-badge"></i> Registar Novo Consultor
+                </div>
+                <div class="card-body p-4">
+
+                    <form asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Nome" class="form-control" placeholder="Nome Completo" />
+                            <label asp-for="Nome">Nome Completo</label>
+                            <span asp-validation-for="Nome" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="Email" class="form-control" placeholder="Email" type="email" />
+                                <label asp-for="Email">Email Profissional</label>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="Telemovel" class="form-control" placeholder="Telemóvel" />
+                                <label asp-for="Telemovel">Telemóvel</label>
+                                <span asp-validation-for="Telemovel" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="LicencaAMI" class="form-control" placeholder="Licença AMI" />
+                            <label asp-for="LicencaAMI">Licença AMI (Opcional)</label>
+                            <span asp-validation-for="LicencaAMI" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4 p-3 bg-light rounded border">
+                            <label class="form-label fw-bold text-secondary mb-2">
+                                <i class="bi bi-camera"></i> Foto de Perfil (Opcional)
+                            </label>
+                            <input type="file" name="fotoUpload" id="fotoUpload" class="form-control" accept="image/*" />
+                            <div class="form-text mt-2">A imagem será guardada de forma segura na base de dados (em conformidade com o RGPD).</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">Voltar</a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold">Guardar Consultor</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
