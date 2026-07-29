@@ -1,260 +1,499 @@
-﻿<!DOCTYPE html>
-<html lang="pt-PT">
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
+<html lang="pt-PT" data-bs-theme="light">
 <head>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RPImobiliaria</title>
-
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/RPImobiliaria.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
-        :root {
-            --primary-color: #dc3545;
-            --secondary-color: #2b2b2b;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .main-content {
-            flex: 1 0 auto;
-        }
-
-        footer {
-            flex-shrink: 0;
-        }
-
-        .navbar-custom {
-            background-color: var(--secondary-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-            .navbar-custom .navbar-brand {
-                font-weight: 800;
-                letter-spacing: 1px;
-                color: #fff !important;
+            /* FIX DE LAYOUT */
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
             }
 
-            .navbar-custom .nav-link,
-            .navbar-custom .btn-link {
-                color: rgba(255,255,255,0.85) !important;
-                font-weight: 500;
-                transition: 0.3s;
+            /* MODOS CLARO / ESCURO */
+            [data-bs-theme="light"] body {
+                background-color: #ffffff !important;
+                color: #212529;
+            }
+
+            [data-bs-theme="light"] .key-hole {
+                background-color: #ffffff !important;
+            }
+
+            [data-bs-theme="dark"] body {
+                background-color: #2b2d31 !important;
+                color: #f2f3f5;
+            }
+
+            [data-bs-theme="dark"] .key-hole {
+                background-color: #2b2d31 !important;
+            }
+
+            /* ====================================================
+                       A CHAVE REALISTA (Baseada na tua Imagem!)
+                       ==================================================== */
+            .key-nav-wrapper {
+                position: relative;
+                max-width: 1050px;
+                margin: 20px auto 40px auto;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
+            }
+
+            /* O FUNDO DA CHAVE */
+            .key-bg {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            .key-bg-head {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 120px;
+                height: 120px;
+                background-color: #111111;
+                border-radius: 50%;
+            }
+
+                .key-bg-head::after {
+                    content: '';
+                    position: absolute;
+                    left: 20px;
+                    top: 40px;
+                    width: 40px;
+                    height: 40px;
+                    background-color: var(--bs-body-bg);
+                    border-radius: 50%;
+                    box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+                    transition: background-color 0.3s ease;
+                }
+
+            .key-bg-collar {
+                position: absolute;
+                left: 105px;
+                top: 15px;
+                width: 30px;
+                height: 90px;
+                background-color: #111111;
+                clip-path: polygon(0 25%, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%);
+            }
+
+            /* O Bico da chave (menos agressivo para proteger os botões) */
+            .key-bg-shaft {
+                position: absolute;
+                left: 130px;
+                right: 0;
+                top: 30px;
+                height: 60px;
+                background-color: #111111;
+                clip-path: polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%);
+            }
+
+            /* DENTES RETANGULARES VARIADOS (Como uma chave de casa verdadeira) */
+            .key-bg-teeth {
+                position: absolute;
+                right: 100px;
+                top: 89px;
+                width: 160px;
+                height: 25px;
+                background-color: #111111;
+                /* Cortes a 90 graus (retângulos com alturas sortidas) */
+                clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
+            }
+
+            /* ====================================================
+                       O CONTEÚDO (MENUS NO CENTRO, BOTÕES PROTEGIDOS)
+                       ==================================================== */
+            .key-content {
+                position: relative;
+                z-index: 2;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                padding-left: 140px; /* Barreira da argola redonda */
+                padding-right: 75px; /* BARREIRA DO BICO - Protege os botões para nunca saírem para fora! */
+            }
+
+            .key-links {
+                margin: 0 auto; /* Magia para centrar perfeitamente no espaço sobrante */
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+                .key-links .nav-link {
+                    color: #ffffff !important;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    font-size: 0.95rem;
+                    padding: 5px 10px;
+                    transition: color 0.2s ease;
+                }
+
+                    .key-links .nav-link:hover {
+                        color: #ffc107 !important;
+                    }
+
+            .key-actions {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                /* Empurrado naturalmente para a direita pelo 'margin: 0 auto' dos links */
+            }
+
+            /* ====================================================
+                       ADAPTAÇÃO MOBILE (ESCADINHA DE RETÂNGULOS)
+                       ==================================================== */
+            @@media (max-width: 991px) {
+                .key-nav-wrapper {
+                    height: 80px;
+                    margin: 10px auto 30px auto;
+                }
+
+                .key-bg-head {
+                    width: 80px;
+                    height: 80px;
+                }
+
+                    .key-bg-head::after {
+                        left: 12px;
+                        top: 25px;
+                        width: 30px;
+                        height: 30px;
+                    }
+
+                .key-bg-collar {
+                    left: 70px;
+                    top: 10px;
+                    width: 20px;
+                    height: 60px;
+                }
+
+                .key-bg-shaft {
+                    left: 85px;
+                    top: 20px;
+                    height: 40px;
+                    clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+                }
+
+                .key-bg-teeth {
+                    right: 90px;
+                    top: 59px;
+                    width: 110px;
+                    height: 18px;
+                    /* MOBILE: Retângulos em escadinha! */
+                    clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
+                }
+                /* Ajustes de Padding no Mobile para proteger os botões */
+                .key-content {
+                    padding-left: 90px;
+                    padding-right: 40px;
+                }
+
+                .key-links {
+                    gap: 5px;
+                }
+
+                    .key-links .nav-link {
+                        font-size: 0.7rem !important;
+                        padding: 3px 5px;
+                        letter-spacing: 0;
+                    }
+
+                .key-actions {
+                    gap: 5px;
+                }
+
+                .dropdown-menu {
+                    font-size: 0.85rem;
+                }
+            }
+
+            @@media (max-width: 480px) {
+                .key-links {
+                    gap: 2px;
+                }
+
+                    .key-links .nav-link {
+                        font-size: 0.6rem !important;
+                    }
+
+                .key-content {
+                    padding-right: 30px;
+                    padding-left: 80px;
+                }
+
+                .key-bg-teeth {
+                    right: 25px;
+                    width: 85px;
+                }
+            }
+
+            /* ====================================================
+                       RODAPÉ E BOTÕES GLOBAIS
+                       ==================================================== */
+            .btn-floating-contact {
+                position: fixed;
+                bottom: 25px;
+                right: 25px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background-color: #25d366;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                transition: transform 0.2s ease;
                 text-decoration: none;
             }
 
-                .navbar-custom .nav-link:hover,
-                .navbar-custom .btn-link:hover {
-                    color: var(--primary-color) !important;
+                .btn-floating-contact:hover {
+                    transform: scale(1.1);
+                    color: white;
                 }
 
-        .action-buttons {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-        }
-
-            .action-buttons .navbar-nav {
-                flex-direction: row !important;
-                gap: 15px;
-                align-items: center;
-                margin: 0;
-                padding: 0;
+            .footer-rp {
+                background-color: #121212;
+                color: #d0d0d0;
+                margin-top: auto;
             }
 
-        @@media (max-width: 991.98px) {
-            .mobile-divider {
-                border-top: 1px solid rgba(255, 255, 255, 0.15);
-                margin-top: 1rem;
-                padding-top: 1rem;
-            }
-        }
-
-        #themeToggle {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-            padding: 0;
-        }
-
-            #themeToggle:hover {
-                background: rgba(255,255,255,0.1);
-                border-color: white;
+            .footer-link {
+                color: #909090;
+                text-decoration: none;
+                transition: color 0.2s;
             }
 
-        /* --- O VERDADEIRO MODO ESCURO FORÇADO NO BODY --- */
-        body.dark-mode {
-            background-color: #121212 !important;
-            color: #e0e0e0 !important;
-        }
-
-            body.dark-mode .card,
-            body.dark-mode .bg-white,
-            body.dark-mode .bg-light {
-                background-color: #1e1e1e !important;
-                border-color: #333 !important;
-                color: #e0e0e0 !important;
-            }
-
-            body.dark-mode .text-dark,
-            body.dark-mode .text-muted {
-                color: #b0b0b0 !important;
-            }
-
-            body.dark-mode .table,
-            body.dark-mode th,
-            body.dark-mode td {
-                color: #e0e0e0 !important;
-                border-color: #333 !important;
-            }
-
-            body.dark-mode .form-control,
-            body.dark-mode .form-select {
-                background-color: #2b2b2b !important;
-                border-color: #444 !important;
-                color: #fff !important;
-            }
+                .footer-link:hover {
+                    color: #ffffff;
+                }
     </style>
 </head>
-<body>
-    <script>
-        (function() {
-            var storedTheme = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
-                document.body.classList.add('dark-mode');
-            }
-        })();
-    </script>
+<body class="d-flex flex-column min-vh-100">
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-custom py-3 mb-4">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-buildings-fill text-danger"></i> Sharp<span class="text-danger">Estate</span>
-                </a>
+    <!-- HEADER: A CHAVE -->
+    <header class="container-fluid px-2 px-md-3">
+        <div class="key-nav-wrapper">
 
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="bi bi-list text-white fs-2"></i>
-                </button>
+            <!-- O FUNDO DESENHADO -->
+            <div class="key-bg">
+                <div class="key-bg-head"></div>
+                <div class="key-bg-collar"></div>
+                <div class="key-bg-shaft"></div>
+                <div class="key-bg-teeth"></div>
+            </div>
 
-                <div class="navbar-collapse collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-3 mt-lg-0">
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Imovels" asp-action="Index">Imóveis</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Consultors" asp-action="Index">Consultores</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Clientes" asp-action="Index">Clientes</a></li>
+            <!-- OS MENUS E BOTÕES (Protegidos pelo padding) -->
+            <div class="key-content">
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarBackoffice" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-shield-lock-fill text-warning"></i> Admin
-                                </a>
-                                <ul class="dropdown-menu shadow border-0" aria-labelledby="navbarBackoffice">
-                                    <li><h6 class="dropdown-header">Gestão de Catálogos</h6></li>
-                                    <li><a class="dropdown-item" asp-controller="CategoriaImovels" asp-action="Index">Categorias</a></li>
-                                    <li><a class="dropdown-item" asp-controller="TipoNegocios" asp-action="Index">Tipos de Negócio</a></li>
-                                    <li><a class="dropdown-item" asp-controller="EstadoImovels" asp-action="Index">Estados</a></li>
-                                    <li><a class="dropdown-item" asp-controller="StatusImovels" asp-action="Index">Status</a></li>
-                                    <li><a class="dropdown-item" asp-controller="CertificadoEnergeticoes" asp-action="Index">Certificados</a></li>
+                <!-- ATALHOS (No Centro Automático) -->
+                <div class="key-links">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
+
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Imóveis</a>
+                        <ul class="dropdown-menu shadow border-0 mt-3">
+                            <li><a class="dropdown-item fw-bold" asp-controller="Imovels" asp-action="Index">Todos os Imóveis</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/Imovels?negocio=comprar">Para Comprar</a></li>
+                            <li><a class="dropdown-item" href="/Imovels?negocio=arrendar">Para Arrendar</a></li>
+                        </ul>
+                    </div>
+
+                    <a class="nav-link" asp-controller="Home" asp-action="QuemSomos">Quem Somos</a>
+                </div>
+
+                <!-- AÇÕES (Fixas com segurança à direita) -->
+                <div class="key-actions">
+                    <button type="button" class="btn btn-sm text-white border-0 p-0" id="btnThemeToggle">
+                        <i class="bi bi-moon-stars-fill fs-5" id="themeIcon"></i>
+                    </button>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="dropdown ms-1 ms-md-2">
+                            <a class="nav-link dropdown-toggle text-warning fw-bold small p-0" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-badge-fill me-1"></i> <span class="d-none d-sm-inline">@User.Identity?.Name?.Split('@')[0]</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-4">
+                                <li><h6 class="dropdown-header">Painel Privado</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Imovels" asp-action="Gestao">Gerir Imóveis</a></li>
+                                <li><a class="dropdown-item" asp-controller="Clientes" asp-action="Index">Gerir Clientes (CRM)</a></li>
+                                @if (User.IsInRole("Admin"))
+                                {
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger fw-bold" asp-controller="Caracteristicas" asp-action="Index">✨ Características</a></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
+                                    <li><a class="dropdown-item text-danger fw-bold" asp-controller="Consultors" asp-action="Index">Equipa & Definições</a></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                        <button type="submit" class="dropdown-item text-danger">Terminar Sessão</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
 
-                    <div class="action-buttons mobile-divider">
-                        <button type="button" id="themeToggle" title="Mudar Tema">
-                            <i class="bi bi-circle-half" id="themeIcon"></i>
-                        </button>
-                        <partial name="_LoginPartial" />
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER RP IMOBILIÁRIA -->
+    <footer class="footer-rp py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="text-white fw-bold mb-3"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Onde Estamos</h5>
+                    <div class="rounded overflow-hidden shadow-sm" style="height: 220px;">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48259.049448839075!2d-8.66578051770932!3d40.85764426861214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23838dc2a0ec43%3A0xbcc0e84b729d3bd!2sOvar!5e0!3m2!1spt-PT!2spt!4v1717000000000!5m2!1spt-PT!2spt"
+                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="row">
+                            <h5 class="text-white fw-bold mb-3">Navegação</h5>
+                            <ul class="list-unstyled space-y-2">
+                                <li><a href="/" class="footer-link"><i class="bi bi-chevron-right small me-1"></i> Início</a></li>
+                                <li><a asp-controller="Imovels" asp-action="Index" class="footer-link"><i class="bi bi-chevron-right small me-1"></i> Imóveis</a></li>
+                                <li><a asp-controller="Home" asp-action="QuemSomos" class="footer-link"><i class="bi bi-chevron-right small me-1"></i> Quem Somos</a></li>
+                                <li><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-1"></i> Política de Privacidade</a></li>
+                                <li><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-1"></i> Política de Cookies</a></li>
+                                <li><a href="https://www.livroreclamacoes.pt/" target="_blank" class="footer-link text-warning"><i class="bi bi-book small me-1"></i> Livro de Reclamações Online</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-3 text-md-end text-start">
+                            <div class="mb-3">
+                                <img src="/images/logo.png" alt="Logo RP Imobiliária" style="max-height: 55px;" onerror="this.style.display='none'">
+                                <h4 class="text-white fw-bold mb-0 mt-2">RP Mediação Imobiliária</h4>
+                                <span class="text-muted small">AMI: 12345</span>
+                            </div>
+
+                            <div class="d-flex gap-2 justify-content-md-end mt-3">
+                                <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="bi bi-facebook"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="bi bi-instagram"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="bi bi-linkedin"></i></a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <div class="container main-content">
-        <main role="main" class="pb-5">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="bg-dark text-white py-4 mt-auto">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div class="mb-2 mb-md-0">
-                &copy; @DateTime.Now.Year - RPImobiliaria - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-white text-decoration-underline">Privacy</a>
-            </div>
-            <div>
-                <small class="text-white-50">A plataforma inteligente de gestão imobiliária.</small>
+            <div class="border-top border-secondary mt-4 pt-3 text-center text-muted small">
+                &copy; @DateTime.Now.Year - RPImobiliaria. Todos os direitos reservados.
             </div>
         </div>
     </footer>
+
+    <!-- BOTÃO FLUTUANTE DE CONTACTO -->
+    <a href="tel:+351999999999" class="btn-floating-contact d-md-none">
+        <i class="bi bi-telephone-fill"></i>
+    </a>
+    <button type="button" class="btn-floating-contact border-0 d-none d-md-flex" data-bs-toggle="modal" data-bs-target="#contactModalGlobal">
+        <i class="bi bi-envelope-paper-fill"></i>
+    </button>
+
+    <!-- MODAL DE CONTACTO -->
+    <div class="modal fade" id="contactModalGlobal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-chat-dots-fill me-2"></i> Fale Connosco</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-telephone-inbound text-success fs-1"></i>
+                        <h4 class="fw-bold mt-1">+351 999 999 999</h4>
+                        <p class="text-muted small">Prefere mensagem? Preencha os campos abaixo:</p>
+                    </div>
+
+                    <form asp-controller="Home" asp-action="EnviarContacto" method="post">
+                        <div class="form-floating mb-2">
+                            <input type="text" class="form-control" name="Nome" placeholder="O seu nome" required>
+                            <label>O seu Nome</label>
+                        </div>
+                        <div class="form-floating mb-2">
+                            <input type="text" class="form-control" name="Contacto" placeholder="Telefone ou Email" required>
+                            <label>Telefone ou Email</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="Assunto" placeholder="Assunto">
+                            <label>Assunto / Ref. Imóvel</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold btn-lg">
+                            Enviar Mensagem <i class="bi bi-send ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <!-- SCRIPT TEMA -->
     <script>
-        $(document).ready(function () {
-            $('.tabela-admin').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-PT.json"
-                },
-                "ordering": true,
-                "paging": true,
-                "searching": true,
-                "info": true,
-                "lengthChange": false,
-                /* MAGIA AQUI: Desliga a ordenação na última coluna (Ações) */
-                "columnDefs": [
-                    { "orderable": false, "targets": -1 }
-                ]
+            document.addEventListener("DOMContentLoaded", () => {
+                const htmlEl = document.documentElement;
+                const btnToggle = document.getElementById("btnThemeToggle");
+                const iconToggle = document.getElementById("themeIcon");
+
+                function getPreferredTheme() {
+                    const saved = localStorage.getItem("theme");
+                    if (saved) return saved;
+                    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                }
+
+                function applyTheme(theme) {
+                    htmlEl.setAttribute("data-bs-theme", theme);
+                    localStorage.setItem("theme", theme);
+                    if (theme === "dark") {
+                        iconToggle.className = "bi bi-sun-fill text-warning fs-5";
+                    } else {
+                        iconToggle.className = "bi bi-moon-stars-fill text-white fs-5";
+                    }
+                }
+
+                applyTheme(getPreferredTheme());
+
+                window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+                    if (!localStorage.getItem("theme")) applyTheme(e.matches ? "dark" : "light");
+                });
+
+                btnToggle.addEventListener("click", () => {
+                    const current = htmlEl.getAttribute("data-bs-theme");
+                    applyTheme(current === "dark" ? "light" : "dark");
+                });
             });
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleBtn = document.getElementById('themeToggle');
-            const icon = document.getElementById('themeIcon');
-
-            // Verifica o estado atual do body
-            const isDark = document.body.classList.contains('dark-mode');
-            icon.className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
-
-            toggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                const nowDark = document.body.classList.contains('dark-mode');
-
-                localStorage.setItem('theme', nowDark ? 'dark' : 'light');
-                icon.className = nowDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
-            });
-        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
