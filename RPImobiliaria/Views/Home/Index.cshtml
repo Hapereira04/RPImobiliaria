@@ -238,3 +238,75 @@
         </div>
     </div>
 </section>
+
+<!-- 3. ZONA DE CONTACTO GLOBAL -->
+<section class="contacto-section py-5 bg-dark text-white">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+
+            <!-- Texto e Informações -->
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">Fale com um Especialista</h2>
+                <p class="text-light mb-4 fs-5">
+                    Tem dúvidas sobre um imóvel ou quer vender a sua casa? Deixe-nos a sua mensagem. A nossa equipa entrará em contacto consigo o mais breve possível.
+                </p>
+
+                <div class="d-flex align-items-center mb-4">
+                    <!-- Bola perfeita para o Telefone -->
+                    <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 60px; height: 60px; flex-shrink: 0;">
+                        <i class="bi bi-telephone-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Ligue-nos</h5>
+                        <span class="text-light">+351 999 999 999</span>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-4">
+                    <!-- Bola perfeita para a Localização -->
+                    <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 60px; height: 60px; flex-shrink: 0;">
+                        <i class="bi bi-geo-alt-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Visite-nos</h5>
+                        <span class="text-light">Câmara, Ovar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário -->
+            <div class="col-lg-6">
+                <div class="bg-white p-4 p-md-5 rounded-4 shadow-lg text-dark">
+                    <h4 class="fw-bold mb-4 text-center">Envie uma Mensagem</h4>
+
+                    <form asp-controller="Home" asp-action="EnviarContacto" method="post">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light" name="Nome" placeholder="O seu nome" required>
+                            <label>O seu Nome</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light" name="Contacto" placeholder="Telefone ou Email" required>
+                            <label>Telefone ou Email</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light" name="Assunto" placeholder="Assunto ou Referência">
+                            <label>Assunto / Ref. Imóvel</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control bg-light" name="Mensagem" placeholder="A sua mensagem" style="height: 120px" required></textarea>
+                            <label>A sua mensagem...</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold btn-lg">
+                            Enviar Mensagem <i class="bi bi-send ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
