@@ -40,6 +40,31 @@
                 background-color: #2b2d31 !important;
             }
 
+            [data-bs-theme="dark"] .modal-content {
+                background-color: #2b2d31;
+                color: #f2f3f5;
+            }
+
+            [data-bs-theme="dark"] .modal-content .text-muted {
+                color: #adb5bd !important;
+            }
+
+            [data-bs-theme="dark"] .modal-content .form-control {
+                background-color: #1e1f22;
+                border-color: #444;
+                color: #f2f3f5;
+            }
+
+                [data-bs-theme="dark"] .modal-content .form-control:focus {
+                    background-color: #2b2d31;
+                    border-color: #0d6efd;
+                    color: #fff;
+                }
+
+            [data-bs-theme="dark"] .modal-content .form-floating label {
+                color: #888;
+            }
+
             /* ====================================================
                        A CHAVE REALISTA (Baseada na tua Imagem!)
                        ==================================================== */
@@ -425,7 +450,7 @@
         <i class="bi bi-envelope-paper-fill"></i>
     </button>
 
-    <!-- MODAL DE CONTACTO -->
+    <!-- MODAL DE CONTACTO GLOAL -->
     <div class="modal fade" id="contactModalGlobal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
@@ -449,10 +474,17 @@
                             <input type="text" class="form-control" name="Contacto" placeholder="Telefone ou Email" required>
                             <label>Telefone ou Email</label>
                         </div>
-                        <div class="form-floating mb-3">
+                        <div class="form-floating mb-2">
                             <input type="text" class="form-control" name="Assunto" placeholder="Assunto">
                             <label>Assunto / Ref. Imóvel</label>
                         </div>
+
+                        <!-- AQUI ESTAVA O PROBLEMA! Faltava o campo de Mensagem neste formulário -->
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" name="Mensagem" placeholder="A sua mensagem" style="height: 100px" required></textarea>
+                            <label>A sua mensagem...</label>
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100 fw-bold btn-lg">
                             Enviar Mensagem <i class="bi bi-send ms-1"></i>
                         </button>
@@ -462,9 +494,60 @@
         </div>
     </div>
 
+<!-- ==========================================
+         NOTIFICAÇÕES MODERNAS (TOASTS)
+         ========================================== -->
+<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 1080;">
+    @if (TempData["MensagemSucesso"] != null)
+    {
+        <div id="emailToast" class="toast align-items-center text-white bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="d-flex">
+                <div class="toast-body fw-bold fs-6">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["MensagemSucesso"]
+                </div>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["MensagemErro"] != null)
+    {
+        <div id="emailToast" class="toast align-items-center text-white bg-danger border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="d-flex">
+                <div class="toast-body fw-bold fs-6">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["MensagemErro"]
+                </div>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+        // Script para ativar a notificação automaticamente se ela existir na página
+        document.addEventListener("DOMContentLoaded", function() {
+            var toastEl = document.getElementById('emailToast');
+            if (toastEl) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+</script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- ALERTA DE SUCESSO OU ERRO (No envio de email) -->
+   
+    @if (TempData["MensagemErro"] != null)
+    {
+        <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    alert("@TempData["MensagemErro"]");
+                });
+        </script>
+    }
 
     <!-- SCRIPT TEMA -->
     <script>
