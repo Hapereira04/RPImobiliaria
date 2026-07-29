@@ -1,8 +1,240 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Página Inicial";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- ESTILOS EXCLUSIVOS DA PÁGINA INICIAL -->
+<style>
+    /* GARANTE A COR DO TÍTULO NO MODO ESCURO E CLARO */
+    [data-bs-theme="light"] .destaques-title {
+        color: #212529 !important;
+    }
+
+    [data-bs-theme="dark"] .destaques-title {
+        color: #ffffff !important;
+    }
+
+    /* HERO SECTION (Vídeo de Fundo) */
+    .hero-section {
+        position: relative;
+        height: 85vh;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -20px;
+    }
+
+    #bg-video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        transform: translateX(-50%) translateY(-50%);
+        z-index: 0;
+        object-fit: cover;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: white;
+        padding: 20px;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-bottom: 30px;
+        text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+    }
+
+    /* CARROSSEL DE DESTAQUES */
+    .destaques-section {
+        padding: 80px 0;
+        background-color: transparent;
+    }
+
+    /* O CARTÃO CLICÁVEL (Corta as curvas na perfeição) */
+    .destaque-link {
+        display: block;
+        text-decoration: none;
+        position: relative;
+        border-radius: 15px; /* Define as curvas aqui */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        background-color: transparent;
+        overflow: hidden; /* <-- O SEGREDO: Corta a foto e o banner que saírem fora das curvas! */
+        transform: translateZ(0); /* Resolve bugs de curvas no Safari/iPhone */
+    }
+
+    .carousel-item img {
+        height: 500px;
+        width: 100%;
+        object-fit: cover;
+        /* Não precisa de border-radius, o contentor corta as pontas */
+        transition: transform 0.3s ease;
+    }
+
+    /* Banner a flutuar no PC (Tem os seus próprios cantos redondos) */
+    .imovel-card-overlay {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(5px);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+
+    .destaque-link:hover .imovel-card-overlay {
+        background: rgba(0, 0, 0, 0.90);
+    }
+
+    .preco-destaque {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #25d366;
+    }
+
+    /* ADAPTAÇÃO MOBILE */
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .carousel-item img {
+            height: 350px;
+        }
+        /* Banner colado abaixo da foto no telemóvel */
+        .imovel-card-overlay {
+            position: relative;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-radius: 0; /* O contentor principal é que faz a curva inferior */
+            margin-top: -1px; /* Remove qualquer risco de fundo a aparecer no meio */
+        }
+    }
+</style>
+
+<!-- 1. ZONA DO VÍDEO (HERO) -->
+<section class="hero-section">
+    <!-- VÍDEO MP4 -->
+    <video autoplay loop muted playsinline id="bg-video">
+        <source src="~/videos/ovar-zoom.mp4" type="video/mp4">
+        <!-- Fundo de segurança -->
+    </video>
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <h1 class="hero-title">Ovar é a nossa Casa</h1>
+        <p class="hero-subtitle">Encontre o imóvel dos seus sonhos com a RP Mediação Imobiliária.</p>
+
+        <div class="d-flex gap-3 justify-content-center mt-4">
+            <a href="/Imovels?negocio=comprar" class="btn btn-primary btn-lg fw-bold px-4 rounded-pill shadow">
+                Comprar <i class="bi bi-house-door-fill ms-2"></i>
+            </a>
+            <a href="/Imovels?negocio=arrendar" class="btn btn-outline-light btn-lg fw-bold px-4 rounded-pill">
+                Arrendar <i class="bi bi-key-fill ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 2. ZONA DOS IMÓVEIS EM DESTAQUE -->
+<section class="destaques-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold destaques-title">Imóveis em Destaque</h2>
+            <div class="mx-auto mt-2" style="height: 4px; width: 60px; background-color: var(--bs-primary); border-radius: 2px;"></div>
+        </div>
+
+        <div id="carroselDestaques" class="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div class="carousel-inner">
+
+                <!-- DESTAQUE 1 -->
+                <div class="carousel-item active" data-bs-interval="4000">
+                    <a href="/Imovels/Details/1" class="destaque-link">
+                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80" alt="Imóvel 1">
+                        <div class="imovel-card-overlay">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <span class="badge bg-primary mb-2">Para Venda</span>
+                                    <h3 class="mb-1 fw-bold">Moradia T4 de Luxo</h3>
+                                    <p class="mb-0 text-light"><i class="bi bi-geo-alt-fill text-danger"></i> Câmara, Ovar</p>
+                                </div>
+                                <div class="text-end mt-2 mt-md-0">
+                                    <div class="preco-destaque">350.000 €</div>
+                                    <span class="btn btn-sm btn-light fw-bold mt-2">Ver Detalhes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- DESTAQUE 2 -->
+                <div class="carousel-item" data-bs-interval="4000">
+                    <a href="/Imovels/Details/2" class="destaque-link">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" alt="Imóvel 2">
+                        <div class="imovel-card-overlay">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <span class="badge bg-warning text-dark mb-2">Novo</span>
+                                    <h3 class="mb-1 fw-bold">Apartamento T3 Moderno</h3>
+                                    <p class="mb-0 text-light"><i class="bi bi-geo-alt-fill text-danger"></i> Furadouro, Ovar</p>
+                                </div>
+                                <div class="text-end mt-2 mt-md-0">
+                                    <div class="preco-destaque">210.000 €</div>
+                                    <span class="btn btn-sm btn-light fw-bold mt-2">Ver Detalhes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Botões de Navegação -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#carroselDestaques" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carroselDestaques" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                <span class="visually-hidden">Próximo</span>
+            </button>
+        </div>
+
+        <div class="text-center mt-5">
+            <a asp-controller="Imovels" asp-action="Index" class="btn btn-outline-primary btn-lg fw-bold">
+                Ver todos os Imóveis <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
