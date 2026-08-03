@@ -1,326 +1,93 @@
-﻿@model RPImobiliaria.Models.Imovel
-
+@model RPImobiliaria.Models.Imovel
 @{
     ViewData["Title"] = Model.Titulo;
+    var fotos = Model.Fotos.OrderBy(f => f.Ordem).ToList();
+    var referencia = Model.Referencia ?? Model.Id.ToString();
+    var precoM2 = Model.AreaUtil > 0 ? Model.Preco / (decimal)Model.AreaUtil : 0;
+    var localizacao = string.Join(", ", new[] { Model.Freguesia?.Nome, Model.Freguesia?.Concelho?.Nome, Model.Freguesia?.Concelho?.Distrito?.Nome }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    var caracteristicas = Model.Caracteristicas.Where(c => c.Caracteristica?.GrupoCaracteristica is not null).GroupBy(c => c.Caracteristica!.GrupoCaracteristica!.Nome).OrderBy(g => g.Key);
+    var equipa = User.IsInRole("Admin") || User.IsInRole("Consultor");
+}
 
-    decimal precoM2 = 0;
-    if (Model.AreaUtil > 0)
+<style>
+    .imovel-gallery { background: #0f172a; min-height: 420px; }
+    .imovel-gallery img { height: min(64vh, 650px); width: 100%; object-fit: cover; }
+    .gallery-thumb { width: 72px; height: 54px; border: 2px solid transparent; object-fit: cover; opacity: .7; cursor: pointer; }
+    .gallery-thumb.active, .gallery-thumb:hover { border-color: #fff; opacity: 1; }
+    .detail-stat { border-radius: 1rem; background: var(--bs-tertiary-bg); height: 100%; }
+    .detail-stat i { color: var(--bs-primary); font-size: 1.3rem; }
+    .contact-card { top: 1.25rem; border-radius: 1rem; overflow: hidden; }
+    .spec-row:last-child { border-bottom: 0 !important; }
+</style>
+
+<section class="bg-body-tertiary border-bottom">
+    <div class="container py-3 d-flex flex-wrap justify-content-between gap-2 align-items-center">
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Início</a></li><li class="breadcrumb-item"><a asp-action="Index">Imóveis</a></li><li class="breadcrumb-item active text-truncate" aria-current="page">@Model.Titulo</li></ol></nav>
+        @if (equipa) { <div class="d-flex gap-2"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square me-1"></i>Editar</a><a asp-action="Gestao" class="btn btn-sm btn-outline-secondary">Gestão</a></div> }
+    </div>
+</section>
+
+<section class="imovel-gallery position-relative">
+    @if (fotos.Any())
     {
-        precoM2 = Model.Preco / (decimal)Model.AreaUtil;
+        <div id="imovelCarousel" class="carousel slide" data-bs-ride="false">
+            <div class="carousel-inner">
+                @for (var indice = 0; indice < fotos.Count; indice++)
+                {
+                    <div class="carousel-item @(indice == 0 ? "active" : "")"><img src="@fotos[indice].CaminhoImagem" alt="@Model.Titulo - fotografia @(indice + 1)" /></div>
+                }
+            </div>
+            @if (fotos.Count > 1)
+            {
+                <button class="carousel-control-prev" type="button" data-bs-target="#imovelCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Anterior</span></button>
+                <button class="carousel-control-next" type="button" data-bs-target="#imovelCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Seguinte</span></button>
+            }
+        </div>
+        @if (fotos.Count > 1)
+        {
+            <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex gap-2 overflow-auto mw-100 px-3">@for (var indice = 0; indice < fotos.Count; indice++) { <button type="button" class="p-0 bg-transparent border-0" data-bs-target="#imovelCarousel" data-bs-slide-to="@indice" aria-label="Ver fotografia @(indice + 1)"><img class="gallery-thumb rounded @(indice == 0 ? "active" : "")" src="@fotos[indice].CaminhoImagem" alt="" /></button> }</div>
+        }
     }
+    else
+    {
+        <div class="d-flex flex-column gap-2 align-items-center justify-content-center text-white" style="min-height: 420px;"><i class="bi bi-house display-3 opacity-50"></i><span>Fotografias disponíveis brevemente</span></div>
+    }
+</section>
 
-    var caracteristicasAgrupadas = (Model.Caracteristicas ?? new List<RPImobiliaria.Models.ImovelCaracteristica>())
-        .Where(c => c.Caracteristica != null && c.Caracteristica.GrupoCaracteristica != null)
-        .GroupBy(c => c.Caracteristica.GrupoCaracteristica.Nome)
-        .OrderBy(g => g.Key)
-        .ToList();
-
-    var fotosOrdenadas = Model.Fotos?.OrderBy(f => f.Ordem).ToList() ?? new List<RPImobiliaria.Models.FotoImovel>();
-}
-
-<div class="container mt-4 mb-5">
-
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
-        <div>
-            <div class="badge bg-danger mb-2 px-3 py-2 text-uppercase fw-bold shadow-sm">
-                @(Model.TipoNegocio?.Nome ?? "Para Comercialização")
-            </div>
-            <h1 class="fw-bold mb-1 text-body-emphasis" style="font-size: 2.2rem; letter-spacing: -0.5px;">@Model.Titulo</h1>
-            <p class="text-body-secondary fs-5 mb-0">
-                <i class="bi bi-geo-alt-fill text-danger me-1"></i> @Model.Freguesia, @Model.Concelho, @Model.Distrito
-            </p>
-        </div>
-        <div class="text-md-end">
-            <h2 class="fw-bold text-success mb-0" style="font-size: 2.5rem;">@Model.Preco.ToString("C0", new System.Globalization.CultureInfo("pt-PT"))</h2>
-            <p class="text-body-secondary mb-0 small fw-bold">Ref: SHARP-@Model.Id.ToString("D5")</p>
-        </div>
-    </div>
-
-    <div class="row">
+<main class="container py-5">
+    <div class="row g-5">
         <div class="col-lg-8">
-
-            @if (fotosOrdenadas.Any())
-            {
-                <div id="imovelCarousel" class="carousel slide shadow-sm rounded overflow-hidden mb-2 bg-dark" data-bs-ride="false" style="height: 450px;">
-                    <div class="carousel-inner h-100">
-                        @for (int i = 0; i < fotosOrdenadas.Count; i++)
-                        {
-                            var foto = fotosOrdenadas[i];
-                            <!-- USAR DIRETAMENTE O CAMINHO FISICO DA IMAGEM -->
-                            <div class="carousel-item @(i == 0 ? "active" : "") h-100">
-                                <img src="@foto.CaminhoImagem" class="d-block w-100 h-100 object-fit-contain" style="cursor: zoom-in;" alt="Foto @i" data-bs-toggle="modal" data-bs-target="#galleryModal" data-bs-slide-to="@i">
-                            </div>
-                        }
-                    </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#imovelCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon bg-dark bg-opacity-50 rounded p-3" aria-hidden="true"></span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#imovelCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon bg-dark bg-opacity-50 rounded p-3" aria-hidden="true"></span>
-                    </button>
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="d-flex gap-2 flex-wrap mb-3"><span class="badge text-bg-primary px-3 py-2">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>@if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome)) { <span class="badge text-bg-light border px-3 py-2">@Model.StatusImovel.Nome</span> }</div>
+                    <h1 class="display-6 fw-bold mb-2">@Model.Titulo</h1>
+                    <p class="text-body-secondary mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)</p>
                 </div>
-
-                <div class="w-100 mb-4" style="overflow: hidden;">
-                    <div class="d-flex gap-2 py-2 overflow-x-auto custom-scrollbar" id="thumbnailTrack" style="flex-wrap: nowrap; overflow-y: hidden;">
-                        @for (int i = 0; i < fotosOrdenadas.Count; i++)
-                        {
-                            var foto = fotosOrdenadas[i];
-                            <!-- MINIATURA: USAR DIRETAMENTE O CAMINHO -->
-                            <img src="@foto.CaminhoImagem" loading="lazy" decoding="async"
-                                 class="rounded object-fit-cover shadow-sm thumbnail-controller @(i == 0 ? "border-primary opacity-100" : "border-transparent opacity-50")"
-                                 style="width: 80px; height: 60px; min-width: 80px; flex-shrink: 0; cursor: pointer; border-width: 3px !important; border-style: solid; transition: all 0.2s ease;"
-                                 data-bs-target="#imovelCarousel" data-bs-slide-to="@i" alt="Miniatura @i">
-                        }
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="rounded mb-4 d-flex flex-column align-items-center justify-content-center text-body-secondary bg-body-tertiary shadow-sm" style="height: 450px;">
-                    <i class="bi bi-camera-fill" style="font-size: 5rem;"></i>
-                    <p class="mt-3 fs-5">Sem fotografias disponíveis</p>
-                </div>
-            }
-
-            <div class="row text-center g-3 mb-5">
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-door-open fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Quartos</span><span class="fs-5 fw-bold text-body-emphasis">@Model.Quartos</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-water fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">WCs</span><span class="fs-5 fw-bold text-body-emphasis">@Model.CasasBanho</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-rulers fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Área Útil</span><span class="fs-5 fw-bold text-body-emphasis">@Model.AreaUtil m²</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-aspect-ratio fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Área Bruta</span><span class="fs-5 fw-bold text-body-emphasis">@Model.AreaBruta m²</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-car-front fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Estac.</span><span class="fs-5 fw-bold text-body-emphasis">@Model.Estacionamento</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-building-up fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Piso</span><span class="fs-5 fw-bold text-body-emphasis">@Model.Piso</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-patch-check fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Cert. Energ.</span><span class="fs-5 fw-bold text-success">@(Model.CertificadoEnergetico?.Nome ?? "-")</span></div></div>
-                <div class="col-6 col-md-3"><div class="p-3 border border-secondary-subtle rounded bg-body-tertiary h-100 shadow-sm"><i class="bi bi-tags fs-3 text-primary d-block mb-1"></i><span class="d-block text-body-secondary small text-uppercase">Preço m²</span><span class="fs-5 fw-bold text-body-emphasis">@precoM2.ToString("C0")</span></div></div>
+                <div class="text-lg-end"><div class="display-6 fw-bold text-primary">@Model.Preco.ToString("N0") €</div><span class="text-body-secondary small">Ref. @referencia</span></div>
             </div>
 
-            <h4 class="fw-bold mb-3 border-bottom border-secondary-subtle pb-2 text-body-emphasis">Descrição do Imóvel</h4>
-            <p class="fs-6 lh-lg mb-5 text-body-emphasis" style="white-space: pre-line; text-align: justify;">
-                @(string.IsNullOrWhiteSpace(Model.Descricao) ? "Nenhuma descrição disponível para este imóvel." : Model.Descricao)
-            </p>
-
-            <h4 class="fw-bold mb-3 border-bottom border-secondary-subtle pb-2 text-body-emphasis">Detalhes e Características</h4>
-
-            <div class="card border border-secondary-subtle shadow-sm bg-body-tertiary mb-4">
-                <div class="card-body d-flex flex-wrap gap-4">
-                    <div>
-                        <span class="d-block text-body-secondary small text-uppercase mb-1">Estado</span>
-                        <span class="fw-bold text-body-emphasis fs-6 border-start border-3 border-primary ps-2">@(Model.EstadoImovel?.Nome ?? "-")</span>
-                    </div>
-                    <div>
-                        <span class="d-block text-body-secondary small text-uppercase mb-1">Categoria</span>
-                        <span class="fw-bold text-body-emphasis fs-6 border-start border-3 border-primary ps-2">@(Model.CategoriaImovel?.Nome ?? "-")</span>
-                    </div>
-                    <div>
-                        <span class="d-block text-body-secondary small text-uppercase mb-1">Ano de Construção</span>
-                        <span class="fw-bold text-body-emphasis fs-6 border-start border-3 border-primary ps-2">@(Model.AnoConstrucao > 0 ? Model.AnoConstrucao.ToString() : "-")</span>
-                    </div>
-                </div>
+            <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
+                <div class="col"><div class="detail-stat p-3"><i class="bi bi-door-open d-block mb-2"></i><span class="small text-body-secondary d-block">Quartos</span><strong>T@(Model.Quartos)</strong></div></div>
+                <div class="col"><div class="detail-stat p-3"><i class="bi bi-droplet d-block mb-2"></i><span class="small text-body-secondary d-block">Casas de banho</span><strong>@Model.CasasBanho WC</strong></div></div>
+                <div class="col"><div class="detail-stat p-3"><i class="bi bi-aspect-ratio d-block mb-2"></i><span class="small text-body-secondary d-block">Área útil</span><strong>@Model.AreaUtil.ToString("N0") m²</strong></div></div>
+                <div class="col"><div class="detail-stat p-3"><i class="bi bi-cash-coin d-block mb-2"></i><span class="small text-body-secondary d-block">Preço / m²</span><strong>@(precoM2 > 0 ? precoM2.ToString("N0") + " €" : "—")</strong></div></div>
             </div>
 
-            <div class="row g-3 mb-5">
-                @foreach (var grupo in caracteristicasAgrupadas)
-                {
-                    <div class="col-md-6">
-                        <div class="card h-100 border border-secondary-subtle shadow-sm bg-body-tertiary">
-                            <div class="card-body">
-                                <h6 class="fw-bold text-body-emphasis mb-3 border-bottom border-secondary-subtle pb-2">
-                                    <i class="bi bi-check2-square text-primary me-2"></i>@grupo.Key
-                                </h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @foreach (var c in grupo)
-                                    {
-                                        <span class="badge bg-body border border-secondary-subtle text-body-emphasis px-2 py-1 shadow-sm fs-6 fw-normal">
-                                            @c.Caracteristica.Nome
-                                        </span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
+            <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Sobre este imóvel</h2><p class="lh-lg text-body-emphasis mb-0" style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Descricao) ? "Contacte-nos para conhecer todos os detalhes deste imóvel." : Model.Descricao)</p></section>
 
-            @if (User.IsInRole("Consultor") || User.IsInRole("Admin"))
+            <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Detalhes</h2><div class="row g-0 border rounded overflow-hidden"><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Tipo de imóvel</span><strong>@(Model.CategoriaImovel?.Nome ?? "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Estado</span><strong>@(Model.EstadoImovel?.Nome ?? "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Área bruta</span><strong>@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("N0") + " m²" : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Estacionamento</span><strong>@(Model.Estacionamento > 0 ? Model.Estacionamento + " lugar(es)" : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Ano de construção</span><strong>@(Model.AnoConstrucao > 0 ? Model.AnoConstrucao.ToString() : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Certificado energético</span><strong>@(Model.CertificadoEnergetico?.Nome ?? "—")</strong></div></div></section>
+
+            @if (caracteristicas.Any())
             {
-                <div class="card border-danger shadow-sm mb-5">
-                    <div class="card-header bg-danger text-white py-3 d-flex align-items-center">
-                        <i class="bi bi-incognito fs-4 me-2"></i>
-                        <h5 class="mb-0 fw-bold">Informações Privadas (Acesso Restrito)</h5>
-                    </div>
-                    <div class="card-body bg-danger bg-opacity-10">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <label class="text-danger fw-bold small text-uppercase">Morada Exata</label>
-                                <div class="fs-6 fw-semibold text-body-emphasis">@(string.IsNullOrEmpty(Model.MoradaExata) ? "Não definida" : Model.MoradaExata)</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-danger fw-bold small text-uppercase">Nº Contrato de Mediação</label>
-                                <div class="fs-6 fw-semibold text-body-emphasis">@(string.IsNullOrEmpty(Model.NumeroContrato) ? "Não definido" : Model.NumeroContrato)</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-danger fw-bold small text-uppercase">Comissão Prevista</label>
-                                <div class="fs-6 fw-bold text-success">@(Model.ValorComissao?.ToString("C0") ?? "Não definida")</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="text-danger fw-bold small text-uppercase">Data de Registo</label>
-                                <div class="fs-6 fw-semibold text-body-emphasis">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")</div>
-                            </div>
-                            <div class="col-12 border-top border-danger border-opacity-25 pt-3">
-                                <label class="text-danger fw-bold small text-uppercase mb-1">Observações Internas (Não partilhar)</label>
-                                <p class="mb-0 text-body-emphasis" style="white-space: pre-line;">
-                                    @(string.IsNullOrEmpty(Model.ObservacoesInternas) ? "Sem notas internas." : Model.ObservacoesInternas)
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Características</h2><div class="row g-3">@foreach (var grupo in caracteristicas) { <div class="col-md-6"><div class="border rounded-4 h-100 p-3"><h3 class="h6 fw-bold mb-3">@grupo.Key</h3><div class="d-flex flex-wrap gap-2">@foreach (var item in grupo) { <span class="badge text-bg-light border fw-normal"> <i class="bi bi-check2 text-success me-1"></i>@item.Caracteristica!.Nome</span> }</div></div></div> }</div></section>
             }
 
+            @if (equipa)
+            {
+                <section class="card border-warning-subtle bg-warning bg-opacity-10 mb-4"><div class="card-header bg-transparent border-warning-subtle fw-bold"><i class="bi bi-shield-lock me-2"></i>Informação interna</div><div class="card-body"><div class="row g-3"><div class="col-md-6"><span class="text-body-secondary small d-block">Morada exata</span><strong>@(Model.MoradaExata ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Contrato</span><strong>@(Model.NumeroContrato ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Comissão prevista</span><strong>@(Model.ValorComissao?.ToString("C0") ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Notas</span><strong>@(Model.ObservacoesInternas ?? "—")</strong></div></div>@if (Model.Documentos.Any()) { <hr /><div class="d-flex flex-wrap gap-2">@foreach (var documento in Model.Documentos) { <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark"><i class="bi bi-file-earmark-arrow-down me-1"></i>@documento.NomeFicheiro</a> }</div> }</div></section>
+            }
         </div>
 
-        <div class="col-lg-4">
-            <div class="card border border-secondary-subtle shadow-sm position-sticky bg-body" style="top: 2rem;">
-                <div class="card-header bg-primary text-white py-3 text-center border-0">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-envelope-paper me-2"></i> Pedir Informação</h5>
-                </div>
-                <div class="card-body p-4 text-center">
-
-                    @if (Model.Consultor != null)
-                    {
-                        @if (!string.IsNullOrEmpty(Model.Consultor.CaminhoFotoPerfil))
-                        {
-                            <img src="@Model.Consultor.CaminhoFotoPerfil" class="rounded-circle object-fit-cover shadow-sm mb-3" style="width: 100px; height: 100px; border: 3px solid var(--bs-primary);" alt="Consultor">
-                        }
-                        else
-                        {
-                            <i class="bi bi-person-circle text-body-secondary d-block mb-3" style="font-size: 5rem;"></i>
-                        }
-
-                        <h5 class="fw-bold mb-1 text-body-emphasis">@Model.Consultor.Nome</h5>
-                        <p class="text-body-secondary small mb-3">Consultor Imobiliário @(Model.Consultor.LicencaAMI != null ? $" | AMI: {Model.Consultor.LicencaAMI}" : "")</p>
-
-                        <a href="tel:@Model.Consultor.Telemovel" class="btn btn-outline-primary w-100 fw-bold mb-2">
-                            <i class="bi bi-telephone-fill me-2"></i> @(string.IsNullOrEmpty(Model.Consultor.Telemovel) ? "Contactar" : Model.Consultor.Telemovel)
-                        </a>
-                    }
-                    else
-                    {
-                        <div class="mb-4">
-                            <h5 class="fw-bold mb-1 text-body-emphasis">RPImobiliaria</h5>
-                            <p class="text-body-secondary small">A sua agência de confiança.</p>
-                        </div>
-                    }
-
-                    <hr class="my-4 border-secondary-subtle">
-
-                    <form>
-                        <div class="form-floating mb-3"><input type="text" class="form-control bg-body-tertiary" placeholder="Nome"><label>O seu Nome</label></div>
-                        <div class="form-floating mb-3"><input type="email" class="form-control bg-body-tertiary" placeholder="Email"><label>O seu E-mail</label></div>
-                        <div class="form-floating mb-3"><input type="tel" class="form-control bg-body-tertiary" placeholder="Telefone"><label>Telefone</label></div>
-                        <div class="form-floating mb-3">
-                            <textarea class="form-control bg-body-tertiary" placeholder="Mensagem" style="height: 100px">Solicito mais informações sobre o imóvel SHARP-@Model.Id.ToString("D5").</textarea>
-                            <label>Mensagem</label>
-                        </div>
-                        <button type="button" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm">Enviar Pedido <i class="bi bi-send-fill ms-2"></i></button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <aside class="col-lg-4"><div class="card contact-card border-0 shadow-sm position-sticky"><div class="card-body p-4"><p class="text-uppercase text-primary fw-bold small mb-2">Tem interesse?</p><h2 class="h4 fw-bold mb-3">Fale connosco sobre este imóvel.</h2>@if (Model.Consultor is not null) { <div class="d-flex align-items-center gap-3 border-top border-bottom py-3 mb-4"><div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 48px;height:48px;">@Model.Consultor.Nome[..1].ToUpper()</div><div><strong class="d-block">@Model.Consultor.Nome</strong><a href="tel:@Model.Consultor.Telemovel" class="small text-decoration-none">@Model.Consultor.Telemovel</a></div></div> }<form asp-controller="Home" asp-action="EnviarContacto" method="post"><input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" /><div class="form-floating mb-2"><input name="Nome" class="form-control" placeholder="Nome" required /><label>O seu nome</label></div><div class="form-floating mb-2"><input name="Contacto" class="form-control" placeholder="Telefone ou e-mail" required /><label>Telefone ou e-mail</label></div><div class="form-floating mb-3"><textarea name="Mensagem" class="form-control" placeholder="Mensagem" style="height: 110px" required>Gostaria de receber mais informações sobre o imóvel Ref. @referencia.</textarea><label>Mensagem</label></div><button class="btn btn-primary w-100 fw-bold" type="submit">Pedir contacto <i class="bi bi-send ms-1"></i></button></form></div></div></aside>
     </div>
-</div>
-
-<div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content bg-dark">
-            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4 shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1060; width: 1.5rem; height: 1.5rem;"></button>
-
-            <div class="modal-body p-0 d-flex align-items-center justify-content-center h-100">
-                @if (fotosOrdenadas.Any())
-                {
-                    <div id="fullscreenCarousel" class="carousel slide w-100 h-100" data-bs-ride="false">
-                        <div class="carousel-inner h-100">
-                            @for (int i = 0; i < fotosOrdenadas.Count; i++)
-                            {
-                                var foto = fotosOrdenadas[i];
-                                <!-- ECRÃ INTEIRO: USAR DIRETAMENTE O CAMINHO -->
-                                <div class="carousel-item @(i == 0 ? "active" : "") h-100 text-center">
-                                    <img src="@foto.CaminhoImagem" class="h-100 w-100 object-fit-contain p-md-5 p-2" alt="Foto Ecrã Inteiro">
-                                </div>
-                            }
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#fullscreenCarousel" data-bs-slide="prev" style="z-index: 1050;">
-                            <span class="carousel-control-prev-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#fullscreenCarousel" data-bs-slide="next" style="z-index: 1050;">
-                            <span class="carousel-control-next-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
-                        </button>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            var galleryModal = document.getElementById('galleryModal');
-            if(galleryModal) {
-                galleryModal.addEventListener('show.bs.modal', function (event) {
-                    var triggerImage = event.relatedTarget;
-                    var slideIndex = triggerImage.getAttribute('data-bs-slide-to');
-
-                    var fullscreenCarousel = document.getElementById('fullscreenCarousel');
-                    var bsCarousel = bootstrap.Carousel.getInstance(fullscreenCarousel) || new bootstrap.Carousel(fullscreenCarousel);
-                    bsCarousel.to(parseInt(slideIndex));
-                });
-            }
-
-            var imovelCarousel = document.getElementById('imovelCarousel');
-            var thumbnails = document.querySelectorAll('.thumbnail-controller');
-
-            if(imovelCarousel && thumbnails.length > 0) {
-                imovelCarousel.addEventListener('slide.bs.carousel', function (event) {
-                    var novoIndice = event.to;
-
-                    thumbnails.forEach(t => {
-                        t.classList.remove('border-primary', 'opacity-100');
-                        t.classList.add('border-transparent', 'opacity-50');
-                    });
-
-                    var ativa = thumbnails[novoIndice];
-                    ativa.classList.remove('border-transparent', 'opacity-50');
-                    ativa.classList.add('border-primary', 'opacity-100');
-
-                    // Faz scroll suave da fita para garantir que a miniatura selecionada fica visível
-                    ativa.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                });
-            }
-        });
-    </script>
-
-    <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-            border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 4px;
-        }
-
-        [data-bs-theme="dark"] .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-
-        [data-bs-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-        }
-    </style>
-}
+</main>

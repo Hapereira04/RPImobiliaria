@@ -6,6 +6,9 @@ namespace RPImobiliaria.Models
     {
         public int Id { get; set; }
 
+        [Display(Name = "Referência Interna")]
+        public string? Referencia { get; set; }
+
         // --- DADOS PÚBLICOS ---
         [Required]
         public string Titulo { get; set; }
@@ -31,9 +34,8 @@ namespace RPImobiliaria.Models
         public int NumeroFrentes { get; set; }
 
         // Localização (Pública)
-        public string? Distrito { get; set; }
-        public string? Concelho { get; set; }
-        public string? Freguesia { get; set; }
+        public int? FreguesiaId { get; set; }
+        public virtual Freguesia? Freguesia { get; set; }
         public string? Zona { get; set; }
 
         // --- DADOS PRIVADOS (SÓ O CONSULTOR VÊ) ---
@@ -76,5 +78,6 @@ namespace RPImobiliaria.Models
         public virtual ICollection<ImovelCaracteristica> Caracteristicas { get; set; } = new List<ImovelCaracteristica>();
         public virtual ICollection<ImovelProprietario> Proprietarios { get; set; } = new List<ImovelProprietario>();
         public virtual ICollection<ImovelFavorito> Favoritos { get; set; } = new List<ImovelFavorito>();
+        public virtual ICollection<DocumentoImovel> Documentos { get; set; } = new List<DocumentoImovel>();
     }
 }

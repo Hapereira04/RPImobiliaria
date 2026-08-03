@@ -1,0 +1,23 @@
+@model RPImobiliaria.Models.Imovel
+
+<div class="row g-3" data-localizacao-cascata>
+    <div class="col-md-4 form-floating">
+        <select class="form-select bg-body text-body-emphasis border-secondary-subtle" id="DistritoId" asp-items="ViewBag.DistritoId">
+            <option value="">Selecione o distrito</option>
+        </select>
+        <label for="DistritoId">Distrito</label>
+    </div>
+    <div class="col-md-4 form-floating">
+        <select class="form-select bg-body text-body-emphasis border-secondary-subtle" id="ConcelhoId" asp-items="ViewBag.ConcelhoId" disabled="@(ViewBag.DistritoId?.SelectedValue == null)">
+            <option value="">Selecione o concelho</option>
+        </select>
+        <label for="ConcelhoId">Concelho / Cidade</label>
+    </div>
+    <div class="col-md-4 form-floating">
+        <select asp-for="FreguesiaId" class="form-select bg-body text-body-emphasis border-secondary-subtle" id="FreguesiaId" asp-items="ViewBag.FreguesiaId" disabled="@(ViewBag.ConcelhoId?.SelectedValue == null)">
+            <option value="">Selecione a freguesia</option>
+        </select>
+        <label asp-for="FreguesiaId">Freguesia</label>
+        <span asp-validation-for="FreguesiaId" class="text-danger small"></span>
+    </div>
+</div>

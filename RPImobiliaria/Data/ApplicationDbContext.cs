@@ -24,10 +24,16 @@ namespace RPImobiliaria.Data
         public DbSet<CategoriaImovel> CategoriasImovel { get; set; }
         public DbSet<CertificadoEnergetico> CertificadosEnergeticos { get; set; }
         public DbSet<FichaCliente> FichasClientes { get; set; }
+        public DbSet<DocumentoImovel> Documentos { get; set; }
 
         // As Características agora estão divididas em Grupos!
         public DbSet<GrupoCaracteristica> GruposCaracteristicas { get; set; }
         public DbSet<Caracteristica> CaracteristicasCatalogo { get; set; }
+
+        // --- LOCALIZAÇÃO ---
+        public DbSet<Distrito> Distritos { get; set; }
+        public DbSet<Concelho> Concelhos { get; set; }
+        public DbSet<Freguesia> Freguesias { get; set; }
 
         // --- TABELAS DE LIGAÇÃO (N:N) ---
         public DbSet<ImovelCaracteristica> ImoveisCaracteristicas { get; set; }
@@ -51,7 +57,10 @@ namespace RPImobiliaria.Data
             builder.Entity<Imovel>().HasOne(i => i.CertificadoEnergetico).WithMany(c => c.Imoveis).HasForeignKey(i => i.CertificadoEnergeticoId).OnDelete(DeleteBehavior.Restrict);
             builder.Entity<ImovelCaracteristica>().HasOne(ic => ic.Caracteristica).WithMany(c => c.ImoveisCaracteristicas).HasForeignKey(ic => ic.CaracteristicaId).OnDelete(DeleteBehavior.Restrict);
 
-            // NOVO: Impedir apagar um Grupo se ele tiver características lá dentro!
+            // Proteger apagar Freguesias que já tenham imóveis
+            builder.Entity<Imovel>().HasOne(i => i.Freguesia).WithMany().HasForeignKey(i => i.FreguesiaId).OnDelete(DeleteBehavior.Restrict);
+
+            // Impedir apagar um Grupo se ele tiver características lá dentro
             builder.Entity<Caracteristica>().HasOne(c => c.GrupoCaracteristica).WithMany(g => g.Caracteristicas).HasForeignKey(c => c.GrupoCaracteristicaId).OnDelete(DeleteBehavior.Restrict);
 
             // 3. Formatação de Moeda e Decimais (Para não dar erro no SQL Server)

@@ -1,139 +1,181 @@
-﻿@model IEnumerable<RPImobiliaria.Models.Imovel>
-
+@model RPImobiliaria.Models.ViewModels.ImovelCatalogoViewModel
 @{
-    ViewData["Title"] = "Gestão de Imóveis";
+    ViewData["Title"] = "Imóveis";
+    var filtrosAvancadosAtivos = Model.EstadoId.HasValue || Model.StatusId.HasValue || Model.CertificadoId.HasValue ||
+        Model.CasasBanho.HasValue || Model.Estacionamento.HasValue || Model.AreaMin.HasValue || Model.AreaMax.HasValue ||
+        Model.AnoConstrucaoMin.HasValue || Model.CaracteristicasIds.Any();
 }
 
-<div class="container mt-4 mb-5">
+<style>
+    .catalogo-hero { background: linear-gradient(135deg, #082f49 0%, #0f766e 100%); color: #fff; }
+    .catalogo-search { border-radius: 1rem; box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, .18); }
+    .catalogo-filter { border: 0; border-radius: 1rem; background: var(--bs-tertiary-bg); }
+    .imovel-card { overflow: hidden; border: 0; border-radius: 1rem; background: var(--bs-body-bg); transition: transform .2s ease, box-shadow .2s ease; }
+    .imovel-card:hover { transform: translateY(-5px); box-shadow: 0 1rem 2rem rgba(15,23,42,.14) !important; }
+    .imovel-photo { height: 225px; background: linear-gradient(135deg, #cbd5e1, #e2e8f0); }
+    .imovel-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+    .imovel-card:hover .imovel-photo img { transform: scale(1.045); }
+    .empty-photo { color: #64748b; font-size: 3rem; }
+    .filter-label { font-size: .72rem; letter-spacing: .05em; font-weight: 700; text-transform: uppercase; color: var(--bs-secondary-color); }
+    .result-pill { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); }
+    .quick-fact { font-size: .82rem; color: var(--bs-secondary-color); }
+    .catalogo-sticky { top: 1rem; }
+    @@media (max-width: 991.98px) { .catalogo-sticky { position: static !important; } }
+</style>
 
-    @if (TempData["MensagemErro"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mt-3" role="alert">
-            <i class="bi bi-exclamation-octagon-fill me-2"></i>
-            <strong>Aviso do Sistema:</strong> @TempData["MensagemErro"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-house-door-fill me-2 text-primary"></i> Gestão de Imóveis</h2>
-            <p class="text-muted mb-0 small">Catálogo completo de propriedades, preços e estados.</p>
-        </div>
-        <div>
-            <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm w-100">
-                <i class="bi bi-plus-lg me-1"></i> Adicionar Imóvel
-            </a>
+<section class="catalogo-hero py-5">
+    <div class="container py-lg-3">
+        <div class="row align-items-end g-3">
+            <div class="col-lg-8">
+                <p class="text-uppercase fw-semibold small opacity-75 mb-2">RP Mediação Imobiliária</p>
+                <h1 class="display-6 fw-bold mb-2">Encontre o lugar certo para si.</h1>
+                <p class="mb-0 opacity-75">Pesquise por localização, tipologia, preço e todos os detalhes que importam.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <span class="result-pill rounded-pill px-3 py-2 d-inline-block"><strong>@Model.Imoveis.Count</strong> imóveis encontrados</span>
+            </div>
         </div>
     </div>
+</section>
 
-    <div class="card shadow-sm border-0 bg-body-tertiary text-body">
-        <div class="card-body p-4">
-
-            <div>
-                <table class="table table-hover table-striped align-middle tabela-admin w-100">
-                    <thead class="table-dark">
-                        <tr>
-                            <th class="ps-3 d-none d-md-table-cell" style="width: 80px;">Foto</th>
-                            <th>Imóvel</th>
-                            <th class="d-none d-lg-table-cell" style="width: 150px;">Detalhes</th>
-                            <th style="width: 120px;">Preço</th>
-                            <th class="d-none d-sm-table-cell" style="width: 120px;">Estado</th>
-                            <th class="text-end pe-4" style="width: 140px;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-
-                            string corEstado = "secondary";
-                            if (item.EstadoImovel != null && !string.IsNullOrEmpty(item.EstadoImovel.Nome))
-                            {
-                                string estadoNome = item.EstadoImovel.Nome.ToLower();
-                                if (estadoNome.Contains("vendid")) corEstado = "danger";
-                                else if (estadoNome.Contains("dispon")) corEstado = "success";
-                                else if (estadoNome.Contains("reserv")) corEstado = "warning";
-                                else corEstado = "primary";
-                            }
-
-                            // NOVA LÓGICA: Ler a Foto de Capa diretamente do caminho
-                            var fotoCapa = item.Fotos.OrderBy(f => f.Ordem).FirstOrDefault();
-                            string imagemSrc = "";
-                            bool temFoto = false;
-
-                            if (fotoCapa != null && !string.IsNullOrEmpty(fotoCapa.CaminhoImagem))
-                            {
-                                imagemSrc = fotoCapa.CaminhoImagem;
-                                temFoto = true;
-                            }
-
-                            <tr>
-                                <td class="ps-3 d-none d-md-table-cell">
-                                    @if (temFoto)
-                                    {
-                                        <img src="@imagemSrc" class="rounded shadow-sm object-fit-cover" width="60" height="45" alt="Foto" />
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 60px; height: 45px;">
-                                            <i class="bi bi-camera-fill text-secondary"></i>
-                                        </div>
-                                    }
-                                </td>
-
-                                <td class="fw-bold">
-                                    <div class="mb-1">
-                                        <span class="d-inline-block border border-secondary-subtle rounded px-2 py-1 text-body-secondary small">
-                                            REF: @item.Id.ToString("D4")
-                                        </span>
-
-                                        <span class="d-inline-block d-sm-none ms-1 border border-@corEstado bg-@corEstado bg-opacity-10 rounded px-2 py-1 text-body-emphasis small">
-                                            @(item.EstadoImovel?.Nome ?? "Sem Estado")
-                                        </span>
-                                    </div>
-
-                                    <div class="text-break line-clamp-2 mt-1 text-body-emphasis">@item.Titulo</div>
-
-                                    <div class="small text-body-secondary fw-normal mt-1">
-                                        <i class="bi bi-geo-alt-fill opacity-75 me-1"></i>@(item.Concelho ?? "N/A")
-
-                                        <span class="d-lg-none ms-1 fw-bold text-body-emphasis">
-                                            | @(item.CategoriaImovel?.Nome ?? "-") • @(item.TipoNegocio?.Nome ?? "-")
-                                        </span>
-                                    </div>
-                                </td>
-
-                                <td class="d-none d-lg-table-cell">
-                                    <div class="fw-bold small text-body-emphasis">@(item.CategoriaImovel?.Nome ?? "-")</div>
-
-                                    <span class="d-inline-block border border-secondary-subtle rounded px-2 py-1 text-body-secondary small mt-1">
-                                        @(item.TipoNegocio?.Nome ?? "-")
-                                    </span>
-                                </td>
-
-                                <td class="fw-bold fs-6 text-body-emphasis">
-                                    @item.Preco.ToString("C0")
-                                </td>
-
-                                <td class="d-none d-sm-table-cell">
-                                    <span class="d-inline-block border border-@corEstado bg-@corEstado bg-opacity-10 rounded px-2 py-1 text-body-emphasis small">
-                                        @(item.EstadoImovel?.Nome ?? "Sem Estado")
-                                    </span>
-                                </td>
-
-                                <td class="text-end pe-3">
-                                    <div class="d-flex justify-content-end gap-3">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil-square"></i></a>
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Detalhes"><i class="bi bi-eye"></i></a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Apagar"><i class="bi bi-trash3"></i></a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+<main class="container pb-5" style="margin-top: -1.5rem;">
+    <form asp-action="Index" method="get" id="filterForm" class="catalogo-search card border-0 mb-4">
+        <div class="card-body p-3 p-lg-4">
+            <div class="row g-2 align-items-end">
+                <div class="col-lg-7">
+                    <label asp-for="Pesquisa" class="filter-label mb-1">O que procura?</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-body border-end-0"><i class="bi bi-search"></i></span>
+                        <input asp-for="Pesquisa" class="form-control border-start-0" placeholder="Referência, imóvel, zona, concelho ou freguesia" />
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-2">
+                    <label asp-for="NegocioId" class="filter-label mb-1">Negócio</label>
+                    <select asp-for="NegocioId" class="form-select form-select-lg">
+                        <option value="">Todos</option>
+                        @foreach (var tipo in Model.TiposNegocio) { <option value="@tipo.Id">@tipo.Nome</option> }
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-3 d-grid">
+                    <button class="btn btn-primary btn-lg fw-bold" type="submit"><i class="bi bi-search me-2"></i>Pesquisar</button>
+                </div>
             </div>
 
+            <div class="row g-2 mt-2">
+                <div class="col-md-4 col-lg-3">
+                    <label asp-for="DistritoId" class="filter-label mb-1">Distrito</label>
+                    <select asp-for="DistritoId" class="form-select" id="filterDistrito">
+                        <option value="">Todos os distritos</option>
+                        @foreach (var distrito in Model.Distritos) { <option value="@distrito.Id">@distrito.Nome</option> }
+                    </select>
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label asp-for="ConcelhoId" class="filter-label mb-1">Concelho</label>
+                    <select asp-for="ConcelhoId" class="form-select" id="filterConcelho" disabled="@(!Model.DistritoId.HasValue)">
+                        <option value="">Todos os concelhos</option>
+                        @foreach (var concelho in Model.Concelhos) { <option value="@concelho.Id">@concelho.Nome</option> }
+                    </select>
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label asp-for="FreguesiaId" class="filter-label mb-1">Freguesia</label>
+                    <select asp-for="FreguesiaId" class="form-select" id="filterFreguesia" disabled="@(!Model.ConcelhoId.HasValue)">
+                        <option value="">Todas as freguesias</option>
+                        @foreach (var freguesia in Model.Freguesias) { <option value="@freguesia.Id">@freguesia.Nome</option> }
+                    </select>
+                </div>
+                <div class="col-lg-3 d-flex align-items-end gap-2">
+                    <button class="btn btn-outline-primary flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosAvancados" aria-expanded="@filtrosAvancadosAtivos.ToString().ToLowerInvariant()"><i class="bi bi-sliders me-1"></i> Mais filtros</button>
+                    <a asp-action="Index" class="btn btn-light border" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </div>
+
+            <div class="collapse @(filtrosAvancadosAtivos ? "show" : "")" id="filtrosAvancados">
+                <hr class="my-4" />
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3"><label asp-for="CategoriaId" class="filter-label mb-1">Tipo de imóvel</label><select asp-for="CategoriaId" class="form-select"><option value="">Todos</option>@foreach (var categoria in Model.Categorias) { <option value="@categoria.Id">@categoria.Nome</option> }</select></div>
+                    <div class="col-sm-6 col-lg-3"><label asp-for="EstadoId" class="filter-label mb-1">Estado</label><select asp-for="EstadoId" class="form-select"><option value="">Todos</option>@foreach (var estado in Model.Estados) { <option value="@estado.Id">@estado.Nome</option> }</select></div>
+                    <div class="col-sm-6 col-lg-3"><label asp-for="StatusId" class="filter-label mb-1">Disponibilidade</label><select asp-for="StatusId" class="form-select"><option value="">Todos</option>@foreach (var status in Model.Statuses) { <option value="@status.Id">@status.Nome</option> }</select></div>
+                    <div class="col-sm-6 col-lg-3"><label asp-for="CertificadoId" class="filter-label mb-1">Classe energética</label><select asp-for="CertificadoId" class="form-select"><option value="">Todas</option>@foreach (var certificado in Model.Certificados) { <option value="@certificado.Id">@certificado.Nome</option> }</select></div>
+
+                    <div class="col-sm-4 col-lg-2"><label asp-for="Quartos" class="filter-label mb-1">Quartos</label><select asp-for="Quartos" class="form-select"><option value="">Todos</option><option value="0">T0</option><option value="1">T1</option><option value="2">T2</option><option value="3">T3</option><option value="4">T4+</option></select></div>
+                    <div class="col-sm-4 col-lg-2"><label asp-for="CasasBanho" class="filter-label mb-1">Casas de banho</label><select asp-for="CasasBanho" class="form-select"><option value="">Todas</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                    <div class="col-sm-4 col-lg-2"><label asp-for="Estacionamento" class="filter-label mb-1">Estacionamento</label><select asp-for="Estacionamento" class="form-select"><option value="">Qualquer</option><option value="1">1+ lugar</option><option value="2">2+ lugares</option></select></div>
+                    <div class="col-sm-6 col-lg-3"><label asp-for="PrecoMin" class="filter-label mb-1">Preço</label><div class="input-group"><input asp-for="PrecoMin" type="number" min="0" class="form-control" placeholder="Mínimo" /><span class="input-group-text">—</span><input asp-for="PrecoMax" type="number" min="0" class="form-control" placeholder="Máximo" /></div></div>
+                    <div class="col-sm-6 col-lg-3"><label asp-for="AreaMin" class="filter-label mb-1">Área útil (m²)</label><div class="input-group"><input asp-for="AreaMin" type="number" min="0" class="form-control" placeholder="Mín." /><span class="input-group-text">—</span><input asp-for="AreaMax" type="number" min="0" class="form-control" placeholder="Máx." /></div></div>
+
+                    <div class="col-sm-6 col-lg-3"><label asp-for="AnoConstrucaoMin" class="filter-label mb-1">Construído a partir de</label><input asp-for="AnoConstrucaoMin" type="number" min="1800" max="@DateTime.Today.Year" class="form-control" placeholder="Ex.: 2015" /></div>
+                    @if (Model.CaracteristicasDisponiveis.Any())
+                    {
+                        <div class="col-lg-9"><span class="filter-label d-block mb-2">Características</span><div class="d-flex flex-wrap gap-2">@foreach (var caracteristica in Model.CaracteristicasDisponiveis) { var marcada = Model.CaracteristicasIds.Contains(caracteristica.Id); <div><input class="btn-check" type="checkbox" name="CaracteristicasIds" value="@caracteristica.Id" id="caracteristica_@caracteristica.Id" @(marcada ? "checked" : "") /><label class="btn btn-sm btn-outline-secondary rounded-pill" for="caracteristica_@caracteristica.Id">@caracteristica.Nome</label></div> }</div></div>
+                    }
+                </div>
+            </div>
         </div>
+    </form>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div><h2 class="h4 fw-bold mb-1">Imóveis disponíveis</h2><p class="text-body-secondary mb-0">@Model.Imoveis.Count resultado@(Model.Imoveis.Count == 1 ? "" : "s") para a sua pesquisa.</p></div>
+        <div class="d-flex align-items-center gap-2"><label asp-for="OrdenarPor" class="small text-body-secondary text-nowrap">Ordenar por</label><select asp-for="OrdenarPor" class="form-select" form="filterForm" onchange="document.getElementById('filterForm').submit()"><option value="">Mais recentes</option><option value="preco_asc">Preço: menor primeiro</option><option value="preco_desc">Preço: maior primeiro</option><option value="area_desc">Maior área</option><option value="titulo">Nome A–Z</option></select></div>
     </div>
-</div>
+
+    @if (!Model.Imoveis.Any())
+    {
+        <div class="card border-0 shadow-sm text-center p-5"><div class="card-body"><i class="bi bi-house-exclamation display-4 text-primary"></i><h2 class="h4 fw-bold mt-3">Não encontrámos imóveis com estes filtros.</h2><p class="text-body-secondary">Tente remover alguns critérios ou alargar a zona de pesquisa.</p><a asp-action="Index" class="btn btn-primary">Ver todos os imóveis</a></div></div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var imovel in Model.Imoveis)
+            {
+                var fotoPrincipal = imovel.Fotos.OrderBy(f => f.Ordem).FirstOrDefault();
+                var localizacao = string.Join(", ", new[] { imovel.Freguesia?.Nome, imovel.Freguesia?.Concelho?.Nome }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                <div class="col-md-6 col-xl-4">
+                    <article class="card imovel-card h-100 shadow-sm">
+                        <a asp-action="Details" asp-route-id="@imovel.Id" class="text-decoration-none text-reset position-relative">
+                            <div class="imovel-photo">@if (fotoPrincipal is not null) { <img src="@fotoPrincipal.CaminhoImagem" alt="@imovel.Titulo" /> } else { <div class="h-100 d-flex align-items-center justify-content-center"><i class="bi bi-house empty-photo"></i></div> }</div>
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-3 shadow-sm">@(imovel.TipoNegocio?.Nome ?? "Imóvel")</span>
+                            @if (!string.IsNullOrWhiteSpace(imovel.StatusImovel?.Nome)) { <span class="badge text-bg-light position-absolute top-0 end-0 m-3 shadow-sm">@imovel.StatusImovel.Nome</span> }
+                        </a>
+                        <div class="card-body d-flex flex-column p-4">
+                            <p class="small text-body-secondary mb-2 text-truncate"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)</p>
+                            <h3 class="h5 fw-bold mb-2"><a asp-action="Details" asp-route-id="@imovel.Id" class="text-decoration-none text-body-emphasis">@imovel.Titulo</a></h3>
+                            <p class="text-body-secondary small mb-3">Ref. @(imovel.Referencia ?? imovel.Id.ToString())</p>
+                            <div class="d-flex flex-wrap gap-3 quick-fact mb-4"><span><i class="bi bi-door-open me-1"></i>T@(imovel.Quartos)</span><span><i class="bi bi-droplet me-1"></i>@imovel.CasasBanho WC</span><span><i class="bi bi-aspect-ratio me-1"></i>@imovel.AreaUtil.ToString("N0") m²</span></div>
+                            <div class="mt-auto d-flex align-items-center justify-content-between border-top pt-3"><strong class="fs-4 text-primary">@imovel.Preco.ToString("N0") €</strong><a asp-action="Details" asp-route-id="@imovel.Id" class="btn btn-outline-primary rounded-pill px-3">Ver imóvel <i class="bi bi-arrow-right ms-1"></i></a></div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@section Scripts {
+    <script>
+        const distrito = document.getElementById('filterDistrito');
+        const concelho = document.getElementById('filterConcelho');
+        const freguesia = document.getElementById('filterFreguesia');
+        const concelhosUrl = '@Url.Action("ObterConcelhos", "Imovels")';
+        const freguesiasUrl = '@Url.Action("ObterFreguesias", "Imovels")';
+
+        function resetSelect(select, texto) { select.innerHTML = `<option value="">${texto}</option>`; select.disabled = true; }
+        async function preencher(select, url, texto) {
+            resetSelect(select, texto);
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const items = await response.json();
+            items.forEach(item => select.add(new Option(item.nome, item.id)));
+            select.disabled = false;
+        }
+
+        distrito.addEventListener('change', async () => {
+            resetSelect(freguesia, 'Todas as freguesias');
+            if (!distrito.value) { resetSelect(concelho, 'Todos os concelhos'); return; }
+            await preencher(concelho, `${concelhosUrl}?distritoId=${encodeURIComponent(distrito.value)}`, 'Todos os concelhos');
+        });
+        concelho.addEventListener('change', async () => {
+            if (!concelho.value) { resetSelect(freguesia, 'Todas as freguesias'); return; }
+            await preencher(freguesia, `${freguesiasUrl}?concelhoId=${encodeURIComponent(concelho.value)}`, 'Todas as freguesias');
+        });
+    </script>
+}

@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RPImobiliaria.Data;
 using RPImobiliaria.Models;
+using RPImobiliaria.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting; // Adicionado para gerir pastas
-using System.IO; // Adicionado para manipulação de ficheiros
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace RPImobiliaria.Controllers
 {
@@ -19,10 +20,8 @@ namespace RPImobiliaria.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        // 1. Variável para aceder às pastas do teu servidor
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        // 2. Construtor atualizado
         public ImovelsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
@@ -30,19 +29,136 @@ namespace RPImobiliaria.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-        // GET: Imoveis
-        public async Task<IActionResult> Index()
+        // =========================================================================
+        // GET: Imoveis (CATÁLOGO PÚBLICO)
+        // =========================================================================
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(ImovelCatalogoViewModel filtros)
         {
-            var applicationDbContext = _context.Imoveis
+            var query = _context.Imoveis
                 .Include(i => i.CategoriaImovel)
                 .Include(i => i.EstadoImovel)
                 .Include(i => i.TipoNegocio)
-                .Include(i => i.Fotos);
+                .Include(i => i.StatusImovel)
+                .Include(i => i.CertificadoEnergetico)
+                .Include(i => i.Fotos)
+                .Include(i => i.Caracteristicas)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
+                .AsQueryable();
 
-            return View(await applicationDbContext.ToListAsync());
+            if (!string.IsNullOrWhiteSpace(filtros.Pesquisa))
+            {
+                var pesquisa = filtros.Pesquisa.Trim();
+                query = query.Where(i => i.Titulo.Contains(pesquisa)
+                    || (i.Referencia != null && i.Referencia.Contains(pesquisa))
+                    || i.Id.ToString() == pesquisa
+                    || (i.Zona != null && i.Zona.Contains(pesquisa))
+                    || (i.Freguesia != null && (i.Freguesia.Nome.Contains(pesquisa) || i.Freguesia.Concelho.Nome.Contains(pesquisa))));
+            }
+
+            if (filtros.NegocioId.HasValue) query = query.Where(i => i.TipoNegocioId == filtros.NegocioId.Value);
+            else if (!string.IsNullOrWhiteSpace(filtros.Negocio)) query = query.Where(i => i.TipoNegocio != null && i.TipoNegocio.Nome.Contains(filtros.Negocio));
+            if (filtros.CategoriaId.HasValue) query = query.Where(i => i.CategoriaImovelId == filtros.CategoriaId.Value);
+            if (filtros.EstadoId.HasValue) query = query.Where(i => i.EstadoImovelId == filtros.EstadoId.Value);
+            if (filtros.StatusId.HasValue) query = query.Where(i => i.StatusImovelId == filtros.StatusId.Value);
+            if (filtros.CertificadoId.HasValue) query = query.Where(i => i.CertificadoEnergeticoId == filtros.CertificadoId.Value);
+            if (filtros.DistritoId.HasValue) query = query.Where(i => i.Freguesia != null && i.Freguesia.Concelho.DistritoId == filtros.DistritoId.Value);
+            if (filtros.ConcelhoId.HasValue) query = query.Where(i => i.Freguesia != null && i.Freguesia.ConcelhoId == filtros.ConcelhoId.Value);
+            if (filtros.FreguesiaId.HasValue) query = query.Where(i => i.FreguesiaId == filtros.FreguesiaId.Value);
+            if (filtros.Quartos.HasValue) query = filtros.Quartos.Value >= 4 ? query.Where(i => i.Quartos >= 4) : query.Where(i => i.Quartos == filtros.Quartos.Value);
+            if (filtros.CasasBanho.HasValue) query = query.Where(i => i.CasasBanho >= filtros.CasasBanho.Value);
+            if (filtros.Estacionamento.HasValue) query = query.Where(i => i.Estacionamento >= filtros.Estacionamento.Value);
+            if (filtros.PrecoMin.HasValue) query = query.Where(i => i.Preco >= filtros.PrecoMin.Value);
+            if (filtros.PrecoMax.HasValue) query = query.Where(i => i.Preco <= filtros.PrecoMax.Value);
+            if (filtros.AreaMin.HasValue) query = query.Where(i => i.AreaUtil >= filtros.AreaMin.Value);
+            if (filtros.AreaMax.HasValue) query = query.Where(i => i.AreaUtil <= filtros.AreaMax.Value);
+            if (filtros.AnoConstrucaoMin.HasValue) query = query.Where(i => i.AnoConstrucao >= filtros.AnoConstrucaoMin.Value);
+
+            foreach (var caracteristicaId in filtros.CaracteristicasIds.Distinct())
+                query = query.Where(i => i.Caracteristicas.Any(ic => ic.CaracteristicaId == caracteristicaId));
+
+            switch (filtros.OrdenarPor)
+            {
+                case "preco_asc": query = query.OrderBy(i => i.Preco); break;
+                case "preco_desc": query = query.OrderByDescending(i => i.Preco); break;
+                case "area_desc": query = query.OrderByDescending(i => i.AreaUtil); break;
+                case "titulo": query = query.OrderBy(i => i.Titulo); break;
+                default: query = query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id); break;
+            }
+
+            filtros.Imoveis = await query.AsNoTracking().ToListAsync();
+            filtros.TiposNegocio = await _context.TiposNegocio.AsNoTracking().OrderBy(t => t.Nome).ToListAsync();
+            filtros.Categorias = await _context.CategoriasImovel.AsNoTracking().OrderBy(c => c.Nome).ToListAsync();
+            filtros.Estados = await _context.EstadosImovel.AsNoTracking().OrderBy(e => e.Nome).ToListAsync();
+            filtros.Statuses = await _context.StatusImoveis.AsNoTracking().OrderBy(s => s.Nome).ToListAsync();
+            filtros.Certificados = await _context.CertificadosEnergeticos.AsNoTracking().OrderBy(c => c.Nome).ToListAsync();
+            filtros.Distritos = await _context.Distritos.AsNoTracking().OrderBy(d => d.Nome).ToListAsync();
+            filtros.Concelhos = filtros.DistritoId.HasValue
+                ? await _context.Concelhos.AsNoTracking().Where(c => c.DistritoId == filtros.DistritoId).OrderBy(c => c.Nome).ToListAsync()
+                : Array.Empty<Concelho>();
+            filtros.Freguesias = filtros.ConcelhoId.HasValue
+                ? await _context.Freguesias.AsNoTracking().Where(f => f.ConcelhoId == filtros.ConcelhoId).OrderBy(f => f.Nome).ToListAsync()
+                : Array.Empty<Freguesia>();
+            filtros.CaracteristicasDisponiveis = await _context.GruposCaracteristicas
+                .SelectMany(g => g.Caracteristicas)
+                .Where(c => _context.ImoveisCaracteristicas.Any(ic => ic.CaracteristicaId == c.Id))
+                .OrderBy(c => c.Nome)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return View(filtros);
         }
 
-        // GET: Imovels/Details/5
+        [Authorize(Roles = "Admin,Consultor")]
+        public async Task<IActionResult> Gestao()
+        {
+            var query = _context.Imoveis
+                .Include(i => i.TipoNegocio)
+                .Include(i => i.StatusImovel)
+                .Include(i => i.Consultor)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho)
+                .AsQueryable();
+
+            if (!User.IsInRole("Admin"))
+            {
+                var userId = _userManager.GetUserId(User);
+                query = query.Where(i => i.Consultor != null && i.Consultor.IdentityUserId == userId);
+            }
+
+            return View(await query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id).ToListAsync());
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ObterConcelhos(int distritoId)
+        {
+            var concelhos = await _context.Concelhos
+                .AsNoTracking()
+                .Where(c => c.DistritoId == distritoId)
+                .OrderBy(c => c.Nome)
+                .Select(c => new { c.Id, c.Nome })
+                .ToListAsync();
+
+            return Json(concelhos);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ObterFreguesias(int concelhoId)
+        {
+            var freguesias = await _context.Freguesias
+                .AsNoTracking()
+                .Where(f => f.ConcelhoId == concelhoId)
+                .OrderBy(f => f.Nome)
+                .Select(f => new { f.Id, f.Nome })
+                .ToListAsync();
+
+            return Json(freguesias);
+        }
+
+        // =========================================================================
+        // GET: Imovels/Details/5 (PÚBLICO)
+        // =========================================================================
         [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
@@ -52,45 +168,37 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.CategoriaImovel)
                 .Include(i => i.EstadoImovel)
                 .Include(i => i.TipoNegocio)
+                .Include(i => i.StatusImovel)
                 .Include(i => i.CertificadoEnergetico)
                 .Include(i => i.Consultor)
                 .Include(i => i.Fotos)
-                .Include(i => i.Caracteristicas)
-                    .ThenInclude(ic => ic.Caracteristica)
-                        .ThenInclude(c => c.GrupoCaracteristica)
+                .Include(i => i.Documentos)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
+                .Include(i => i.Caracteristicas).ThenInclude(ic => ic.Caracteristica).ThenInclude(c => c.GrupoCaracteristica)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (imovel == null) return NotFound();
 
-            var proprietarioAtual = await _context.ImoveisProprietarios.FirstOrDefaultAsync(ip => ip.ImovelId == id);
-            ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", proprietarioAtual?.ClienteId);
-
             return View(imovel);
         }
 
+        // =========================================================================
         // GET: Imovels/Create
+        // =========================================================================
         [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Create()
         {
-            ViewData["CategoriaImovelId"] = new SelectList(_context.CategoriasImovel, "Id", "Nome");
-            ViewData["TipoNegocioId"] = new SelectList(_context.TiposNegocio, "Id", "Nome");
-            ViewData["EstadoImovelId"] = new SelectList(_context.EstadosImovel, "Id", "Nome");
-            ViewData["StatusImovelId"] = new SelectList(_context.StatusImoveis, "Id", "Nome");
-            ViewData["CertificadoEnergeticoId"] = new SelectList(_context.CertificadosEnergeticos, "Id", "Nome");
-            ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome");
-
-            ViewBag.GruposComCaracteristicas = await _context.GruposCaracteristicas
-                .Include(g => g.Caracteristicas)
-                .ToListAsync();
-
+            await CarregarDropdownsAsync();
             return View();
         }
 
+        // =========================================================================
         // POST: Imovels/Create
+        // =========================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Create([Bind("Id,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,Distrito,Concelho,Freguesia,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel, int? clienteProprietarioId, List<int> selectedCaracteristicas, List<IFormFile> fotosUpload)
+        public async Task<IActionResult> Create([Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel, int? clienteProprietarioId, List<int> selectedCaracteristicas, List<IFormFile> fotosUpload, List<IFormFile> documentosUpload)
         {
             ModelState.Remove("ConsultorId");
 
@@ -113,95 +221,50 @@ namespace RPImobiliaria.Controllers
                 {
                     foreach (var caracId in selectedCaracteristicas)
                     {
-                        _context.ImoveisCaracteristicas.Add(new ImovelCaracteristica
-                        {
-                            ImovelId = imovel.Id,
-                            CaracteristicaId = caracId
-                        });
+                        _context.ImoveisCaracteristicas.Add(new ImovelCaracteristica { ImovelId = imovel.Id, CaracteristicaId = caracId });
                     }
                     await _context.SaveChangesAsync();
                 }
 
-                // 3. UPLOAD DE FOTOS PARA A PASTA FÍSICA DO SERVIDOR
-                if (fotosUpload != null && fotosUpload.Count > 0)
-                {
-                    string pastaUploads = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "imoveis");
-                    if (!Directory.Exists(pastaUploads)) Directory.CreateDirectory(pastaUploads);
-
-                    int ordemCounter = 1;
-                    foreach (var formFile in fotosUpload)
-                    {
-                        if (formFile.Length > 0 && formFile.ContentType.StartsWith("image/"))
-                        {
-                            string nomeUnico = Guid.NewGuid().ToString() + "_" + formFile.FileName;
-                            string caminhoCompleto = Path.Combine(pastaUploads, nomeUnico);
-
-                            // Guarda no disco
-                            using (var fileStream = new FileStream(caminhoCompleto, FileMode.Create))
-                            {
-                                await formFile.CopyToAsync(fileStream);
-                            }
-
-                            // Guarda só o link na Base de Dados
-                            var novaFoto = new FotoImovel
-                            {
-                                ImovelId = imovel.Id,
-                                CaminhoImagem = "/uploads/imoveis/" + nomeUnico,
-                                Ordem = ordemCounter
-                            };
-                            _context.Fotos.Add(novaFoto);
-                            ordemCounter++;
-                        }
-                    }
-                    await _context.SaveChangesAsync();
-                }
+                await ProcessarUploadFotos(imovel.Id, fotosUpload);
+                await ProcessarUploadDocumentos(imovel.Id, documentosUpload);
 
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CategoriaImovelId"] = new SelectList(_context.CategoriasImovel, "Id", "Nome", imovel.CategoriaImovelId);
-            ViewData["TipoNegocioId"] = new SelectList(_context.TiposNegocio, "Id", "Nome", imovel.TipoNegocioId);
-            ViewData["EstadoImovelId"] = new SelectList(_context.EstadosImovel, "Id", "Nome", imovel.EstadoImovelId);
-            ViewData["StatusImovelId"] = new SelectList(_context.StatusImoveis, "Id", "Nome", imovel.StatusImovelId);
-            ViewData["CertificadoEnergeticoId"] = new SelectList(_context.CertificadosEnergeticos, "Id", "Nome", imovel.CertificadoEnergeticoId);
-            ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", clienteProprietarioId);
-            ViewBag.GruposComCaracteristicas = await _context.GruposCaracteristicas.Include(g => g.Caracteristicas).ToListAsync();
-
+            await CarregarDropdownsAsync(imovel, clienteProprietarioId, selectedCaracteristicas);
             return View(imovel);
         }
 
+        // =========================================================================
         // GET: Imovels/Edit/5
+        // =========================================================================
+        [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
             var imovel = await _context.Imoveis
                 .Include(i => i.Fotos)
+                .Include(i => i.Documentos)
                 .Include(i => i.Caracteristicas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (imovel == null) return NotFound();
 
-            ViewData["CategoriaImovelId"] = new SelectList(_context.CategoriasImovel, "Id", "Nome", imovel.CategoriaImovelId);
-            ViewData["CertificadoEnergeticoId"] = new SelectList(_context.CertificadosEnergeticos, "Id", "Nome", imovel.CertificadoEnergeticoId);
-            ViewData["ConsultorId"] = new SelectList(_context.Consultores, "Id", "Nome", imovel.ConsultorId);
-            ViewData["EstadoImovelId"] = new SelectList(_context.EstadosImovel, "Id", "Nome", imovel.EstadoImovelId);
-            ViewData["StatusImovelId"] = new SelectList(_context.StatusImoveis, "Id", "Nome", imovel.StatusImovelId);
-            ViewData["TipoNegocioId"] = new SelectList(_context.TiposNegocio, "Id", "Nome", imovel.TipoNegocioId);
-
-            ViewBag.GruposComCaracteristicas = await _context.GruposCaracteristicas
-                .Include(g => g.Caracteristicas)
-                .ToListAsync();
-
-            ViewBag.CaracteristicasAtuais = imovel.Caracteristicas?.Select(c => c.CaracteristicaId).ToList() ?? new List<int>();
+            var proprietarioAtual = await _context.ImoveisProprietarios.FirstOrDefaultAsync(ip => ip.ImovelId == id);
+            await CarregarDropdownsAsync(imovel, proprietarioAtual?.ClienteId, imovel.Caracteristicas.Select(c => c.CaracteristicaId).ToList());
 
             return View(imovel);
         }
 
+        // =========================================================================
         // POST: Imovels/Edit/5
+        // =========================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,Distrito,Concelho,Freguesia,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] Imovel imovel, List<int> selectedCaracteristicas, List<IFormFile> novasFotos, int? clienteProprietarioId)
+        [Authorize(Roles = "Admin,Consultor")]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] Imovel imovel, List<int> selectedCaracteristicas, List<IFormFile> novasFotos, List<IFormFile> documentosUpload, List<int> documentosRemover, int? clienteProprietarioId)
         {
             if (id != imovel.Id) return NotFound();
 
@@ -214,7 +277,9 @@ namespace RPImobiliaria.Controllers
             ModelState.Remove("StatusImovel");
             ModelState.Remove("CertificadoEnergetico");
             ModelState.Remove("Fotos");
+            ModelState.Remove("Documentos");
             ModelState.Remove("Caracteristicas");
+            ModelState.Remove("Freguesia");
 
             if (ModelState.IsValid)
             {
@@ -237,13 +302,12 @@ namespace RPImobiliaria.Controllers
                     if (propAtual != null) _context.ImoveisProprietarios.Remove(propAtual);
                     if (clienteProprietarioId.HasValue) _context.ImoveisProprietarios.Add(new ImovelProprietario { ImovelId = imovel.Id, ClienteId = clienteProprietarioId.Value });
 
-                    // 4. LÓGICA DE FOTOS E ORDENAÇÃO
                     if (!string.IsNullOrEmpty(existingPhotoOrder))
                     {
                         var itensOrdem = existingPhotoOrder.Split(',').Select(s => s.Trim()).ToList();
                         int ordemAtual = 1;
-
                         var listaNovasFotos = novasFotos?.ToList() ?? new List<IFormFile>();
+
                         string pastaUploads = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "imoveis");
                         if (listaNovasFotos.Any() && !Directory.Exists(pastaUploads)) Directory.CreateDirectory(pastaUploads);
 
@@ -264,32 +328,40 @@ namespace RPImobiliaria.Controllers
                             }
                             else if (item.StartsWith("new_"))
                             {
-                                if (int.TryParse(item.Replace("new_", ""), out int fileIndex))
+                                if (int.TryParse(item.Replace("new_", ""), out int fileIndex) && fileIndex >= 0 && fileIndex < listaNovasFotos.Count)
                                 {
-                                    if (fileIndex >= 0 && fileIndex < listaNovasFotos.Count)
+                                    var formFile = listaNovasFotos[fileIndex];
+                                    if (formFile.Length > 0 && formFile.ContentType.StartsWith("image/"))
                                     {
-                                        var formFile = listaNovasFotos[fileIndex];
-                                        if (formFile.Length > 0 && formFile.ContentType.StartsWith("image/"))
+                                        string nomeUnico = Guid.NewGuid().ToString() + "_" + formFile.FileName;
+                                        string caminhoCompleto = Path.Combine(pastaUploads, nomeUnico);
+
+                                        using (var fileStream = new FileStream(caminhoCompleto, FileMode.Create))
                                         {
-                                            string nomeUnico = Guid.NewGuid().ToString() + "_" + formFile.FileName;
-                                            string caminhoCompleto = Path.Combine(pastaUploads, nomeUnico);
-
-                                            using (var fileStream = new FileStream(caminhoCompleto, FileMode.Create))
-                                            {
-                                                await formFile.CopyToAsync(fileStream);
-                                            }
-
-                                            var novaFoto = new FotoImovel
-                                            {
-                                                ImovelId = imovel.Id,
-                                                CaminhoImagem = "/uploads/imoveis/" + nomeUnico,
-                                                Ordem = ordemAtual
-                                            };
-                                            _context.Fotos.Add(novaFoto);
-                                            ordemAtual++;
+                                            await formFile.CopyToAsync(fileStream);
                                         }
+
+                                        _context.Fotos.Add(new FotoImovel { ImovelId = imovel.Id, CaminhoImagem = "/uploads/imoveis/" + nomeUnico, Ordem = ordemAtual });
+                                        ordemAtual++;
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    await ProcessarUploadDocumentos(imovel.Id, documentosUpload);
+
+                    if (documentosRemover != null && documentosRemover.Any())
+                    {
+                        foreach (var docId in documentosRemover)
+                        {
+                            var docToDelete = await _context.Documentos.FindAsync(docId);
+                            if (docToDelete != null && docToDelete.ImovelId == id)
+                            {
+                                string caminhoFisico = Path.Combine(_hostEnvironment.WebRootPath, docToDelete.CaminhoFicheiro.TrimStart('/'));
+                                if (System.IO.File.Exists(caminhoFisico)) System.IO.File.Delete(caminhoFisico);
+
+                                _context.Documentos.Remove(docToDelete);
                             }
                         }
                     }
@@ -308,32 +380,21 @@ namespace RPImobiliaria.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CategoriaImovelId"] = new SelectList(_context.CategoriasImovel, "Id", "Nome", imovel.CategoriaImovelId);
-            ViewData["CertificadoEnergeticoId"] = new SelectList(_context.CertificadosEnergeticos, "Id", "Nome", imovel.CertificadoEnergeticoId);
-            ViewData["ConsultorId"] = new SelectList(_context.Consultores, "Id", "Nome", imovel.ConsultorId);
-            ViewData["EstadoImovelId"] = new SelectList(_context.EstadosImovel, "Id", "Nome", imovel.EstadoImovelId);
-            ViewData["StatusImovelId"] = new SelectList(_context.StatusImoveis, "Id", "Nome", imovel.StatusImovelId);
-            ViewData["TipoNegocioId"] = new SelectList(_context.TiposNegocio, "Id", "Nome", imovel.TipoNegocioId);
-            var proprietarioAtual = _context.ImoveisProprietarios.FirstOrDefault(ip => ip.ImovelId == imovel.Id);
-            ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", proprietarioAtual?.ClienteId);
-            ViewBag.GruposComCaracteristicas = await _context.GruposCaracteristicas.Include(g => g.Caracteristicas).ToListAsync();
-            ViewBag.CaracteristicasAtuais = selectedCaracteristicas ?? new List<int>();
-
+            await CarregarDropdownsAsync(imovel, clienteProprietarioId, selectedCaracteristicas);
             return View(imovel);
         }
 
+        // =========================================================================
         // GET: Imovels/Delete/5
+        // =========================================================================
+        [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
             var imovel = await _context.Imoveis
-                .Include(i => i.CategoriaImovel)
-                .Include(i => i.CertificadoEnergetico)
                 .Include(i => i.Consultor)
-                .Include(i => i.EstadoImovel)
-                .Include(i => i.StatusImovel)
-                .Include(i => i.TipoNegocio)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (imovel == null) return NotFound();
@@ -341,28 +402,41 @@ namespace RPImobiliaria.Controllers
             return View(imovel);
         }
 
+        // =========================================================================
         // POST: Imovels/Delete/5
+        // =========================================================================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // Trazemos o imóvel juntamente com a lista das suas fotografias
-            var imovel = await _context.Imoveis.Include(i => i.Fotos).FirstOrDefaultAsync(m => m.Id == id);
+            var imovel = await _context.Imoveis
+                .Include(i => i.Fotos)
+                .Include(i => i.Documentos)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (imovel != null)
             {
-                // 5. APAGAR FOTOS DO DISCO ANTES DE APAGAR O IMÓVEL
-                if (imovel.Fotos != null && imovel.Fotos.Any())
+                if (imovel.Fotos != null)
                 {
                     foreach (var foto in imovel.Fotos)
                     {
                         if (!string.IsNullOrEmpty(foto.CaminhoImagem))
                         {
-                            string caminhoFisico = Path.Combine(_hostEnvironment.WebRootPath, foto.CaminhoImagem.TrimStart('/'));
-                            if (System.IO.File.Exists(caminhoFisico))
-                            {
-                                System.IO.File.Delete(caminhoFisico); // Liberta o espaço no disco!
-                            }
+                            string caminho = Path.Combine(_hostEnvironment.WebRootPath, foto.CaminhoImagem.TrimStart('/'));
+                            if (System.IO.File.Exists(caminho)) System.IO.File.Delete(caminho);
+                        }
+                    }
+                }
+
+                if (imovel.Documentos != null)
+                {
+                    foreach (var doc in imovel.Documentos)
+                    {
+                        if (!string.IsNullOrEmpty(doc.CaminhoFicheiro))
+                        {
+                            string caminho = Path.Combine(_hostEnvironment.WebRootPath, doc.CaminhoFicheiro.TrimStart('/'));
+                            if (System.IO.File.Exists(caminho)) System.IO.File.Delete(caminho);
                         }
                     }
                 }
@@ -377,6 +451,85 @@ namespace RPImobiliaria.Controllers
         private bool ImovelExists(int id)
         {
             return _context.Imoveis.Any(e => e.Id == id);
+        }
+
+        // --- MÉTODOS AUXILIARES ---
+        private async Task CarregarDropdownsAsync(Imovel? imovel = null, int? clienteProprietarioId = null, List<int>? selectedCaracteristicas = null)
+        {
+            ViewData["CategoriaImovelId"] = new SelectList(_context.CategoriasImovel, "Id", "Nome", imovel?.CategoriaImovelId);
+            ViewData["TipoNegocioId"] = new SelectList(_context.TiposNegocio, "Id", "Nome", imovel?.TipoNegocioId);
+            ViewData["EstadoImovelId"] = new SelectList(_context.EstadosImovel, "Id", "Nome", imovel?.EstadoImovelId);
+            ViewData["StatusImovelId"] = new SelectList(_context.StatusImoveis, "Id", "Nome", imovel?.StatusImovelId);
+            ViewData["CertificadoEnergeticoId"] = new SelectList(_context.CertificadosEnergeticos, "Id", "Nome", imovel?.CertificadoEnergeticoId);
+            ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", clienteProprietarioId);
+            ViewData["ConsultorId"] = new SelectList(_context.Consultores, "Id", "Nome", imovel?.ConsultorId);
+
+            var localizacaoSelecionada = imovel?.FreguesiaId is int freguesiaId
+                ? await _context.Freguesias.Include(f => f.Concelho).FirstOrDefaultAsync(f => f.Id == freguesiaId)
+                : null;
+            var distritoId = localizacaoSelecionada?.Concelho?.DistritoId;
+            var concelhoId = localizacaoSelecionada?.ConcelhoId;
+
+            ViewBag.DistritoId = new SelectList(_context.Distritos.OrderBy(d => d.Nome), "Id", "Nome", distritoId);
+            ViewBag.ConcelhoId = new SelectList(
+                distritoId.HasValue ? _context.Concelhos.Where(c => c.DistritoId == distritoId).OrderBy(c => c.Nome) : Enumerable.Empty<Concelho>(),
+                "Id", "Nome", concelhoId);
+            ViewBag.FreguesiaId = new SelectList(
+                concelhoId.HasValue ? _context.Freguesias.Where(f => f.ConcelhoId == concelhoId).OrderBy(f => f.Nome) : Enumerable.Empty<Freguesia>(),
+                "Id", "Nome", imovel?.FreguesiaId);
+
+            ViewBag.GruposComCaracteristicas = _context.GruposCaracteristicas.Include(g => g.Caracteristicas).ToList();
+            ViewBag.CaracteristicasAtuais = selectedCaracteristicas ?? new List<int>();
+        }
+
+        private async Task ProcessarUploadFotos(int imovelId, List<IFormFile> fotosUpload)
+        {
+            if (fotosUpload == null || fotosUpload.Count == 0) return;
+
+            string pastaUploads = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "imoveis");
+            if (!Directory.Exists(pastaUploads)) Directory.CreateDirectory(pastaUploads);
+
+            int ordemCounter = 1;
+            foreach (var formFile in fotosUpload)
+            {
+                if (formFile.Length > 0 && formFile.ContentType.StartsWith("image/"))
+                {
+                    string nomeUnico = Guid.NewGuid().ToString() + "_" + formFile.FileName;
+                    string caminhoCompleto = Path.Combine(pastaUploads, nomeUnico);
+
+                    using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                    }
+                    _context.Fotos.Add(new FotoImovel { ImovelId = imovelId, CaminhoImagem = "/uploads/imoveis/" + nomeUnico, Ordem = ordemCounter++ });
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task ProcessarUploadDocumentos(int imovelId, List<IFormFile> documentosUpload)
+        {
+            if (documentosUpload == null || documentosUpload.Count == 0) return;
+
+            string pastaDocs = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "documentos");
+            if (!Directory.Exists(pastaDocs)) Directory.CreateDirectory(pastaDocs);
+
+            foreach (var doc in documentosUpload)
+            {
+                if (doc.Length > 0)
+                {
+                    string nomeOriginal = Path.GetFileName(doc.FileName);
+                    string nomeUnico = Guid.NewGuid().ToString() + "_" + nomeOriginal;
+                    string caminhoCompleto = Path.Combine(pastaDocs, nomeUnico);
+
+                    using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                    {
+                        await doc.CopyToAsync(stream);
+                    }
+                    _context.Documentos.Add(new DocumentoImovel { ImovelId = imovelId, NomeFicheiro = nomeOriginal, CaminhoFicheiro = "/uploads/documentos/" + nomeUnico, DataUpload = DateTime.Now });
+                }
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

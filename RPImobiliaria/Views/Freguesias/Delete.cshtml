@@ -1,0 +1,3 @@
+@model RPImobiliaria.Models.Freguesia
+@{ ViewData["Title"] = "Apagar freguesia"; }
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-6"><div class="card border-danger shadow-sm"><div class="card-body p-4"><i class="bi bi-exclamation-triangle text-danger fs-2"></i><h1 class="h4 fw-bold mt-2">Apagar “@Model.Nome”?</h1><p class="text-body-secondary">Só pode apagar esta freguesia se não estiver associada a imóveis. A localização será removida de forma segura apenas quando não tiver utilizações.</p><form asp-action="Delete"><input asp-for="Id" type="hidden" /><a asp-action="Index" class="btn btn-light border">Cancelar</a><button type="submit" class="btn btn-danger">Apagar freguesia</button></form></div></div></div></div></div>

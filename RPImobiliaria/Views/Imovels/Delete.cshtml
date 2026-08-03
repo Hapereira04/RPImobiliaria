@@ -1,53 +1,41 @@
 ﻿@model RPImobiliaria.Models.Imovel
-
 @{
     ViewData["Title"] = "Apagar Imóvel";
 }
 
 <div class="container mt-5 mb-5 d-flex justify-content-center">
     <div class="col-md-8 col-lg-6">
-
         <div class="card border-danger shadow-lg">
             <div class="card-header bg-danger text-white p-4 text-center">
                 <i class="bi bi-exclamation-triangle-fill display-1 mb-3"></i>
                 <h2 class="fw-bold mb-0">Zona de Perigo</h2>
             </div>
 
-            <div class="card-body p-5 text-center bg-body-tertiary">
-                <h4 class="text-body-emphasis mb-3">Tem a certeza absoluta que deseja apagar este imóvel?</h4>
-                <p class="text-body-secondary mb-4">Esta ação é <strong>irreversível</strong>. Todos as fotografias, características e notas internas associadas serão eliminadas permanentemente da base de dados.</p>
+            <div class="card-body p-5 text-center bg-body-tertiary text-body-emphasis">
+                <h4 class="fw-bold mb-3">Tem a certeza absoluta que deseja apagar este imóvel?</h4>
+                <p class="text-body-secondary mb-4">Esta ação é <strong>irreversível</strong>. Todas as fotografias, documentos e notas serão eliminados.</p>
 
-                <div class="card border-secondary-subtle bg-body text-start mb-4 shadow-sm">
+                <div class="card border-secondary-subtle bg-body text-start mb-4 shadow-sm text-body-emphasis">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-primary">Ref: SHARP-@Model.Id.ToString("D5")</span>
-                            <span class="badge bg-success">@Model.Preco.ToString("C0")</span>
+                            <span class="badge bg-primary fs-6 shadow-sm">Ref: @(Model.Referencia ?? Model.Id.ToString())</span>
+                            <span class="badge bg-success fs-6 shadow-sm">@Model.Preco.ToString("C0")</span>
                         </div>
-                        <h5 class="fw-bold text-body-emphasis">@Model.Titulo</h5>
+                        <h5 class="fw-bold mt-3 text-body-emphasis">@Model.Titulo</h5>
                         <p class="text-body-secondary small mb-2">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> @Model.Freguesia, @Model.Concelho, @Model.Distrito
-                        </p>
-                        <p class="text-body-secondary small mb-0">
-                            <strong>Consultor:</strong> @(Model.Consultor?.Nome ?? "Sem consultor associado")
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> @Model.Freguesia?.Nome, @Model.Freguesia?.Concelho?.Nome
                         </p>
                     </div>
                 </div>
 
                 <form asp-action="Delete">
                     <input type="hidden" asp-for="Id" />
-
                     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg fw-bold px-4">
-                            <i class="bi bi-arrow-left me-2"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-danger btn-lg fw-bold px-4 shadow">
-                            <i class="bi bi-trash3-fill me-2"></i> Sim, Apagar Imóvel
-                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg fw-bold px-4 shadow-sm">Cancelar</a>
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold px-4 shadow"><i class="bi bi-trash3-fill me-2"></i> Apagar Imóvel</button>
                     </div>
                 </form>
-
             </div>
         </div>
-
     </div>
 </div>

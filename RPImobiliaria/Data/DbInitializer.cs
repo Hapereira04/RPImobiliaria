@@ -134,6 +134,44 @@ namespace RPImobiliaria.Data
                 );
             }
 
+            // 6. Distritos
+            if (!context.Distritos.Any())
+            {
+                context.Distritos.Add(new Distrito { Nome = "Aveiro" });
+                await context.SaveChangesAsync();
+            }
+
+            // 7. Concelhos
+            if (!context.Concelhos.Any())
+            {
+                var aveiro = context.Distritos.FirstOrDefault(d => d.Nome == "Aveiro");
+                if (aveiro != null)
+                {
+                    context.Concelhos.AddRange(
+                        new Concelho { Nome = "Ovar", DistritoId = aveiro.Id },
+                        new Concelho { Nome = "Espinho", DistritoId = aveiro.Id },
+                        new Concelho { Nome = "Santa Maria da Feira", DistritoId = aveiro.Id }
+                    );
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            // 8. Freguesias (Focadas em Ovar)
+            if (!context.Freguesias.Any())
+            {
+                var ovar = context.Concelhos.FirstOrDefault(c => c.Nome == "Ovar");
+                if (ovar != null)
+                {
+                    context.Freguesias.AddRange(
+                        new Freguesia { Nome = "União das Freguesias de Ovar, São João, Arada e São Vicente de Pereira Jusã", ConcelhoId = ovar.Id },
+                        new Freguesia { Nome = "Esmoriz", ConcelhoId = ovar.Id },
+                        new Freguesia { Nome = "Cortegaça", ConcelhoId = ovar.Id },
+                        new Freguesia { Nome = "Maceda", ConcelhoId = ovar.Id },
+                        new Freguesia { Nome = "Válega", ConcelhoId = ovar.Id }
+                    );
+                }
+            }
+
             await context.SaveChangesAsync();
         }
     }

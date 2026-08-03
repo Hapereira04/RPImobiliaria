@@ -13,6 +13,29 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
+            
+            /* Garante que o menu superior fica sempre à frente de tudo */
+            .navbar {
+                z-index: 1050 !important;
+            }
+
+            /* Novo formato para as fotos nos cartões (Página Imóveis) */
+            .imovel-img-wrapper {
+                height: 280px; /* Mais altura! */
+                background-color: var(--bs-secondary-bg); /* Fundo suave se a imagem não preencher tudo */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+                .imovel-img-wrapper img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain; /* Contém a foto (adiciona bordas) em vez de esticar ou cortar */
+                    transition: transform 0.3s ease;
+                }
+
             /* FIX DE LAYOUT */
             html, body {
                 height: 100%;
@@ -340,8 +363,8 @@
                         <ul class="dropdown-menu shadow border-0 mt-3">
                             <li><a class="dropdown-item fw-bold" asp-controller="Imovels" asp-action="Index">Todos os Imóveis</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/Imovels?negocio=comprar">Para Comprar</a></li>
-                            <li><a class="dropdown-item" href="/Imovels?negocio=arrendar">Para Arrendar</a></li>
+                            <li><a class="dropdown-item" asp-controller="Imovels" asp-action="Index" asp-route-Negocio="Comprar">Para Comprar</a></li>
+                            <li><a class="dropdown-item" asp-controller="Imovels" asp-action="Index" asp-route-Negocio="Arrendar">Para Arrendar</a></li>
                         </ul>
                     </div>
 
@@ -367,7 +390,8 @@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger fw-bold" asp-controller="Consultors" asp-action="Index">Equipa & Definições</a></li>
+                                    <li><a class="dropdown-item fw-bold" asp-controller="Backoffice" asp-action="Index">Catálogos e localização</a></li>
+                                    <li><a class="dropdown-item text-danger fw-bold" asp-controller="Consultors" asp-action="Index">Gerir equipa</a></li>
                                 }
                                 <li><hr class="dropdown-divider"></li>
                                 <li>

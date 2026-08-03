@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RPImobiliaria.Data;
@@ -10,6 +11,7 @@ using RPImobiliaria.Models;
 
 namespace RPImobiliaria.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class EstadoImovelsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -144,12 +146,15 @@ namespace RPImobiliaria.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var estadoImovel = await _context.EstadosImovel.FindAsync(id);
-            if (estadoImovel != null)
+            if (estadoImovel == null) return RedirectToAction(nameof(Index));
+            if (await _context.Imoveis.AnyAsync(i => i.EstadoImovelId == id))
             {
-                _context.EstadosImovel.Remove(estadoImovel);
+                TempData["MensagemErro"] = "Não é possível apagar um estado que está a ser utilizado por imóveis.";
+                return RedirectToAction(nameof(Index));
             }
-
+            _context.EstadosImovel.Remove(estadoImovel);
             await _context.SaveChangesAsync();
+            TempData["MensagemSucesso"] = "Estado apagado com sucesso.";
             return RedirectToAction(nameof(Index));
         }
 

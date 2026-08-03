@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RPImobiliaria.Data;
@@ -9,6 +10,7 @@ using System.IO; // Necessário para FileStream e manipulação de ficheiros
 
 namespace RPImobiliaria.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ConsultorsController : Controller
     {
         private readonly ApplicationDbContext _context;

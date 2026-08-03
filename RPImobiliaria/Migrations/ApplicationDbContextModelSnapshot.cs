@@ -312,6 +312,28 @@ namespace RPImobiliaria.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("RPImobiliaria.Models.Concelho", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DistritoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DistritoId");
+
+                    b.ToTable("Concelhos");
+                });
+
             modelBuilder.Entity("RPImobiliaria.Models.Consultor", b =>
                 {
                     b.Property<int>("Id")
@@ -345,6 +367,52 @@ namespace RPImobiliaria.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Consultores");
+                });
+
+            modelBuilder.Entity("RPImobiliaria.Models.Distrito", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Distritos");
+                });
+
+            modelBuilder.Entity("RPImobiliaria.Models.DocumentoImovel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CaminhoFicheiro")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DataUpload")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ImovelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NomeFicheiro")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImovelId");
+
+                    b.ToTable("Documentos");
                 });
 
             modelBuilder.Entity("RPImobiliaria.Models.EstadoImovel", b =>
@@ -438,6 +506,28 @@ namespace RPImobiliaria.Migrations
                     b.ToTable("Fotos");
                 });
 
+            modelBuilder.Entity("RPImobiliaria.Models.Freguesia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConcelhoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConcelhoId");
+
+                    b.ToTable("Freguesias");
+                });
+
             modelBuilder.Entity("RPImobiliaria.Models.GrupoCaracteristica", b =>
                 {
                     b.Property<int>("Id")
@@ -481,9 +571,6 @@ namespace RPImobiliaria.Migrations
                     b.Property<int?>("CertificadoEnergeticoId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Concelho")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("ConsultorId")
                         .HasColumnType("int");
 
@@ -493,17 +580,14 @@ namespace RPImobiliaria.Migrations
                     b.Property<string>("Descricao")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Distrito")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Estacionamento")
                         .HasColumnType("int");
 
                     b.Property<int?>("EstadoImovelId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Freguesia")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("FreguesiaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("MoradaExata")
                         .HasColumnType("nvarchar(max)");
@@ -525,6 +609,9 @@ namespace RPImobiliaria.Migrations
 
                     b.Property<int>("Quartos")
                         .HasColumnType("int");
+
+                    b.Property<string>("Referencia")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("StatusImovelId")
                         .HasColumnType("int");
@@ -551,6 +638,8 @@ namespace RPImobiliaria.Migrations
                     b.HasIndex("ConsultorId");
 
                     b.HasIndex("EstadoImovelId");
+
+                    b.HasIndex("FreguesiaId");
 
                     b.HasIndex("StatusImovelId");
 
@@ -703,6 +792,28 @@ namespace RPImobiliaria.Migrations
                     b.Navigation("GrupoCaracteristica");
                 });
 
+            modelBuilder.Entity("RPImobiliaria.Models.Concelho", b =>
+                {
+                    b.HasOne("RPImobiliaria.Models.Distrito", "Distrito")
+                        .WithMany("Concelhos")
+                        .HasForeignKey("DistritoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Distrito");
+                });
+
+            modelBuilder.Entity("RPImobiliaria.Models.DocumentoImovel", b =>
+                {
+                    b.HasOne("RPImobiliaria.Models.Imovel", "Imovel")
+                        .WithMany("Documentos")
+                        .HasForeignKey("ImovelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Imovel");
+                });
+
             modelBuilder.Entity("RPImobiliaria.Models.FichaCliente", b =>
                 {
                     b.HasOne("RPImobiliaria.Models.Cliente", "Cliente")
@@ -723,6 +834,17 @@ namespace RPImobiliaria.Migrations
                         .IsRequired();
 
                     b.Navigation("Imovel");
+                });
+
+            modelBuilder.Entity("RPImobiliaria.Models.Freguesia", b =>
+                {
+                    b.HasOne("RPImobiliaria.Models.Concelho", "Concelho")
+                        .WithMany("Freguesias")
+                        .HasForeignKey("ConcelhoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Concelho");
                 });
 
             modelBuilder.Entity("RPImobiliaria.Models.Imovel", b =>
@@ -746,6 +868,11 @@ namespace RPImobiliaria.Migrations
                         .HasForeignKey("EstadoImovelId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("RPImobiliaria.Models.Freguesia", "Freguesia")
+                        .WithMany()
+                        .HasForeignKey("FreguesiaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("RPImobiliaria.Models.StatusImovel", "StatusImovel")
                         .WithMany("Imoveis")
                         .HasForeignKey("StatusImovelId")
@@ -763,6 +890,8 @@ namespace RPImobiliaria.Migrations
                     b.Navigation("Consultor");
 
                     b.Navigation("EstadoImovel");
+
+                    b.Navigation("Freguesia");
 
                     b.Navigation("StatusImovel");
 
@@ -850,9 +979,19 @@ namespace RPImobiliaria.Migrations
                     b.Navigation("ImoveisPropriedade");
                 });
 
+            modelBuilder.Entity("RPImobiliaria.Models.Concelho", b =>
+                {
+                    b.Navigation("Freguesias");
+                });
+
             modelBuilder.Entity("RPImobiliaria.Models.Consultor", b =>
                 {
                     b.Navigation("ImoveisAngariados");
+                });
+
+            modelBuilder.Entity("RPImobiliaria.Models.Distrito", b =>
+                {
+                    b.Navigation("Concelhos");
                 });
 
             modelBuilder.Entity("RPImobiliaria.Models.EstadoImovel", b =>
@@ -868,6 +1007,8 @@ namespace RPImobiliaria.Migrations
             modelBuilder.Entity("RPImobiliaria.Models.Imovel", b =>
                 {
                     b.Navigation("Caracteristicas");
+
+                    b.Navigation("Documentos");
 
                     b.Navigation("Favoritos");
 

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RPImobiliaria.Data;
 using RPImobiliaria.Models;
 
 namespace RPImobiliaria.Controllers
 {
+    [Authorize(Roles = "Admin,Consultor")]
     public class ClientesController : Controller
     {
         private readonly ApplicationDbContext _context;
