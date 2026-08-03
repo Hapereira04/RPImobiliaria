@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RPImobiliaria.Migrations
 {
     /// <inheritdoc />
-    public partial class AtualizarParaFicheirosLocais : Migration
+    public partial class InicialParaSQLite : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,10 +15,10 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,21 +29,21 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,9 +54,9 @@ namespace RPImobiliaria.Migrations
                 name: "CategoriasImovel",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,9 +67,9 @@ namespace RPImobiliaria.Migrations
                 name: "CertificadosEnergeticos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,14 +80,14 @@ namespace RPImobiliaria.Migrations
                 name: "Clientes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Telemovel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NIF = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IdentityUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CaminhoFotoPerfil = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    Telemovel = table.Column<string>(type: "TEXT", nullable: true),
+                    NIF = table.Column<string>(type: "TEXT", nullable: true),
+                    IdentityUserId = table.Column<string>(type: "TEXT", nullable: true),
+                    CaminhoFotoPerfil = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -98,15 +98,15 @@ namespace RPImobiliaria.Migrations
                 name: "Consultores",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Telemovel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LicencaAMI = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CaminhoFotoPerfil = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContentTypeFoto = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IdentityUserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    Telemovel = table.Column<string>(type: "TEXT", nullable: true),
+                    LicencaAMI = table.Column<string>(type: "TEXT", nullable: true),
+                    CaminhoFotoPerfil = table.Column<string>(type: "TEXT", nullable: true),
+                    ContentTypeFoto = table.Column<string>(type: "TEXT", nullable: true),
+                    IdentityUserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -114,12 +114,25 @@ namespace RPImobiliaria.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Distritos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Distritos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EstadosImovel",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,9 +143,9 @@ namespace RPImobiliaria.Migrations
                 name: "GruposCaracteristicas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,9 +156,9 @@ namespace RPImobiliaria.Migrations
                 name: "StatusImoveis",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -156,9 +169,9 @@ namespace RPImobiliaria.Migrations
                 name: "TiposNegocio",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -169,11 +182,11 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false),
+                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
+                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -190,11 +203,11 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
+                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,10 +224,10 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -231,8 +244,8 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,10 +268,10 @@ namespace RPImobiliaria.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -275,19 +288,19 @@ namespace RPImobiliaria.Migrations
                 name: "FichasClientes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
-                    PerfilComprador = table.Column<bool>(type: "bit", nullable: false),
-                    PerfilVendedor = table.Column<bool>(type: "bit", nullable: false),
-                    PerfilArrendatario = table.Column<bool>(type: "bit", nullable: false),
-                    PerfilInvestidor = table.Column<bool>(type: "bit", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ClienteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PerfilComprador = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PerfilVendedor = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PerfilArrendatario = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PerfilInvestidor = table.Column<bool>(type: "INTEGER", nullable: false),
                     OrcamentoMaximo = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    ZonasPreferencia = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TipologiasProcuradas = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NotasRequisitos = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UltimaAtualizacao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PreenchidoPeloCliente = table.Column<bool>(type: "bit", nullable: false)
+                    ZonasPreferencia = table.Column<string>(type: "TEXT", nullable: true),
+                    TipologiasProcuradas = table.Column<string>(type: "TEXT", nullable: true),
+                    NotasRequisitos = table.Column<string>(type: "TEXT", nullable: true),
+                    UltimaAtualizacao = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PreenchidoPeloCliente = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -301,13 +314,33 @@ namespace RPImobiliaria.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Concelhos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false),
+                    DistritoId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Concelhos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Concelhos_Distritos_DistritoId",
+                        column: x => x.DistritoId,
+                        principalTable: "Distritos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CaracteristicasCatalogo",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GrupoCaracteristicaId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false),
+                    GrupoCaracteristicaId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -321,37 +354,56 @@ namespace RPImobiliaria.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Freguesias",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: false),
+                    ConcelhoId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Freguesias", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Freguesias_Concelhos_ConcelhoId",
+                        column: x => x.ConcelhoId,
+                        principalTable: "Concelhos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Imoveis",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Referencia = table.Column<string>(type: "TEXT", nullable: true),
+                    Titulo = table.Column<string>(type: "TEXT", nullable: false),
                     Preco = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Quartos = table.Column<int>(type: "int", nullable: false),
-                    CasasBanho = table.Column<int>(type: "int", nullable: false),
-                    Estacionamento = table.Column<int>(type: "int", nullable: false),
-                    AreaUtil = table.Column<double>(type: "float", nullable: false),
-                    AreaBruta = table.Column<double>(type: "float", nullable: false),
-                    Piso = table.Column<int>(type: "int", nullable: false),
-                    AnoConstrucao = table.Column<int>(type: "int", nullable: false),
-                    NumeroFrentes = table.Column<int>(type: "int", nullable: false),
-                    Distrito = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Concelho = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Freguesia = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Zona = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MoradaExata = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NumeroContrato = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ObservacoesInternas = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Descricao = table.Column<string>(type: "TEXT", nullable: true),
+                    Quartos = table.Column<int>(type: "INTEGER", nullable: false),
+                    CasasBanho = table.Column<int>(type: "INTEGER", nullable: false),
+                    Estacionamento = table.Column<int>(type: "INTEGER", nullable: false),
+                    AreaUtil = table.Column<double>(type: "REAL", nullable: false),
+                    AreaBruta = table.Column<double>(type: "REAL", nullable: false),
+                    Piso = table.Column<int>(type: "INTEGER", nullable: false),
+                    AnoConstrucao = table.Column<int>(type: "INTEGER", nullable: false),
+                    NumeroFrentes = table.Column<int>(type: "INTEGER", nullable: false),
+                    FreguesiaId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Zona = table.Column<string>(type: "TEXT", nullable: true),
+                    MoradaExata = table.Column<string>(type: "TEXT", nullable: true),
+                    NumeroContrato = table.Column<string>(type: "TEXT", nullable: true),
+                    ObservacoesInternas = table.Column<string>(type: "TEXT", nullable: true),
                     ValorComissao = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    DataRegisto = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CategoriaImovelId = table.Column<int>(type: "int", nullable: true),
-                    TipoNegocioId = table.Column<int>(type: "int", nullable: true),
-                    EstadoImovelId = table.Column<int>(type: "int", nullable: true),
-                    StatusImovelId = table.Column<int>(type: "int", nullable: true),
-                    CertificadoEnergeticoId = table.Column<int>(type: "int", nullable: true),
-                    ConsultorId = table.Column<int>(type: "int", nullable: true)
+                    DataRegisto = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CategoriaImovelId = table.Column<int>(type: "INTEGER", nullable: true),
+                    TipoNegocioId = table.Column<int>(type: "INTEGER", nullable: true),
+                    EstadoImovelId = table.Column<int>(type: "INTEGER", nullable: true),
+                    StatusImovelId = table.Column<int>(type: "INTEGER", nullable: true),
+                    CertificadoEnergeticoId = table.Column<int>(type: "INTEGER", nullable: true),
+                    ConsultorId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -380,6 +432,12 @@ namespace RPImobiliaria.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Imoveis_Freguesias_FreguesiaId",
+                        column: x => x.FreguesiaId,
+                        principalTable: "Freguesias",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Imoveis_StatusImoveis_StatusImovelId",
                         column: x => x.StatusImovelId,
                         principalTable: "StatusImoveis",
@@ -394,14 +452,36 @@ namespace RPImobiliaria.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Documentos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ImovelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    NomeFicheiro = table.Column<string>(type: "TEXT", nullable: false),
+                    CaminhoFicheiro = table.Column<string>(type: "TEXT", nullable: false),
+                    DataUpload = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Documentos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Documentos_Imoveis_ImovelId",
+                        column: x => x.ImovelId,
+                        principalTable: "Imoveis",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Fotos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CaminhoImagem = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Ordem = table.Column<int>(type: "int", nullable: false),
-                    ImovelId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CaminhoImagem = table.Column<string>(type: "TEXT", nullable: false),
+                    Ordem = table.Column<int>(type: "INTEGER", nullable: false),
+                    ImovelId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -418,8 +498,8 @@ namespace RPImobiliaria.Migrations
                 name: "ImoveisCaracteristicas",
                 columns: table => new
                 {
-                    ImovelId = table.Column<int>(type: "int", nullable: false),
-                    CaracteristicaId = table.Column<int>(type: "int", nullable: false)
+                    ImovelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CaracteristicaId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -442,9 +522,9 @@ namespace RPImobiliaria.Migrations
                 name: "ImoveisFavoritos",
                 columns: table => new
                 {
-                    ImovelId = table.Column<int>(type: "int", nullable: false),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
-                    DataAdicionado = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ImovelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ClienteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataAdicionado = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -467,8 +547,8 @@ namespace RPImobiliaria.Migrations
                 name: "ImoveisProprietarios",
                 columns: table => new
                 {
-                    ImovelId = table.Column<int>(type: "int", nullable: false),
-                    ClienteId = table.Column<int>(type: "int", nullable: false)
+                    ImovelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ClienteId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -496,8 +576,7 @@ namespace RPImobiliaria.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -523,13 +602,22 @@ namespace RPImobiliaria.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CaracteristicasCatalogo_GrupoCaracteristicaId",
                 table: "CaracteristicasCatalogo",
                 column: "GrupoCaracteristicaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Concelhos_DistritoId",
+                table: "Concelhos",
+                column: "DistritoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Documentos_ImovelId",
+                table: "Documentos",
+                column: "ImovelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FichasClientes_ClienteId",
@@ -541,6 +629,11 @@ namespace RPImobiliaria.Migrations
                 name: "IX_Fotos_ImovelId",
                 table: "Fotos",
                 column: "ImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Freguesias_ConcelhoId",
+                table: "Freguesias",
+                column: "ConcelhoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Imoveis_CategoriaImovelId",
@@ -561,6 +654,11 @@ namespace RPImobiliaria.Migrations
                 name: "IX_Imoveis_EstadoImovelId",
                 table: "Imoveis",
                 column: "EstadoImovelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Imoveis_FreguesiaId",
+                table: "Imoveis",
+                column: "FreguesiaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Imoveis_StatusImovelId",
@@ -605,6 +703,9 @@ namespace RPImobiliaria.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Documentos");
 
             migrationBuilder.DropTable(
                 name: "FichasClientes");
@@ -652,10 +753,19 @@ namespace RPImobiliaria.Migrations
                 name: "EstadosImovel");
 
             migrationBuilder.DropTable(
+                name: "Freguesias");
+
+            migrationBuilder.DropTable(
                 name: "StatusImoveis");
 
             migrationBuilder.DropTable(
                 name: "TiposNegocio");
+
+            migrationBuilder.DropTable(
+                name: "Concelhos");
+
+            migrationBuilder.DropTable(
+                name: "Distritos");
         }
     }
 }
