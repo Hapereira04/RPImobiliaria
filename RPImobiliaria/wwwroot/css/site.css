@@ -105,3 +105,325 @@ table.dataTable {
     width: 100%;
     overflow-x: hidden;
 }
+
+/* Garante que o menu superior fica sempre à frente de tudo */
+.navbar {
+    z-index: 1050 !important;
+}
+
+/* Novo formato para as fotos nos cartões (Página Imóveis) */
+.imovel-img-wrapper {
+    height: 280px; /* Mais altura! */
+    background-color: var(--bs-secondary-bg); /* Fundo suave se a imagem não preencher tudo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+    .imovel-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Contém a foto (adiciona bordas) em vez de esticar ou cortar */
+        transition: transform 0.3s ease;
+    }
+
+/* FIX DE LAYOUT */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* MODOS CLARO / ESCURO */
+[data-bs-theme="light"] body {
+    background-color: #ffffff !important;
+    color: #212529;
+}
+
+[data-bs-theme="light"] .key-bg-head::after {
+    background-color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] body {
+    background-color: #2b2d31 !important;
+    color: #f2f3f5;
+}
+
+[data-bs-theme="dark"] .key-bg-head::after {
+    background-color: #2b2d31 !important;
+}
+
+[data-bs-theme="dark"] .modal-content {
+    background-color: #2b2d31;
+    color: #f2f3f5;
+}
+
+    [data-bs-theme="dark"] .modal-content .text-muted {
+        color: #adb5bd !important;
+    }
+
+    [data-bs-theme="dark"] .modal-content .form-control {
+        background-color: #1e1f22;
+        border-color: #444;
+        color: #f2f3f5;
+    }
+
+        [data-bs-theme="dark"] .modal-content .form-control:focus {
+            background-color: #2b2d31;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+    [data-bs-theme="dark"] .modal-content .form-floating label {
+        color: #888;
+    }
+
+/* ====================================================
+           A CHAVE REALISTA (Baseada na tua Imagem!)
+           ==================================================== */
+.key-nav-wrapper {
+    position: relative;
+    max-width: 1050px;
+    margin: 20px auto 40px auto;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
+}
+
+/* O FUNDO DA CHAVE */
+.key-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.key-bg-head {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 120px;
+    height: 120px;
+    background-color: #111111;
+    border-radius: 50%;
+}
+
+    .key-bg-head::after {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 40px;
+        width: 40px;
+        height: 40px;
+        background-color: var(--bs-body-bg);
+        border-radius: 50%;
+        box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+    }
+
+.key-bg-collar {
+    position: absolute;
+    left: 105px;
+    top: 15px;
+    width: 30px;
+    height: 90px;
+    background-color: #111111;
+    clip-path: polygon(0 25%, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%);
+}
+
+/* O Bico da chave (menos agressivo para proteger os botões) */
+.key-bg-shaft {
+    position: absolute;
+    left: 130px;
+    right: 0;
+    top: 30px;
+    height: 60px;
+    background-color: #111111;
+    clip-path: polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%);
+}
+
+/* DENTES RETANGULARES VARIADOS (Como uma chave de casa verdadeira) */
+.key-bg-teeth {
+    position: absolute;
+    right: 100px;
+    top: 89px;
+    width: 160px;
+    height: 25px;
+    background-color: #111111;
+    /* Cortes a 90 graus (retângulos com alturas sortidas) */
+    clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
+}
+
+/* ====================================================
+           O CONTEÚDO (MENUS NO CENTRO, BOTÕES PROTEGIDOS)
+           ==================================================== */
+.key-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 140px; /* Barreira da argola redonda */
+    padding-right: 75px; /* BARREIRA DO BICO - Protege os botões para nunca saírem para fora! */
+}
+
+.key-links {
+    margin: 0 auto; /* Magia para centrar perfeitamente no espaço sobrante */
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+    .key-links .nav-link {
+        color: #ffffff !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.95rem;
+        padding: 5px 10px;
+        transition: color 0.2s ease;
+    }
+
+        .key-links .nav-link:hover {
+            color: #ffc107 !important;
+        }
+
+.key-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    /* Empurrado naturalmente para a direita pelo 'margin: 0 auto' dos links */
+}
+
+/* ====================================================
+           ADAPTAÇÃO MOBILE (ESCADINHA DE RETÂNGULOS)
+           ==================================================== */
+@media (max-width: 991px) {
+    .key-nav-wrapper {
+        height: 80px;
+        margin: 10px auto 30px auto;
+    }
+
+    .key-bg-head {
+        width: 80px;
+        height: 80px;
+    }
+
+        .key-bg-head::after {
+            left: 12px;
+            top: 25px;
+            width: 30px;
+            height: 30px;
+        }
+
+    .key-bg-collar {
+        left: 70px;
+        top: 10px;
+        width: 20px;
+        height: 60px;
+    }
+
+    .key-bg-shaft {
+        left: 85px;
+        top: 20px;
+        height: 40px;
+        clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+    }
+
+    .key-bg-teeth {
+        right: 90px;
+        top: 59px;
+        width: 110px;
+        height: 18px;
+        /* MOBILE: Retângulos em escadinha! */
+        clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
+    }
+    /* Ajustes de Padding no Mobile para proteger os botões */
+    .key-content {
+        padding-left: 90px;
+        padding-right: 40px;
+    }
+
+    .key-links {
+        gap: 5px;
+    }
+
+        .key-links .nav-link {
+            font-size: 0.7rem !important;
+            padding: 3px 5px;
+            letter-spacing: 0;
+        }
+
+    .key-actions {
+        gap: 5px;
+    }
+
+    .dropdown-menu {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .key-links {
+        gap: 2px;
+    }
+
+        .key-links .nav-link {
+            font-size: 0.6rem !important;
+        }
+
+    .key-content {
+        padding-right: 30px;
+        padding-left: 80px;
+    }
+
+    .key-bg-teeth {
+        right: 25px;
+        width: 85px;
+    }
+}
+
+/* ====================================================
+           RODAPÉ E BOTÕES GLOBAIS
+           ==================================================== */
+.btn-floating-contact {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #25d366;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    transition: transform 0.2s ease;
+    text-decoration: none;
+}
+
+    .btn-floating-contact:hover {
+        transform: scale(1.1);
+        color: white;
+    }
+
+.footer-rp {
+    background-color: #121212;
+    color: #d0d0d0;
+    margin-top: auto;
+}
+
+.footer-link {
+    color: #909090;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .footer-link:hover {
+        color: #ffffff;
+    }
