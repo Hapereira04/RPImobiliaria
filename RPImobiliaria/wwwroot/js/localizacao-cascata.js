@@ -1,44 +1,46 @@
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-localizacao-cascata]').forEach((container) => {
-        const distrito = container.querySelector('#DistritoId');
-        const concelho = container.querySelector('#ConcelhoId');
-        const freguesia = container.querySelector('#FreguesiaId');
-        if (!distrito || !concelho || !freguesia) return;
+document.addEventListener('DOMContentLoaded', function () {
+    const distrito = document.getElementById('filterDistrito');
+    const concelho = document.getElementById('filterConcelho');
+    const freguesia = document.getElementById('filterFreguesia');
 
-        const reset = (select, placeholder) => {
-            select.innerHTML = '';
-            select.add(new Option(placeholder, ''));
-            select.disabled = true;
-        };
+    if (!distrito || !concelho || !freguesia) return;
 
-        const populate = async (select, url, placeholder) => {
-            reset(select, placeholder);
-            try {
-                const response = await fetch(url);
-                if (!response.ok) return;
-                const items = await response.json();
-                items.forEach((item) => select.add(new Option(item.nome, item.id)));
-                select.disabled = false;
-            } catch {
-                // Mantém o campo indisponível enquanto não for possível obter a lista.
-            }
-        };
+    // Obtém as URLs dos atributos data ou assume os endpoints padrão do controller
+    const concelhosUrl = distrito.dataset.url || '/Imovels/ObterConcelhos';
+    const freguesiasUrl = concelho.dataset.url || '/Imovels/ObterFreguesias';
 
-        distrito.addEventListener('change', async () => {
-            reset(freguesia, 'Selecione a freguesia');
-            if (!distrito.value) {
-                reset(concelho, 'Selecione o concelho');
-                return;
-            }
-            await populate(concelho, `/Imovels/ObterConcelhos?distritoId=${encodeURIComponent(distrito.value)}`, 'Selecione o concelho');
-        });
+    function resetSelect(select, texto) {
+        select.innerHTML = `<option value="">${texto}</option>`;
+        select.disabled = true;
+    }
 
-        concelho.addEventListener('change', async () => {
-            if (!concelho.value) {
-                reset(freguesia, 'Selecione a freguesia');
-                return;
-            }
-            await populate(freguesia, `/Imovels/ObterFreguesias?concelhoId=${encodeURIComponent(concelho.value)}`, 'Selecione a freguesia');
-        });
+    async function preencher(select, url, texto) {
+        resetSelect(select, texto);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const items = await response.json();
+            items.forEach(item => select.add(new Option(item.nome, item.id)));
+            select.disabled = false;
+        } catch (e) {
+            console.error("Erro ao carregar dados de localização:", e);
+        }
+    }
+
+    distrito.addEventListener('change', async () => {
+        resetSelect(freguesia, 'Todas as freguesias');
+        if (!distrito.value) {
+            resetSelect(concelho, 'Todos os concelhos');
+            return;
+        }
+        await preencher(concelho, `${concelhosUrl}?distritoId=${encodeURIComponent(distrito.value)}`, 'Todos os concelhos');
+    });
+
+    concelho.addEventListener('change', async () => {
+        if (!concelho.value) {
+            resetSelect(freguesia, 'Todas as freguesias');
+            return;
+        }
+        await preencher(freguesia, `${freguesiasUrl}?concelhoId=${encodeURIComponent(concelho.value)}`, 'Todas as freguesias');
     });
 });

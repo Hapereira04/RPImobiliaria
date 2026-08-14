@@ -440,33 +440,60 @@ html, body {
     }
 
 /* ====================================================
-       CORREÇÃO DE FORMULÁRIOS ISOLADA APENAS PARA ESTA PÁGINA
-       ==================================================== */
-[data-bs-theme="dark"] .catalogo-search .form-control,
-[data-bs-theme="dark"] .catalogo-search .form-select,
-[data-bs-theme="dark"] .catalogo-search .input-group-text,
-[data-bs-theme="dark"] select[name="OrdenarPor"] {
-    background-color: #1e1f22 !important;
-    border-color: #444 !important;
-    color: #f2f3f5 !important;
+   PÁGINA DE CATÁLOGO DE IMÓVEIS (Views/Imovels/Index)
+   ==================================================== */
+.catalogo-hero {
+    background: linear-gradient(135deg, #082f49 0%, #0f766e 100%);
+    color: #fff;
 }
 
-    [data-bs-theme="dark"] .catalogo-search .form-control:focus,
-    [data-bs-theme="dark"] .catalogo-search .form-select:focus,
-    [data-bs-theme="dark"] select[name="OrdenarPor"]:focus {
-        background-color: #2b2d31 !important;
-        border-color: #0d6efd !important;
-        color: #fff !important;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+.imovel-card {
+    overflow: hidden;
+    border: 1px solid var(--bs-border-color-translucent);
+    background-color: var(--bs-body-bg);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+    .imovel-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--bs-box-shadow-lg) !important;
     }
 
-    [data-bs-theme="dark"] .catalogo-search .form-control::placeholder {
-        color: #adb5bd !important;
-        opacity: 1;
+.imovel-photo {
+    height: 225px;
+    background-color: var(--bs-secondary-bg);
+}
+
+    .imovel-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .35s ease;
     }
 
-    [data-bs-theme="dark"] .catalogo-search option,
-    [data-bs-theme="dark"] select[name="OrdenarPor"] option {
-        background-color: #1e1f22;
-        color: #f2f3f5;
-    }
+.imovel-card:hover .imovel-photo img {
+    transform: scale(1.045);
+}
+
+.empty-photo {
+    color: var(--bs-secondary-color);
+    font-size: 3rem;
+}
+
+.filter-label {
+    font-size: .72rem;
+    letter-spacing: .05em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6c757d !important;
+}
+
+.result-pill {
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.25);
+}
+
+.quick-fact {
+    font-size: .82rem;
+    color: var(--bs-secondary-color);
+}

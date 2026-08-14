@@ -6,67 +6,6 @@
         Model.AnoConstrucaoMin.HasValue || Model.CaracteristicasIds.Any();
 }
 
-<style>
-    /* O Header azul escuro e verde (Fica bem em ambos os modos) */
-    .catalogo-hero {
-        background: linear-gradient(135deg, #082f49 0%, #0f766e 100%);
-        color: #fff;
-    }
-
-    /* Cartões de imóveis mudam automaticamente com o modo escuro */
-    .imovel-card {
-        overflow: hidden;
-        border: 1px solid var(--bs-border-color-translucent);
-        background-color: var(--bs-body-bg);
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-        .imovel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--bs-box-shadow-lg) !important;
-        }
-
-    .imovel-photo {
-        height: 225px;
-        background-color: var(--bs-secondary-bg);
-    }
-
-        .imovel-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform .35s ease;
-        }
-
-    .imovel-card:hover .imovel-photo img {
-        transform: scale(1.045);
-    }
-
-    .empty-photo {
-        color: var(--bs-secondary-color);
-        font-size: 3rem;
-    }
-
-    /* Rótulos dos filtros (Sempre cinzentos como no modo claro) */
-    .filter-label {
-        font-size: .72rem;
-        letter-spacing: .05em;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #6c757d !important;
-    }
-
-    .result-pill {
-        background: rgba(255,255,255,.16);
-        border: 1px solid rgba(255,255,255,.25);
-    }
-
-    .quick-fact {
-        font-size: .82rem;
-        color: var(--bs-secondary-color);
-    }
-</style>
-
 <section class="catalogo-hero py-5">
     <div class="container py-lg-3">
         <div class="row align-items-end g-3">
@@ -111,7 +50,7 @@
             <div class="row g-2 mt-2">
                 <div class="col-md-4 col-lg-3">
                     <label asp-for="DistritoId" class="filter-label mb-1">Distrito</label>
-                    <select asp-for="DistritoId" class="form-select" id="filterDistrito">
+                    <select asp-for="DistritoId" class="form-select" id="filterDistrito" data-url="@Url.Action("ObterConcelhos", "Imovels")">
                         <option value="">Todos os distritos</option>
                         @foreach (var distrito in Model.Distritos)
                         {
@@ -121,7 +60,7 @@
                 </div>
                 <div class="col-md-4 col-lg-3">
                     <label asp-for="ConcelhoId" class="filter-label mb-1">Concelho</label>
-                    <select asp-for="ConcelhoId" class="form-select" id="filterConcelho" disabled="@(!Model.DistritoId.HasValue)">
+                    <select asp-for="ConcelhoId" class="form-select" id="filterConcelho" data-url="@Url.Action("ObterFreguesias", "Imovels")" disabled="@(!Model.DistritoId.HasValue)">
                         <option value="">Todos os concelhos</option>
                         @foreach (var concelho in Model.Concelhos)
                         {
@@ -248,31 +187,5 @@ else
 </main>
 
 @section Scripts {
-    <script>
-        const distrito = document.getElementById('filterDistrito');
-        const concelho = document.getElementById('filterConcelho');
-        const freguesia = document.getElementById('filterFreguesia');
-        const concelhosUrl = '@Url.Action("ObterConcelhos", "Imovels")';
-        const freguesiasUrl = '@Url.Action("ObterFreguesias", "Imovels")';
-
-        function resetSelect(select, texto) { select.innerHTML = `<option value="">${texto}</option>`; select.disabled = true; }
-        async function preencher(select, url, texto) {
-            resetSelect(select, texto);
-            const response = await fetch(url);
-            if (!response.ok) return;
-            const items = await response.json();
-            items.forEach(item => select.add(new Option(item.nome, item.id)));
-            select.disabled = false;
-        }
-
-        distrito.addEventListener('change', async () => {
-            resetSelect(freguesia, 'Todas as freguesias');
-            if (!distrito.value) { resetSelect(concelho, 'Todos os concelhos'); return; }
-            await preencher(concelho, `${concelhosUrl}?distritoId=${encodeURIComponent(distrito.value)}`, 'Todos os concelhos');
-        });
-        concelho.addEventListener('change', async () => {
-            if (!concelho.value) { resetSelect(freguesia, 'Todas as freguesias'); return; }
-            await preencher(freguesia, `${freguesiasUrl}?concelhoId=${encodeURIComponent(concelho.value)}`, 'Todas as freguesias');
-        });
-    </script>
+    <script src="~/js/localizacao-cascata.js" asp-append-version="true"></script>
 }
