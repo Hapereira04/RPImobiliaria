@@ -106,9 +106,20 @@ table.dataTable {
     overflow-x: hidden;
 }
 
-/* Garante que o menu superior fica sempre à frente de tudo */
-.navbar {
+header {
+    position: relative;
     z-index: 1050 !important;
+}
+
+.key-nav-wrapper {
+    position: relative;
+    z-index: 1050 !important;
+    max-width: 1050px;
+    margin: 20px auto 40px auto;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
 }
 
 /* Novo formato para as fotos nos cartões (Página Imóveis) */
@@ -426,4 +437,36 @@ html, body {
 
     .footer-link:hover {
         color: #ffffff;
+    }
+
+/* ====================================================
+       CORREÇÃO DE FORMULÁRIOS ISOLADA APENAS PARA ESTA PÁGINA
+       ==================================================== */
+[data-bs-theme="dark"] .catalogo-search .form-control,
+[data-bs-theme="dark"] .catalogo-search .form-select,
+[data-bs-theme="dark"] .catalogo-search .input-group-text,
+[data-bs-theme="dark"] select[name="OrdenarPor"] {
+    background-color: #1e1f22 !important;
+    border-color: #444 !important;
+    color: #f2f3f5 !important;
+}
+
+    [data-bs-theme="dark"] .catalogo-search .form-control:focus,
+    [data-bs-theme="dark"] .catalogo-search .form-select:focus,
+    [data-bs-theme="dark"] select[name="OrdenarPor"]:focus {
+        background-color: #2b2d31 !important;
+        border-color: #0d6efd !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+    [data-bs-theme="dark"] .catalogo-search .form-control::placeholder {
+        color: #adb5bd !important;
+        opacity: 1;
+    }
+
+    [data-bs-theme="dark"] .catalogo-search option,
+    [data-bs-theme="dark"] select[name="OrdenarPor"] option {
+        background-color: #1e1f22;
+        color: #f2f3f5;
     }
