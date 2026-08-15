@@ -16,7 +16,7 @@ namespace RPImobiliaria.Models
         public string? ContentTypeFoto { get; set; }
 
         // Ligação à tabela de Logins do ASP.NET
-        public string? IdentityUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
 
         public virtual ICollection<Imovel> ImoveisAngariados { get; set; } = new List<Imovel>();
     }

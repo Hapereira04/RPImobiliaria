@@ -126,7 +126,7 @@
                         <div class="p-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                             <div>
                                 <h6 class="text-muted fw-bold mb-1 text-uppercase small">ID do Sistema (Identity)</h6>
-                                <p class="mb-0 text-muted font-monospace small">@(string.IsNullOrEmpty(Model?.IdentityUserId) ? "Sem conta associada" : Model.IdentityUserId)</p>
+                                <p class="mb-0 text-muted font-monospace small">@(string.IsNullOrEmpty(Model?.ApplicationUserId) ? "Sem conta associada" : Model.ApplicationUserId)</p>
                             </div>
                             <div class="mt-2 mt-sm-0 text-muted">
                                 <i class="bi bi-hdd-network fs-3"></i>

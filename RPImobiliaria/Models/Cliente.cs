@@ -13,7 +13,7 @@ namespace RPImobiliaria.Models
         public string? NIF { get; set; }
 
         // Ligação à tabela de Logins do ASP.NET (Pode ser nulo se for só um cliente registado em papel)
-        public string? IdentityUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
 
         [Display(Name = "Foto de Perfil")]
         public string? CaminhoFotoPerfil { get; set; }

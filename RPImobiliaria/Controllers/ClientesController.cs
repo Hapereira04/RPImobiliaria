@@ -65,7 +65,7 @@ namespace RPImobiliaria.Controllers
 
                     if (usuarioIdentity != null)
                     {
-                        cliente.IdentityUserId = usuarioIdentity.Id;
+                        cliente.ApplicationUserId = usuarioIdentity.Id;
                     }
                 }
 
@@ -108,7 +108,7 @@ namespace RPImobiliaria.Controllers
         // POST: Clientes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telemovel,NIF,IdentityUserId,Ficha")] Cliente cliente)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telemovel,NIF,ApplicationUserId,Ficha")] Cliente cliente)
         {
             if (id != cliente.Id) return NotFound();
 

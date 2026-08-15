@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RPImobiliaria.Migrations
 {
     /// <inheritdoc />
-    public partial class InicialParaSQLite : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,7 +86,7 @@ namespace RPImobiliaria.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     Telemovel = table.Column<string>(type: "TEXT", nullable: true),
                     NIF = table.Column<string>(type: "TEXT", nullable: true),
-                    IdentityUserId = table.Column<string>(type: "TEXT", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "TEXT", nullable: true),
                     CaminhoFotoPerfil = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -106,7 +106,7 @@ namespace RPImobiliaria.Migrations
                     LicencaAMI = table.Column<string>(type: "TEXT", nullable: true),
                     CaminhoFotoPerfil = table.Column<string>(type: "TEXT", nullable: true),
                     ContentTypeFoto = table.Column<string>(type: "TEXT", nullable: true),
-                    IdentityUserId = table.Column<string>(type: "TEXT", nullable: true)
+                    ApplicationUserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

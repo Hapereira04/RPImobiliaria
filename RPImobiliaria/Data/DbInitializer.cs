@@ -8,7 +8,7 @@ namespace RPImobiliaria.Data
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             // 1. Criar os Cargos (Roles) se não existirem
             string[] cargos = { "Admin", "Consultor", "Cliente" };
@@ -27,7 +27,7 @@ namespace RPImobiliaria.Data
 
             if (await userManager.FindByEmailAsync(emailAdmin) == null)
             {
-                var adminUser = new IdentityUser
+                var adminUser = new ApplicationUser
                 {
                     UserName = emailAdmin,
                     Email = emailAdmin,

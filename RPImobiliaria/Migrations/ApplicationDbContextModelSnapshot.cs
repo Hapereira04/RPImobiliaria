@@ -15,7 +15,7 @@ namespace RPImobiliaria.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.23");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.30");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -269,13 +269,13 @@ namespace RPImobiliaria.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CaminhoFotoPerfil")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IdentityUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NIF")
@@ -319,6 +319,9 @@ namespace RPImobiliaria.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CaminhoFotoPerfil")
                         .HasColumnType("TEXT");
 
@@ -326,9 +329,6 @@ namespace RPImobiliaria.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IdentityUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LicencaAMI")

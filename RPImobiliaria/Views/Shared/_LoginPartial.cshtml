@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using RPImobiliaria.Data
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext
 
 @{
@@ -14,10 +14,10 @@
         var userId = UserManager.GetUserId(User);
 
         // 1. Procurar se este Login pertence a um Consultor
-        var consultor = DbContext.Consultores.FirstOrDefault(c => c.IdentityUserId == userId);
+        var consultor = DbContext.Consultores.FirstOrDefault(c => c.ApplicationUserId == userId);
 
         // 2. Se não for Consultor, procurar se é um Cliente
-        var cliente = DbContext.Clientes.FirstOrDefault(c => c.IdentityUserId == userId);
+        var cliente = DbContext.Clientes.FirstOrDefault(c => c.ApplicationUserId == userId);
 
         if (consultor != null)
         {

@@ -11,14 +11,14 @@ using RPImobiliaria.Data;
 namespace RPImobiliaria.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260803190140_InicialParaSQLite")]
-    partial class InicialParaSQLite
+    [Migration("20260815170916_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.23");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.30");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -272,13 +272,13 @@ namespace RPImobiliaria.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CaminhoFotoPerfil")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IdentityUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NIF")
@@ -322,6 +322,9 @@ namespace RPImobiliaria.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CaminhoFotoPerfil")
                         .HasColumnType("TEXT");
 
@@ -329,9 +332,6 @@ namespace RPImobiliaria.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IdentityUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LicencaAMI")

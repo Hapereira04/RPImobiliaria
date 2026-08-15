@@ -14,12 +14,12 @@ namespace RPImobiliaria.Controllers
     public class ConsultorsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         // 1. Variável para aceder às pastas físicas do servidor Proxmox
         private readonly IWebHostEnvironment _hostEnvironment;
 
         // 2. Adicionado ao construtor
-        public ConsultorsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment hostEnvironment)
+        public ConsultorsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
             _userManager = userManager;
@@ -63,7 +63,7 @@ namespace RPImobiliaria.Controllers
         {
             // Limpamos do ModelState os campos não preenchidos diretamente
             ModelState.Remove("CaminhoFotoPerfil"); // Alterado do antigo FotoPerfil
-            ModelState.Remove("IdentityUserId");
+            ModelState.Remove("ApplicationUserId");
             ModelState.Remove("ImoveisAngariados");
 
             if (ModelState.IsValid)
@@ -81,7 +81,7 @@ namespace RPImobiliaria.Controllers
                     return View(consultor);
                 }
 
-                var novoUser = new IdentityUser
+                var novoUser = new ApplicationUser
                 {
                     UserName = consultor.Email,
                     Email = consultor.Email,
@@ -93,7 +93,7 @@ namespace RPImobiliaria.Controllers
                 if (resultadoIdentity.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(novoUser, "Consultor");
-                    consultor.IdentityUserId = novoUser.Id;
+                    consultor.ApplicationUserId = novoUser.Id;
 
                     // LÓGICA NOVA: GUARDAR A FOTO NUMA PASTA FÍSICA
                     if (fotoUpload != null && fotoUpload.Length > 0)
@@ -161,7 +161,7 @@ namespace RPImobiliaria.Controllers
         // POST: Consultors/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telemovel,LicencaAMI,IdentityUserId")] Consultor consultor, IFormFile? fotoUpload)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telemovel,LicencaAMI,ApplicationUserId")] Consultor consultor, IFormFile? fotoUpload)
         {
             if (id != consultor.Id)
             {
@@ -169,7 +169,7 @@ namespace RPImobiliaria.Controllers
             }
 
             ModelState.Remove("CaminhoFotoPerfil"); // Alterado do antigo
-            ModelState.Remove("IdentityUserId");
+            ModelState.Remove("ApplicationUserId");
 
             if (ModelState.IsValid)
             {
@@ -217,9 +217,9 @@ namespace RPImobiliaria.Controllers
                         consultor.CaminhoFotoPerfil = consultorExistente.CaminhoFotoPerfil;
                     }
 
-                    if (string.IsNullOrEmpty(consultor.IdentityUserId))
+                    if (string.IsNullOrEmpty(consultor.ApplicationUserId))
                     {
-                        consultor.IdentityUserId = consultorExistente.IdentityUserId;
+                        consultor.ApplicationUserId = consultorExistente.ApplicationUserId;
                     }
 
                     _context.Update(consultor);
@@ -268,9 +268,9 @@ namespace RPImobiliaria.Controllers
             if (consultor != null)
             {
                 // 1. Apaga a conta de acesso no Identity
-                if (!string.IsNullOrEmpty(consultor.IdentityUserId))
+                if (!string.IsNullOrEmpty(consultor.ApplicationUserId))
                 {
-                    var user = await _userManager.FindByIdAsync(consultor.IdentityUserId);
+                    var user = await _userManager.FindByIdAsync(consultor.ApplicationUserId);
                     if (user != null)
                     {
                         await _userManager.DeleteAsync(user);

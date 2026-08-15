@@ -14,14 +14,14 @@ namespace RPImobiliaria.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment; // NOVA VARIÁVEL PARA AS PASTAS
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             ApplicationDbContext context,
             IWebHostEnvironment hostEnvironment) // Injetado no construtor
         {
@@ -63,15 +63,15 @@ namespace RPImobiliaria.Areas.Identity.Pages.Account.Manage
             public bool IsCliente { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             Username = userName;
 
             Input = new InputModel();
 
-            var consultor = await _context.Consultores.FirstOrDefaultAsync(c => c.IdentityUserId == user.Id);
-            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.IdentityUserId == user.Id);
+            var consultor = await _context.Consultores.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
 
             if (consultor != null)
             {
@@ -115,8 +115,8 @@ namespace RPImobiliaria.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var consultor = await _context.Consultores.FirstOrDefaultAsync(c => c.IdentityUserId == user.Id);
-            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.IdentityUserId == user.Id);
+            var consultor = await _context.Consultores.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
 
             string caminhoNovaFoto = null;
 

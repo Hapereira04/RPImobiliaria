@@ -19,10 +19,10 @@ namespace RPImobiliaria.Controllers
     public class ImovelsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        public ImovelsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment hostEnvironment)
+        public ImovelsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
             _userManager = userManager;
@@ -122,7 +122,7 @@ namespace RPImobiliaria.Controllers
             if (!User.IsInRole("Admin"))
             {
                 var userId = _userManager.GetUserId(User);
-                query = query.Where(i => i.Consultor != null && i.Consultor.IdentityUserId == userId);
+                query = query.Where(i => i.Consultor != null && i.Consultor.ApplicationUserId == userId);
             }
 
             return View(await query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id).ToListAsync());
@@ -205,7 +205,7 @@ namespace RPImobiliaria.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(User);
-                var consultorLogado = await _context.Consultores.FirstOrDefaultAsync(c => c.IdentityUserId == user.Id);
+                var consultorLogado = await _context.Consultores.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
                 if (consultorLogado != null) imovel.ConsultorId = consultorLogado.Id;
 
                 _context.Add(imovel);
