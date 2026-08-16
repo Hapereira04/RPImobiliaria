@@ -497,3 +497,68 @@ html, body {
     font-size: .82rem;
     color: var(--bs-secondary-color);
 }
+
+/* ====================================================\
+   PÁGINA DE CONFIGURAÇÃO - MODOS CLARO E ESCURO
+   ==================================================== */
+
+/* Ícone */
+.config-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+/* Cartões de Localização */
+.config-card {
+    background-color: var(--bs-card-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 1rem;
+    /* Corta qualquer animação herdada */
+    transition: none !important;
+    transform: none !important;
+}
+
+    .config-card:hover {
+        border-color: var(--bs-primary-border-subtle);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15) !important;
+        transform: none !important; /* Garante que não sobe */
+    }
+
+/* Botões dos Catálogos */
+.btn-config-catalog {
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    color: var(--bs-body-color);
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    /* Corta a transição base do Bootstrap e qualquer movimento */
+    transition: none !important;
+    transform: none !important;
+}
+
+    .btn-config-catalog:hover {
+        background-color: var(--bs-secondary-bg);
+        border-color: var(--bs-primary);
+        color: var(--bs-primary);
+        transform: none !important; /* Garante que não desliza para o lado */
+    }
+
+/* Regras específicas para Modo Escuro */
+[data-bs-theme="dark"] .config-card {
+    background-color: #1e1f22;
+    border-color: #333438;
+}
+
+[data-bs-theme="dark"] .btn-config-catalog {
+    background-color: #1e1f22;
+    border-color: #333438;
+    color: #e3e5e8;
+}
+
+    [data-bs-theme="dark"] .btn-config-catalog:hover {
+        background-color: #2b2d31;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
