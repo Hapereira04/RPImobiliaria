@@ -1,3 +1,92 @@
 @model RPImobiliaria.Models.Distrito
-@{ ViewData["Title"] = Model.Nome; }
-<div class="container py-4"><a asp-action="Index" class="btn btn-link px-0 mb-3"><i class="bi bi-arrow-left"></i> Distritos</a><div class="card border-0 shadow-sm"><div class="card-body p-4"><div class="d-flex justify-content-between gap-3"><div><p class="text-uppercase text-body-secondary small fw-bold">Distrito</p><h1 class="h3 fw-bold">@Model.Nome</h1></div><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary align-self-start">Editar</a></div><hr /><h2 class="h5 fw-bold">Concelhos (@Model.Concelhos.Count)</h2>@if (Model.Concelhos.Any()) { <ul class="list-group list-group-flush">@foreach (var concelho in Model.Concelhos.OrderBy(c => c.Nome)) { <li class="list-group-item d-flex justify-content-between px-0"><span>@concelho.Nome</span><span class="text-body-secondary small">@concelho.Freguesias.Count freguesia@(concelho.Freguesias.Count == 1 ? "" : "s")</span></li> }</ul> } else { <p class="text-body-secondary mb-0">Ainda não existem concelhos associados.</p> }</div></div></div>
+
+@{
+    ViewData["Title"] = "Detalhes do Distrito";
+    var concelhos = Model?.Concelhos ?? new List<RPImobiliaria.Models.Concelho>();
+    var totalFreguesias = concelhos.Sum(c => c.Freguesias?.Count ?? 0);
+}
+
+<div class="container mt-4 mb-5 d-flex justify-content-center">
+    <div class="col-md-9 col-lg-8">
+
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold mb-1 text-body-emphasis">
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i> @ViewData["Title"]
+            </h2>
+            <p class="text-body-secondary mb-0">Informações do distrito e concelhos associados.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 border-top border-5 border-primary mb-4">
+            <div class="card-body p-4 p-md-5">
+
+                <div class="bg-white p-4 rounded border border-secondary-subtle mb-4">
+                    <div class="mb-3 border-bottom border-secondary-subtle pb-3">
+                        <h6 class="text-dark fw-bold text-uppercase small mb-1">Identificador (ID)</h6>
+                        <p class="fs-5 fw-mono text-primary mb-0">#@Model?.Id</p>
+                    </div>
+
+                    <div>
+                        <h6 class="text-dark fw-bold text-uppercase small mb-1">Nome do Distrito</h6>
+                        <p class="fs-4 fw-bold text-dark mb-0">@Model?.Nome</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded border border-secondary-subtle">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 pb-2 border-bottom border-secondary-subtle gap-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-building text-primary me-2"></i> Concelhos e Freguesias
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-info text-dark px-3 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-building me-1"></i> @concelhos.Count @(concelhos.Count == 1 ? "Concelho" : "Concelhos")
+                            </span>
+                            <span class="badge bg-primary text-white px-3 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-houses me-1"></i> @totalFreguesias @(totalFreguesias == 1 ? "Freguesia" : "Freguesias")
+                            </span>
+                        </div>
+                    </div>
+
+                    @if (!concelhos.Any())
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-3 mb-2 d-block opacity-50 text-dark"></i>
+                            <span class="text-dark fw-medium d-block">Nenhum concelho associado a este distrito até ao momento.</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                            @foreach (var concelho in concelhos)
+                            {
+                                var nFreguesias = concelho.Freguesias?.Count ?? 0;
+                                <div class="col">
+                                    <div class="p-3 bg-light rounded border border-secondary-subtle h-100">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold text-dark fs-6">
+                                                <i class="bi bi-geo text-secondary me-1"></i> @concelho.Nome
+                                            </span>
+                                            <span class="badge bg-dark text-white small">
+                                                @nFreguesias Freg.
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Voltar à Lista
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary fw-bold px-4 shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Editar Distrito
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

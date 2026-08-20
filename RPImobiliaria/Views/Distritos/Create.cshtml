@@ -1,4 +1,49 @@
 @model RPImobiliaria.Models.Distrito
-@{ ViewData["Title"] = "Novo distrito"; }
-<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-6"><a asp-action="Index" class="btn btn-link px-0 mb-3"><i class="bi bi-arrow-left"></i> Voltar</a><div class="card border-0 shadow-sm"><div class="card-body p-4"><h1 class="h3 fw-bold">Novo distrito</h1><p class="text-body-secondary">Adicione um distrito para organizar concelhos e freguesias.</p><form asp-action="Create"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="form-floating mb-4"><input asp-for="Nome" class="form-control" placeholder="Nome" autofocus /><label asp-for="Nome">Nome do distrito</label><span asp-validation-for="Nome" class="text-danger small"></span></div><button class="btn btn-primary" type="submit">Guardar distrito</button></form></div></div></div></div></div>
-@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }
+
+@{
+    ViewData["Title"] = "Adicionar Distrito";
+}
+
+<div class="container mt-4 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold mb-1 text-body-emphasis">
+                <i class="bi bi-plus-circle-fill text-primary me-2"></i> @ViewData["Title"]
+            </h2>
+            <p class="text-body-secondary mb-0">Preencha os dados abaixo para registar um novo distrito.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 border-top border-5 border-primary">
+            <div class="card-body p-4 p-md-5">
+
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Nome" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="Nome do Distrito (Ex: Aveiro, Porto, Lisboa)" autofocus />
+                        <label asp-for="Nome" class="text-dark fw-bold">Nome do Distrito <span class="text-danger">*</span></label>
+                        <span asp-validation-for="Nome" class="text-danger small fw-bold"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Registo
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

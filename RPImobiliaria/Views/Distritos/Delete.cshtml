@@ -1,3 +1,97 @@
 @model RPImobiliaria.Models.Distrito
-@{ ViewData["Title"] = "Apagar distrito"; }
-<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-6"><div class="card border-danger shadow-sm"><div class="card-body p-4"><i class="bi bi-exclamation-triangle text-danger fs-2"></i><h1 class="h4 fw-bold mt-2">Apagar “@Model.Nome”?</h1><p class="text-body-secondary">Esta ação só é possível se o distrito não tiver concelhos associados. Atualmente tem <strong>@Model.Concelhos.Count</strong>.</p><form asp-action="Delete"><input asp-for="Id" type="hidden" /><a asp-action="Index" class="btn btn-light border">Cancelar</a><button type="submit" class="btn btn-danger">Apagar distrito</button></form></div></div></div></div></div>
+
+@{
+    ViewData["Title"] = "Eliminar Distrito";
+    int totalConcelhos = ViewBag.TotalConcelhos ?? (Model?.Concelhos?.Count ?? 0);
+    int totalFreguesias = ViewBag.TotalFreguesias ?? (Model?.Concelhos?.Sum(c => c.Freguesias?.Count ?? 0) ?? 0);
+}
+
+<div class="container mt-4 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="mb-4 text-center">
+            <h2 class="fw-bold mb-1 text-body-emphasis">
+                <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> @ViewData["Title"]
+            </h2>
+            <p class="text-body-secondary mb-0">Esta ação requer confirmação manual absoluta.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 border-top border-5 border-danger">
+            <div class="card-body p-4 p-md-5 text-center">
+
+                <h4 class="fw-bold text-danger mb-3">Tem a certeza que deseja apagar?</h4>
+
+                @if (totalConcelhos > 0)
+                {
+                    <div class="alert alert-warning border-warning-subtle shadow-sm d-flex align-items-center text-start gap-3 mb-4">
+                        <i class="bi bi-exclamation-diamond-fill fs-2 text-warning flex-shrink-0"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Aviso de Impacto Crítico!</h6>
+                            <span>Este distrito contém <strong>@totalConcelhos</strong> concelho(s) e <strong>@totalFreguesias</strong> freguesia(s) associada(s). Para poder apagar este distrito, deve primeiro eliminar ou reatribuir estes concelhos!</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success border-success-subtle shadow-sm d-flex align-items-center text-start gap-3 mb-4">
+                        <i class="bi bi-shield-check fs-2 text-success flex-shrink-0"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Eliminação Segura</h6>
+                            <span>Nenhum concelho está atualmente associado a este distrito.</span>
+                        </div>
+                    </div>
+                }
+
+                <div class="bg-white p-3 rounded border border-secondary-subtle text-start mb-4">
+                    <span class="badge bg-danger mb-2">ID: #@Model?.Id</span>
+                    <h5 class="fw-bold mb-0 text-dark">@Model?.Nome</h5>
+                </div>
+
+                @if (totalConcelhos > 0)
+                {
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Voltar à Lista
+                        </a>
+                        <button type="button" class="btn btn-danger fw-bold px-4 shadow disabled" disabled>
+                            <i class="bi bi-trash3-fill me-1"></i> Bloqueado (Possui Concelhos)
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="form-check text-start mb-4 bg-white p-3 rounded border border-danger-subtle">
+                            <input class="form-check-input ms-0 me-2 border-danger" type="checkbox" id="chkConfirmar">
+                            <label class="form-check-label small text-danger fw-bold" for="chkConfirmar">
+                                Estou ciente do impacto e confirmo que desejo eliminar permanentemente o distrito "@Model?.Nome".
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" id="btnEliminar" class="btn btn-danger fw-bold px-4 shadow" disabled>
+                                <i class="bi bi-trash3-fill me-1"></i> Sim, Eliminar Permanentemente
+                            </button>
+                        </div>
+                    </form>
+                }
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@if (totalConcelhos == 0)
+{
+    <script>
+        document.getElementById('chkConfirmar').addEventListener('change', function() {
+            document.getElementById('btnEliminar').disabled = !this.checked;
+        });
+    </script>
+}
