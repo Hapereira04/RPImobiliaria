@@ -1,54 +1,147 @@
 ﻿@model RPImobiliaria.Models.Cliente
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Cliente - " + Model.Nome;
 }
 
-<h1>Edit</h1>
-
-<h4>Cliente</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telemovel" class="control-label"></label>
-                <input asp-for="Telemovel" class="form-control" />
-                <span asp-validation-for="Telemovel" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NIF" class="control-label"></label>
-                <input asp-for="NIF" class="form-control" />
-                <span asp-validation-for="NIF" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ApplicationUserId" class="control-label"></label>
-                <input asp-for="ApplicationUserId" class="form-control" />
-                <span asp-validation-for="ApplicationUserId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container mt-4 mb-5">
+    <div class="mb-4 text-center text-lg-start">
+        <h2 class="fw-bold mb-1 text-body-emphasis">
+            <i class="bi bi-pencil-square text-primary me-2"></i> Editar Cliente
+        </h2>
+        <p class="text-body-secondary mb-0">Atualize os dados de identificação e os requisitos de qualificação do cliente.</p>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm mb-4"></div>
+
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ApplicationUserId" />
+        <input type="hidden" asp-for="CaminhoFotoPerfil" />
+
+        @if (Model.Ficha != null)
+        {
+            <input type="hidden" asp-for="Ficha.Id" />
+            <input type="hidden" asp-for="Ficha.ClienteId" />
+            <input type="hidden" asp-for="Ficha.UltimaAtualizacao" />
+            <input type="hidden" asp-for="Ficha.PreenchidoPeloCliente" />
+        }
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 border-top border-5 border-primary h-100 bg-white">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-card-heading text-primary me-2"></i> Dados de Identificação
+                        </h5>
+                        <hr class="my-2 border-secondary-subtle">
+                    </div>
+                    <div class="card-body px-4 pb-4">
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Nome" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="Nome Completo" autofocus />
+                            <label asp-for="Nome" class="fw-bold text-dark">Nome Completo <span class="text-danger">*</span></label>
+                            <span asp-validation-for="Nome" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Email" type="email" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="E-mail" />
+                            <label asp-for="Email" class="fw-bold text-dark">Endereço de E-mail</label>
+                            <span asp-validation-for="Email" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Telemovel" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="Telemóvel" />
+                            <label asp-for="Telemovel" class="fw-bold text-dark">Contacto Telefónico</label>
+                            <span asp-validation-for="Telemovel" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="form-floating mb-2">
+                            <input asp-for="NIF" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="NIF" />
+                            <label asp-for="NIF" class="fw-bold text-dark">NIF (Contribuinte)</label>
+                            <span asp-validation-for="NIF" class="text-danger small fw-bold"></span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 border-top border-5 border-info h-100 bg-white">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-sliders text-info me-2"></i> Ficha de Qualificação
+                        </h5>
+                        <hr class="my-2 border-secondary-subtle">
+                    </div>
+                    <div class="card-body px-4 pb-4">
+
+                        <label class="fw-bold text-dark small text-uppercase mb-2 d-block">Tipo de Perfil de Cliente</label>
+                        <div class="row g-2 mb-4">
+                            <div class="col-sm-6">
+                                <div class="p-2 border border-secondary-subtle rounded bg-white d-flex align-items-center h-100 shadow-sm">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilComprador" id="chkComprador" />
+                                    <label class="form-check-label fw-bold text-success small" for="chkComprador">Procura Comprar</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border border-secondary-subtle rounded bg-white d-flex align-items-center h-100 shadow-sm">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilVendedor" id="chkVendedor" />
+                                    <label class="form-check-label fw-bold text-danger small" for="chkVendedor">Quer Vender</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border border-secondary-subtle rounded bg-white d-flex align-items-center h-100 shadow-sm">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilArrendatario" id="chkArrendatario" />
+                                    <label class="form-check-label fw-bold text-dark small" for="chkArrendatario">Procura Arrendar</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 border border-secondary-subtle rounded bg-white d-flex align-items-center h-100 shadow-sm">
+                                    <input class="form-check-input ms-1 me-2 border-secondary" type="checkbox" asp-for="Ficha.PerfilInvestidor" id="chkInvestidor" />
+                                    <label class="form-check-label fw-bold text-dark small" for="chkInvestidor">Investidor</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.OrcamentoMaximo" type="number" step="0.01" class="form-control border-info shadow-sm bg-white text-dark" placeholder="Orçamento" />
+                            <label asp-for="Ficha.OrcamentoMaximo" class="fw-bold text-dark">Orçamento Máximo (€)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.ZonasPreferencia" class="form-control border-info shadow-sm bg-white text-dark" placeholder="Zonas" />
+                            <label asp-for="Ficha.ZonasPreferencia" class="fw-bold text-dark">Zonas de Preferência (Ex: Ovar, Aveiro)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Ficha.TipologiasProcuradas" class="form-control border-info shadow-sm bg-white text-dark" placeholder="Tipologias" />
+                            <label asp-for="Ficha.TipologiasProcuradas" class="fw-bold text-dark">Tipologias Procuradas (Ex: T2, T3)</label>
+                        </div>
+
+                        <div class="form-floating mb-2">
+                            <textarea asp-for="Ficha.NotasRequisitos" class="form-control border-info shadow-sm bg-white text-dark" placeholder="Notas" style="height: 90px;"></textarea>
+                            <label asp-for="Ficha.NotasRequisitos" class="fw-bold text-dark">Notas de Qualificação / Requisitos Extra</label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
+                <i class="bi bi-save-fill me-1"></i> Guardar Alterações
+            </button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

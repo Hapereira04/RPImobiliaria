@@ -5,10 +5,10 @@
 }
 
 <div class="container mt-4 mb-5">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 border-bottom pb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 border-bottom pb-3 border-secondary-subtle">
         <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-person-bounding-box text-primary me-2"></i> Perfil do Cliente</h2>
-            <p class="text-body-secondary mb-0">Gestão de relacionamento, preferências e imóveis associados.</p>
+            <h2 class="fw-bold mb-1 text-body-emphasis"><i class="bi bi-person-bounding-box text-primary me-2"></i> Perfil do Cliente</h2>
+            <p class="mb-0 text-body-secondary">Gestão de relacionamento, preferências e imóveis associados.</p>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
@@ -22,11 +22,10 @@
 
     <div class="row g-4">
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4 text-center">
+            <div class="card shadow-sm border-0 mb-4 text-center bg-white">
                 <div class="card-body p-4">
                     <div class="mb-3 position-relative d-inline-block">
 
-                        <!-- NOVA LÓGICA DE IMAGEM DO CLIENTE -->
                         @if (!string.IsNullOrEmpty(Model.CaminhoFotoPerfil))
                         {
                             <img src="@Model.CaminhoFotoPerfil" class="rounded-circle border shadow" style="width: 110px; height: 110px; object-fit: cover;" />
@@ -40,31 +39,31 @@
 
                     </div>
 
-                    <h4 class="fw-bold mb-1 text-body-emphasis">@Model.Nome</h4>
+                    <h4 class="fw-bold mb-1 text-dark">@Model.Nome</h4>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-3">Cliente Ativo</span>
 
-                    <hr class="text-muted opacity-25">
+                    <hr class="opacity-25" style="border-color: #adb5bd;">
 
                     <div class="text-start space-y-3">
                         <div class="mb-2">
-                            <small class="text-muted fw-bold d-block text-uppercase small">E-mail</small>
-                            <span class="text-body-emphasis">@(string.IsNullOrEmpty(Model.Email) ? "Não registado" : Model.Email)</span>
+                            <small class="fw-bold d-block text-uppercase small" style="color: #6c757d;">E-mail</small>
+                            <span class="text-dark fw-bold">@(string.IsNullOrEmpty(Model.Email) ? "Não registado" : Model.Email)</span>
                         </div>
                         <div class="mb-2">
-                            <small class="text-muted fw-bold d-block text-uppercase small">Telemóvel</small>
-                            <span class="text-body-emphasis">@(string.IsNullOrEmpty(Model.Telemovel) ? "Não registado" : Model.Telemovel)</span>
+                            <small class="fw-bold d-block text-uppercase small" style="color: #6c757d;">Telemóvel</small>
+                            <span class="text-dark fw-bold">@(string.IsNullOrEmpty(Model.Telemovel) ? "Não registado" : Model.Telemovel)</span>
                         </div>
                         <div class="mb-3">
-                            <small class="text-muted fw-bold d-block text-uppercase small">NIF</small>
-                            <span class="text-body-emphasis">@(string.IsNullOrEmpty(Model.NIF) ? "Não registado" : Model.NIF)</span>
+                            <small class="fw-bold d-block text-uppercase small" style="color: #6c757d;">NIF</small>
+                            <span class="text-dark fw-bold">@(string.IsNullOrEmpty(Model.NIF) ? "Não registado" : Model.NIF)</span>
                         </div>
                     </div>
 
-                    <hr class="text-muted opacity-25">
+                    <hr class="opacity-25" style="border-color: #adb5bd;">
 
-                    <div class="text-start bg-light p-3 rounded border">
+                    <div class="text-start p-3 rounded border border-secondary-subtle" style="background-color: #f8f9fa;">
                         <div class="mb-2">
-                            <small class="text-muted d-block small">Conta Online (Identity)</small>
+                            <small class="d-block small fw-bold mb-1" style="color: #495057;">Conta Online (Identity)</small>
                             @if (!string.IsNullOrEmpty(Model.ApplicationUserId))
                             {
                                 <span class="badge bg-success shadow-sm"><i class="bi bi-shield-check me-1"></i> Vinculada</span>
@@ -75,7 +74,7 @@
                             }
                         </div>
                         <div>
-                            <small class="text-muted d-block small">Origem dos Dados</small>
+                            <small class="d-block small fw-bold mb-1 mt-3" style="color: #495057;">Origem dos Dados</small>
                             @if (Model.Ficha?.PreenchidoPeloCliente == true)
                             {
                                 <span class="text-success small fw-bold"><i class="bi bi-laptop me-1"></i> Submetido pelo Cliente</span>
@@ -92,27 +91,25 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 bg-white">
                 <div class="card-header bg-white pt-3 px-4 border-0">
                     <ul class="nav nav-tabs card-header-tabs border-bottom-0" id="crmTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold px-3 border-0" id="ficha-tab" data-bs-toggle="tab" data-bs-target="#ficha" type="button" role="tab"><i class="bi bi-file-earmark-person me-1"></i> Ficha Técnica</button>
+                            <button class="nav-link active fw-bold px-3 border-0 text-dark" id="ficha-tab" data-bs-toggle="tab" data-bs-target="#ficha" type="button" role="tab"><i class="bi bi-file-earmark-person me-1"></i> Ficha Técnica</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold px-3 border-0" id="propriedades-tab" data-bs-toggle="tab" data-bs-target="#propriedades" type="button" role="tab"><i class="bi bi-building me-1"></i> Imóveis Angariados (@Model.ImoveisPropriedade.Count)</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold px-3 border-0" id="favoritos-tab" data-bs-toggle="tab" data-bs-target="#favoritos" type="button" role="tab"><i class="bi bi-heart-fill text-danger me-1"></i> Favoritos (@Model.Favoritos.Count)</button>
+                            <button class="nav-link fw-bold px-3 border-0 text-dark" id="propriedades-tab" data-bs-toggle="tab" data-bs-target="#propriedades" type="button" role="tab"><i class="bi bi-building me-1"></i> Imóveis Angariados (@Model.ImoveisPropriedade.Count)</button>
                         </li>
                     </ul>
                 </div>
-                <div class="card-body p-4 bg-body-tertiary rounded-bottom">
+
+                <div class="card-body p-4 rounded-bottom border-top border-secondary-subtle" style="background-color: #f8f9fa;">
                     <div class="tab-content" id="crmTabsContent">
 
                         <div class="tab-pane fade show active" id="ficha" role="tabpanel">
                             @if (Model.Ficha == null)
                             {
-                                <div class="text-center py-5 text-muted">
+                                <div class="text-center py-5" style="color: #6c757d;">
                                     <i class="bi bi-journal-x fs-1 mb-2 d-block"></i>
                                     Este cliente ainda não tem uma Ficha de Qualificação ativa.
                                 </div>
@@ -141,20 +138,20 @@
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-sm-6">
-                                        <div class="p-3 bg-white border rounded shadow-sm">
-                                            <small class="text-muted fw-bold d-block text-uppercase small mb-1">Orçamento Limite</small>
+                                        <div class="p-3 bg-white border border-secondary-subtle rounded shadow-sm">
+                                            <small class="fw-bold d-block text-uppercase small mb-1" style="color: #6c757d;">Orçamento Limite</small>
                                             <span class="fs-4 fw-bold text-primary">@(Model.Ficha.OrcamentoMaximo.HasValue ? Model.Ficha.OrcamentoMaximo.Value.ToString("C") : "Não Definido")</span>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <div class="p-3 bg-white border rounded shadow-sm">
-                                            <small class="text-muted fw-bold d-block text-uppercase small mb-1">Tipologias Procuradas</small>
+                                        <div class="p-3 bg-white border border-secondary-subtle rounded shadow-sm">
+                                            <small class="fw-bold d-block text-uppercase small mb-1" style="color: #6c757d;">Tipologias Procuradas</small>
                                             <span class="fs-4 fw-bold text-dark">@(string.IsNullOrEmpty(Model.Ficha.TipologiasProcuradas) ? "Qualquer" : Model.Ficha.TipologiasProcuradas)</span>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="p-3 bg-white border rounded shadow-sm">
-                                            <small class="text-muted fw-bold d-block text-uppercase small mb-1">Zonas de Preferência</small>
+                                        <div class="p-3 bg-white border border-secondary-subtle rounded shadow-sm">
+                                            <small class="fw-bold d-block text-uppercase small mb-1" style="color: #6c757d;">Zonas de Preferência</small>
                                             <span class="fs-5 fw-medium text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @(string.IsNullOrEmpty(Model.Ficha.ZonasPreferencia) ? "Sem restrições geográficas" : Model.Ficha.ZonasPreferencia)</span>
                                         </div>
                                     </div>
@@ -162,13 +159,13 @@
 
                                 <h5 class="fw-bold text-dark mb-2">Notas de Acompanhamento</h5>
                                 <div class="p-3 bg-white rounded border border-start border-primary border-4 shadow-sm mb-4">
-                                    <p class="mb-0 text-body-emphasis style-italic text-break">
+                                    <p class="mb-0 text-dark fst-italic text-break">
                                         @(string.IsNullOrEmpty(Model.Ficha.NotasRequisitos) ? "Sem notas ou requisitos extra averbados até ao momento." : Model.Ficha.NotasRequisitos)
                                     </p>
                                 </div>
 
                                 <div class="text-end">
-                                    <small class="text-muted"><i class="bi bi-clock-history me-1"></i> CRM atualizado a: @Model.Ficha.UltimaAtualizacao.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <small class="fw-bold" style="color: #6c757d;"><i class="bi bi-clock-history me-1"></i> CRM atualizado a: @Model.Ficha.UltimaAtualizacao.ToString("dd/MM/yyyy HH:mm")</small>
                                 </div>
                             }
                         </div>
@@ -176,7 +173,7 @@
                         <div class="tab-pane fade" id="propriedades" role="tabpanel">
                             @if (!Model.ImoveisPropriedade.Any())
                             {
-                                <div class="text-center py-5 text-muted">
+                                <div class="text-center py-5" style="color: #6c757d;">
                                     <i class="bi bi-houses fs-1 mb-2 d-block"></i>
                                     Este cliente não consta como proprietário de nenhum imóvel angariado.
                                 </div>
@@ -187,13 +184,13 @@
                                     @foreach (var prop in Model.ImoveisPropriedade)
                                     {
                                         <div class="col-md-6">
-                                            <div class="card h-100 border-0 shadow-sm overflow-hidden bg-white">
+                                            <div class="card h-100 border-0 shadow-sm overflow-hidden bg-white border border-secondary-subtle">
                                                 <div class="card-body p-3 d-flex align-items-center gap-3">
                                                     <div class="bg-success-subtle text-success rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
                                                         <i class="bi bi-building-check fs-3"></i>
                                                     </div>
                                                     <div class="overflow-hidden flex-grow-1">
-                                                        <h6 class="fw-bold text-body-emphasis text-truncate mb-1">@prop.Imovel?.Titulo</h6>
+                                                        <h6 class="fw-bold text-dark text-truncate mb-1">@prop.Imovel?.Titulo</h6>
                                                         <span class="text-success fw-bold">@prop.Imovel?.Preco.ToString("C")</span>
                                                     </div>
                                                 </div>
@@ -203,41 +200,6 @@
                                 </div>
                             }
                         </div>
-
-                        <div class="tab-pane fade" id="favoritos" role="tabpanel">
-                            @if (!Model.Favoritos.Any())
-                            {
-                                <div class="text-center py-5 text-muted">
-                                    <i class="bi bi-heartbreak-fill text-muted fs-1 mb-2 d-block"></i>
-                                    Este cliente ainda não guardou nenhum imóvel nos favoritos.
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="row g-3">
-                                    @foreach (var fav in Model.Favoritos)
-                                    {
-                                        <div class="col-md-6">
-                                            <div class="card h-100 border-0 shadow-sm overflow-hidden bg-white">
-                                                <div class="card-body p-3 d-flex align-items-center gap-3">
-                                                    <div class="bg-primary-subtle text-primary rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
-                                                        <i class="bi bi-house-heart fs-3"></i>
-                                                    </div>
-                                                    <div class="overflow-hidden flex-grow-1">
-                                                        <h6 class="fw-bold text-body-emphasis text-truncate mb-1">@fav.Imovel?.Titulo</h6>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="text-primary fw-bold">@fav.Imovel?.Preco.ToString("C")</span>
-                                                            <small class="text-muted small" style="font-size: 11px;"><i class="bi bi-calendar-check me-1"></i>@fav.DataAdicionado.ToString("dd/MM/yy")</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -247,13 +209,18 @@
 
 @section Scripts {
     <style>
-        .nav-tabs .nav-link.active {
-            background-color: var(--bs-tertiary-bg) !important;
-            border-bottom-color: transparent !important;
+        .nav-tabs .nav-link {
+            color: #495057 !important;
         }
 
-        .nav-tabs .nav-link:hover {
-            color: var(--bs-primary);
-        }
+            .nav-tabs .nav-link.active {
+                background-color: #f8f9fa !important;
+                border-bottom-color: transparent !important;
+                color: #0d6efd !important;
+            }
+
+            .nav-tabs .nav-link:hover {
+                color: #0d6efd !important;
+            }
     </style>
 }

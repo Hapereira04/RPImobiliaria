@@ -1,51 +1,76 @@
 ﻿@model RPImobiliaria.Models.Cliente
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar Cliente - " + Model.Nome;
+    var temImoveis = Model.ImoveisPropriedade != null && Model.ImoveisPropriedade.Any();
 }
 
-<h1>Delete</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telemovel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telemovel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NIF)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NIF)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ApplicationUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ApplicationUserId)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+            <div class="mb-4 text-center">
+                <h2 class="fw-bold mb-1 text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Eliminar Registo de Cliente
+                </h2>
+                <p class="text-body-secondary mb-0">Tem a certeza de que pretende eliminar este cliente da base de dados?</p>
+            </div>
+
+            <div class="card shadow-sm border-0 border-top border-5 border-danger bg-body-tertiary">
+                <div class="card-body p-4 p-md-5">
+
+                    @if (temImoveis)
+                    {
+                        <div class="alert alert-warning border-warning-subtle shadow-sm mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <strong>Atenção:</strong> Este cliente consta como proprietário de <strong>@Model.ImoveisPropriedade.Count imóvel(eis)</strong>.
+                            Verifique a gestão dos imóveis associados antes de prosseguir com a remoção do registo.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger border-danger-subtle shadow-sm mb-4" role="alert">
+                            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                            Esta ação é irreversível e removerá permanentemente a ficha de CRM e os dados de contacto do cliente.
+                        </div>
+                    }
+
+                    <div class="p-3 rounded border border-secondary-subtle bg-white mb-4">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <small class="fw-bold text-uppercase d-block small mb-1" style="color: #6c757d;">Nome Completo</small>
+                                <span class="fw-bold text-dark fs-5">@Model.Nome</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="fw-bold text-uppercase d-block small mb-1" style="color: #6c757d;">Endereço de E-mail</small>
+                                <span class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.Email) ? "Não registado" : Model.Email)</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="fw-bold text-uppercase d-block small mb-1" style="color: #6c757d;">Contacto Telefónico</small>
+                                <span class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.Telemovel) ? "Não registado" : Model.Telemovel)</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="fw-bold text-uppercase d-block small mb-1" style="color: #6c757d;">NIF</small>
+                                <span class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.NIF) ? "Não registado" : Model.NIF)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary fw-bold px-4 shadow-sm">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
+                                <i class="bi bi-trash-fill me-1"></i> Confirmar Eliminação
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>

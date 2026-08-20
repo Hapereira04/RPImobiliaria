@@ -21,11 +21,26 @@ namespace RPImobiliaria.Controllers
         }
 
         // GET: Clientes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            // Select que puxa os clientes e a respetiva Ficha para sabermos os perfis
-            var clientes = await _context.Clientes.Include(c => c.Ficha).ToListAsync();
-            return View(clientes);
+            ViewData["CurrentFilter"] = searchString;
+
+            // Vai buscar os clientes com as respetivas Fichas
+            var clientes = from c in _context.Clientes.Include(c => c.Ficha)
+                           select c;
+
+            // Se escrevermos algo na pesquisa...
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                clientes = clientes.Where(s =>
+                    (s.Nome != null && s.Nome.Contains(searchString)) ||
+                    (s.Email != null && s.Email.Contains(searchString)) ||
+                    (s.NIF != null && s.NIF.Contains(searchString)) ||
+                    (s.Telemovel != null && s.Telemovel.Contains(searchString))
+                );
+            }
+
+            return View(await clientes.ToListAsync());
         }
 
         // GET: Clientes/Details/5
@@ -105,50 +120,77 @@ namespace RPImobiliaria.Controllers
             return View(cliente);
         }
 
-        // POST: Clientes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telemovel,NIF,ApplicationUserId,Ficha")] Cliente cliente)
+        public async Task<IActionResult> Edit(int id, Cliente cliente)
         {
-            if (id != cliente.Id) return NotFound();
+            if (id != cliente.Id)
+            {
+                return NotFound();
+            }
+
+            // Ignorar validações de listas relacionadas que não vêm no formulário
+            ModelState.Remove("ImoveisPropriedade");
+            ModelState.Remove("Favoritos");
+            ModelState.Remove("ConsultorResponsavel");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Buscamos a ficha antiga ou criamos uma se não existir para evitar erros de tracking
-                    var fichaExistente = await _context.FichasClientes.FirstOrDefaultAsync(f => f.ClienteId == id);
+                    // 1. Ir buscar o cliente atual e a sua Ficha à base de dados
+                    var clienteAtual = await _context.Clientes
+                        .Include(c => c.Ficha)
+                        .FirstOrDefaultAsync(c => c.Id == id);
 
-                    if (cliente.Ficha != null)
+                    if (clienteAtual == null)
                     {
-                        if (fichaExistente != null)
-                        {
-                            // Atualiza os campos da ficha existente
-                            _context.Entry(fichaExistente).CurrentValues.SetValues(cliente.Ficha);
-                            fichaExistente.UltimaAtualizacao = DateTime.Now;
-                        }
-                        else
-                        {
-                            // Se o cliente não tinha ficha (antigo), cria uma nova agora
-                            cliente.Ficha.ClienteId = id;
-                            cliente.Ficha.UltimaAtualizacao = DateTime.Now;
-                            _context.Add(cliente.Ficha);
-                        }
+                        return NotFound();
                     }
 
-                    _context.Update(cliente);
-                    // Ignora a propriedade de navegação direta para não duplicar o tracking
-                    _context.Entry(cliente).Reference(c => c.Ficha).IsModified = false;
+                    // 2. Atualizar apenas os dados do Cliente
+                    clienteAtual.Nome = cliente.Nome;
+                    clienteAtual.Email = cliente.Email;
+                    clienteAtual.Telemovel = cliente.Telemovel;
+                    clienteAtual.NIF = cliente.NIF;
 
+                    // 3. Atualizar os dados da Ficha (se existir)
+                    if (clienteAtual.Ficha != null && cliente.Ficha != null)
+                    {
+                        clienteAtual.Ficha.PerfilComprador = cliente.Ficha.PerfilComprador;
+                        clienteAtual.Ficha.PerfilVendedor = cliente.Ficha.PerfilVendedor;
+                        clienteAtual.Ficha.PerfilArrendatario = cliente.Ficha.PerfilArrendatario;
+                        clienteAtual.Ficha.PerfilInvestidor = cliente.Ficha.PerfilInvestidor;
+
+                        clienteAtual.Ficha.OrcamentoMaximo = cliente.Ficha.OrcamentoMaximo;
+                        clienteAtual.Ficha.ZonasPreferencia = cliente.Ficha.ZonasPreferencia;
+                        clienteAtual.Ficha.TipologiasProcuradas = cliente.Ficha.TipologiasProcuradas;
+                        clienteAtual.Ficha.NotasRequisitos = cliente.Ficha.NotasRequisitos;
+
+                        // Atualizamos a data para o momento exato em que foi editado
+                        clienteAtual.Ficha.UltimaAtualizacao = DateTime.Now;
+                    }
+
+                    // 4. Guardar as alterações. O EF Core sabe perfeitamente o que mudou!
                     await _context.SaveChangesAsync();
+
+                    TempData["MensagemSucesso"] = "Dados do cliente atualizados com sucesso!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClienteExists(cliente.Id)) return NotFound();
-                    else throw;
+                    if (!ClienteExists(cliente.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
+            TempData["MensagemErro"] = "Verifique os erros no formulário antes de submeter.";
             return View(cliente);
         }
 
