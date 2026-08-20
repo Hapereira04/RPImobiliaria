@@ -11,8 +11,8 @@ using RPImobiliaria.Data;
 namespace RPImobiliaria.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260815183644_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260820105259_AtualizacaoViews")]
+    partial class AtualizacaoViews
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

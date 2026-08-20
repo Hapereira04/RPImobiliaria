@@ -22,9 +22,34 @@ namespace RPImobiliaria.Controllers
         }
 
         // GET: TipoNegocios
-        public async Task<IActionResult> Index()
+        // ATUALIZADO: Recebe parâmetros para pesquisa e ordenação
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await _context.TiposNegocio.ToListAsync());
+            // Configura os ViewData para a View manter o estado dos botões
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+
+            var tipos = from t in _context.TiposNegocio
+                        select t;
+
+            // Filtro de Pesquisa
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                tipos = tipos.Where(s => s.Nome.Contains(searchString));
+            }
+
+            // Ordenação
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    tipos = tipos.OrderByDescending(s => s.Nome);
+                    break;
+                default: // Crescente por defeito
+                    tipos = tipos.OrderBy(s => s.Nome);
+                    break;
+            }
+
+            return View(await tipos.ToListAsync());
         }
 
         // GET: TipoNegocios/Details/5
@@ -37,6 +62,7 @@ namespace RPImobiliaria.Controllers
 
             var tipoNegocio = await _context.TiposNegocio
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (tipoNegocio == null)
             {
                 return NotFound();
@@ -52,8 +78,6 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: TipoNegocios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome")] TipoNegocio tipoNegocio)
@@ -84,8 +108,6 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: TipoNegocios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome")] TipoNegocio tipoNegocio)
@@ -126,18 +148,18 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
-            // Usamos o Include para carregar a lista de Imóveis associados
-            var tipoNegocio = await _context.TiposNegocio // Confirme se não é outra grafia no DbContext
-            .Include(m => m.Imoveis)
-            .FirstOrDefaultAsync(m => m.Id == id);
+            // Carrega a lista de Imóveis associados
+            var tipoNegocio = await _context.TiposNegocio
+                .Include(m => m.Imoveis)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (tipoNegocio == null)
             {
                 return NotFound();
             }
 
-            // Contamos os imóveis dentro da coleção
-            ViewBag.TotalImoveis = tipoNegocio.Imoveis.Count;
+            // Conta os imóveis dentro da coleção para a View saber se deve bloquear
+            ViewBag.TotalImoveis = tipoNegocio.Imoveis?.Count ?? 0;
 
             return View(tipoNegocio);
         }
@@ -147,13 +169,24 @@ namespace RPImobiliaria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tipoNegocio = await _context.TiposNegocio.FindAsync(id);
+            // ATUALIZADO: Segurança do lado do servidor para impedir apagar com imóveis associados
+            var tipoNegocio = await _context.TiposNegocio
+                .Include(t => t.Imoveis)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (tipoNegocio != null)
             {
+                // Se alguém tentar forçar a submissão, o servidor bloqueia aqui:
+                if (tipoNegocio.Imoveis != null && tipoNegocio.Imoveis.Count > 0)
+                {
+                    TempData["Erro"] = "Segurança ativada: Não é possível eliminar este Tipo de Negócio porque está associado a imóveis.";
+                    return RedirectToAction(nameof(Delete), new { id = id });
+                }
+
                 _context.TiposNegocio.Remove(tipoNegocio);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

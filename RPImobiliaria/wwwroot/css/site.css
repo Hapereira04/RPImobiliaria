@@ -533,7 +533,8 @@ html, body {
     padding: 0.6rem 1rem;
     border-radius: 0.5rem;
     font-weight: 500;
-    /* Corta a transição base do Bootstrap e qualquer movimento */
+    /* Sombra leve estática para o Modo Claro */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: none !important;
     transform: none !important;
 }
@@ -542,7 +543,31 @@ html, body {
         background-color: var(--bs-secondary-bg);
         border-color: var(--bs-primary);
         color: var(--bs-primary);
-        transform: none !important; /* Garante que não desliza para o lado */
+        /* Sombra um pouco mais forte ao passar o rato no Modo Claro */
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+        transform: none !important;
+    }
+
+/* Regras específicas para Modo Escuro */
+[data-bs-theme="dark"] .config-card {
+    background-color: #1e1f22;
+    border-color: #333438;
+}
+
+[data-bs-theme="dark"] .btn-config-catalog {
+    background-color: #1e1f22;
+    border-color: #333438;
+    color: #e3e5e8;
+    /* Removemos as sombras no Modo Escuro para manter o aspeto "flat" */
+    box-shadow: none !important;
+}
+
+    [data-bs-theme="dark"] .btn-config-catalog:hover {
+        background-color: #2b2d31;
+        border-color: #0d6efd;
+        color: #ffffff;
+        /* Garante que continua sem sombra no hover do Modo Escuro */
+        box-shadow: none !important;
     }
 
 /* Regras específicas para Modo Escuro */
@@ -561,4 +586,52 @@ html, body {
         background-color: #2b2d31;
         border-color: #0d6efd;
         color: #ffffff;
+    }
+
+/* ====================================================
+   MODO ESCURO NATIVO (SEM !IMPORTANT)
+   ==================================================== */
+
+/* Redefinição das variáveis de tema do Bootstrap */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #18191c;
+    --bs-body-color: #f2f3f5;
+    --bs-tertiary-bg: #2b2d31;
+    --bs-secondary-bg: #1e1f22;
+    --bs-border-color: #383a40;
+}
+
+    /* Cartões (Cards) */
+    [data-bs-theme="dark"] .card {
+        --bs-card-bg: #1e1f22;
+        --bs-card-border-color: #383a40;
+        --bs-card-color: #f2f3f5;
+    }
+
+    /* Tabela da página Index */
+    [data-bs-theme="dark"] .table {
+        --bs-table-color: #f2f3f5;
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #383a40;
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+        --bs-table-hover-color: #ffffff;
+    }
+
+    /* Alertas da página Delete */
+    [data-bs-theme="dark"] .alert-success {
+        --bs-alert-color: #75b798;
+        --bs-alert-bg: #0f291e;
+        --bs-alert-border-color: #198754;
+    }
+
+    [data-bs-theme="dark"] .alert-danger {
+        --bs-alert-color: #ea868f;
+        --bs-alert-bg: #2c0b0e;
+        --bs-alert-border-color: #dc3545;
+    }
+
+    [data-bs-theme="dark"] .alert-warning {
+        --bs-alert-color: #ffda6a;
+        --bs-alert-bg: #332701;
+        --bs-alert-border-color: #ffc107;
     }
