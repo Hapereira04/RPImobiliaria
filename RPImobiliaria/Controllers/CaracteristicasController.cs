@@ -22,10 +22,32 @@ namespace RPImobiliaria.Controllers
         }
 
         // GET: Caracteristicas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            var applicationDbContext = _context.CaracteristicasCatalogo.Include(c => c.GrupoCaracteristica);
-            return View(await applicationDbContext.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+
+            var query = _context.CaracteristicasCatalogo.Include(c => c.GrupoCaracteristica).AsQueryable();
+
+            // 1. CORREÇÃO DA PESQUISA: Ignorar Maiúsculas/Minúsculas usando ToLower()
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                var termo = searchString.ToLower();
+                query = query.Where(c => c.Nome.ToLower().Contains(termo));
+            }
+
+            // Lógica de Ordenação
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.Nome);
+                    break;
+                default:
+                    query = query.OrderBy(c => c.Nome);
+                    break;
+            }
+
+            return View(await query.ToListAsync());
         }
 
         // GET: Caracteristicas/Details/5
@@ -55,17 +77,27 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: Caracteristicas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,GrupoCaracteristicaId")] Caracteristica caracteristica)
         {
+            ModelState.Remove("GrupoCaracteristica");
+            ModelState.Remove("ImoveisCaracteristicas");
+
             if (ModelState.IsValid)
             {
-                _context.Add(caracteristica);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(caracteristica);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    // 2. CORREÇÃO CREATE: Se a BD bloquear, mostramos o erro exato no ecrã!
+                    var erroReal = ex.InnerException?.Message ?? ex.Message;
+                    ModelState.AddModelError("", $"Erro ao gravar na Base de Dados. Verifique se precisa de associar o Grupo de Característica. (Detalhe: {erroReal})");
+                }
             }
             ViewData["GrupoCaracteristicaId"] = new SelectList(_context.GruposCaracteristicas, "Id", "Nome", caracteristica.GrupoCaracteristicaId);
             return View(caracteristica);
@@ -89,8 +121,6 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: Caracteristicas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,GrupoCaracteristicaId")] Caracteristica caracteristica)
@@ -100,12 +130,16 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove("GrupoCaracteristica");
+            ModelState.Remove("ImoveisCaracteristicas");
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(caracteristica);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +152,12 @@ namespace RPImobiliaria.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    // 3. CORREÇÃO EDIT: Se a BD bloquear, mostramos o erro exato no ecrã!
+                    var erroReal = ex.InnerException?.Message ?? ex.Message;
+                    ModelState.AddModelError("", $"Erro ao atualizar na Base de Dados. (Detalhe: {erroReal})");
+                }
             }
             ViewData["GrupoCaracteristicaId"] = new SelectList(_context.GruposCaracteristicas, "Id", "Nome", caracteristica.GrupoCaracteristicaId);
             return View(caracteristica);
@@ -132,8 +171,6 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
-            // 1. Usamos o nome correto do DbSet: CaracteristicasCatalogo
-            // 2. Incluímos a tabela de ligação: ImoveisCaracteristicas
             var caracteristica = await _context.CaracteristicasCatalogo
                 .Include(m => m.ImoveisCaracteristicas)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -143,7 +180,6 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
-            // 3. Contamos os registos na tabela de ligação para saber o impacto!
             ViewBag.TotalImoveis = caracteristica.ImoveisCaracteristicas?.Count ?? 0;
 
             return View(caracteristica);
