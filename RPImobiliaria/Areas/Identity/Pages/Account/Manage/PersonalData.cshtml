@@ -5,36 +5,42 @@
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+<div class="card shadow-sm border-0 border-top border-5 border-danger bg-white text-dark">
+    <div class="card-body p-4 p-md-5">
 
-<div class="row">
-    <div class="col-md-8 col-lg-8">
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center mb-3 text-primary">
-                    <i class="bi bi-shield-lock-fill fs-2 me-3"></i>
-                    <h5 class="card-title mb-0 fw-bold">A sua privacidade é importante</h5>
-                </div>
-                <p class="card-text text-muted">
-                    A sua conta contém dados pessoais que nos forneceu. Esta página permite-lhe descarregar ou apagar esses dados, em conformidade com o Regulamento Geral sobre a Proteção de Dados (RGPD).
-                </p>
-                <p class="card-text text-muted mb-4">
-                    <strong>Aviso:</strong> Apagar a sua conta é uma ação permanente e não pode ser revertida.
-                </p>
+        <h4 class="fw-bold text-dark mb-2">
+            <i class="bi bi-file-earmark-person-fill text-danger me-2"></i> @ViewData["Title"]
+        </h4>
+        <p class="text-secondary small mb-4">A sua conta contém dados pessoais fornecidos por si. Esta página permite descarregar ou eliminar permanentemente esses dados (Regulamento RGPD).</p>
 
-                <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
-                    <form id="download-data" asp-page="DownloadPersonalData" method="post">
-                        <button class="btn btn-outline-primary fw-bold px-4 shadow-sm w-100" type="submit">
-                            <i class="bi bi-cloud-download me-2"></i> Descarregar os meus dados
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded border border-secondary-subtle h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-download text-primary me-1"></i> Descarregar Dados</h6>
+                        <p class="small text-secondary mb-3">Obtenha um ficheiro em formato JSON com todas as informações guardadas sobre a sua conta.</p>
+                    </div>
+                    <form id="download-data" asp-page="./DownloadPersonalData" method="post">
+                        <button class="btn btn-outline-primary fw-bold w-100" type="submit">
+                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Descarregar
                         </button>
                     </form>
+                </div>
+            </div>
 
-                    <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger fw-bold px-4 shadow-sm">
-                        <i class="bi bi-trash3 me-2"></i> Apagar a minha conta
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded border border-danger-subtle h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-trash3-fill me-1"></i> Eliminar Conta</h6>
+                        <p class="small text-secondary mb-3">A eliminação da conta apaga permanentemente todos os seus dados e não pode ser revertida.</p>
+                    </div>
+                    <a id="delete" asp-page="./DeletePersonalData" class="btn btn-danger fw-bold w-100 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Apagar Conta
                     </a>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

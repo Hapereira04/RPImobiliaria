@@ -18,18 +18,25 @@
         // 2. Se não for Consultor, procurar se é um Cliente
         var cliente = DbContext.Clientes.FirstOrDefault(c => c.ApplicationUserId == userId);
 
-        if (consultor != null)
+        if (consultor != null && !string.IsNullOrEmpty(consultor.Nome))
         {
             nomeApresentacao = consultor.Nome.Split(' ')[0]; // Primeiro nome
         }
-        else if (cliente != null)
+        else if (cliente != null && !string.IsNullOrEmpty(cliente.Nome))
         {
             nomeApresentacao = cliente.Nome.Split(' ')[0];
         }
         else
         {
-            // Se for Administrador
-            nomeApresentacao = "Administrador";
+            // Se for Administrador ou se não tiver nome definido, extrai a parte antes do @
+            if (!string.IsNullOrEmpty(emailUser) && emailUser.Contains("@"))
+            {
+                nomeApresentacao = emailUser.Split('@')[0];
+            }
+            else
+            {
+                nomeApresentacao = "Utilizador";
+            }
         }
     }
 }
@@ -50,10 +57,17 @@
                 </li>
 
                 <li>
-                    <a class="dropdown-item py-2 fw-medium" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir a sua conta">
+                    <a class="dropdown-item py-2 fw-medium" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir o seu perfil">
                         <i class="bi bi-person-gear text-primary me-2"></i> Configurações de Conta
                     </a>
                 </li>
+
+                <li>
+                    <a class="dropdown-item py-2 fw-medium" asp-area="Identity" asp-page="/Account/Manage/ChangePassword" title="Alterar a sua palavra-passe">
+                        <i class="bi bi-key-fill text-warning me-2"></i> Alterar Palavra-passe
+                    </a>
+                </li>
+
                 <li><hr class="dropdown-divider"></li>
 
                 <li>
