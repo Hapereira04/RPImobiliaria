@@ -20,11 +20,32 @@ namespace RPImobiliaria.Controllers
         {
             _context = context;
         }
-
-        // GET: GrupoCaracteristicas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await _context.GruposCaracteristicas.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+
+            var query = _context.GruposCaracteristicas
+                .Include(g => g.Caracteristicas)
+                .AsQueryable();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                var termo = searchString.ToLower();
+                query = query.Where(g => g.Nome.ToLower().Contains(termo));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(g => g.Nome);
+                    break;
+                default:
+                    query = query.OrderBy(g => g.Nome);
+                    break;
+            }
+
+            return View(await query.ToListAsync());
         }
 
         // GET: GrupoCaracteristicas/Details/5
@@ -35,8 +56,11 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
+            // .Include(g => g.Caracteristicas) força o Entity Framework a carregar todas as características associadas!
             var grupoCaracteristica = await _context.GruposCaracteristicas
+                .Include(g => g.Caracteristicas)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (grupoCaracteristica == null)
             {
                 return NotFound();
@@ -118,7 +142,7 @@ namespace RPImobiliaria.Controllers
             return View(grupoCaracteristica);
         }
 
-        // GET: GruposCaracteristicas/Delete/5
+        // GET: GrupoCaracteristicas/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -127,7 +151,7 @@ namespace RPImobiliaria.Controllers
             }
 
             var grupoCaracteristica = await _context.GruposCaracteristicas
-                .Include(m => m.Caracteristicas) // Traz as características que pertencem a este grupo
+                .Include(g => g.Caracteristicas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (grupoCaracteristica == null)
@@ -135,7 +159,7 @@ namespace RPImobiliaria.Controllers
                 return NotFound();
             }
 
-            // Passa para a vista quantas características estão dentro deste grupo
+            // Contamos quantas características pertencem a este grupo
             ViewBag.TotalCaracteristicas = grupoCaracteristica.Caracteristicas?.Count ?? 0;
 
             return View(grupoCaracteristica);
