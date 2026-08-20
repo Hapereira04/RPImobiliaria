@@ -1,14 +1,16 @@
 ﻿@model RPImobiliaria.Models.StatusImovel
 
 @{
-    ViewData["Title"] = "Adicionar Status de Disponibilidade";
+    ViewData["Title"] = "Adicionar Estado do Imóvel";
 }
 
 <div class="container mt-4 mb-5 d-flex justify-content-center">
     <div class="col-md-8 col-lg-6">
 
         <div class="mb-4 text-center">
-            <h2 class="fw-bold mb-1"><i class="bi bi-plus-circle-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+            <h2 class="fw-bold mb-1 text-body-emphasis">
+                <i class="bi bi-plus-circle-fill text-primary me-2"></i> @ViewData["Title"]
+            </h2>
             <p class="text-body-secondary mb-0">Preencha os dados abaixo para criar um novo registo.</p>
         </div>
 
@@ -19,8 +21,8 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
 
                     <div class="form-floating mb-4">
-                        <input asp-for="Nome" class="form-control form-control-lg border-primary shadow-sm" placeholder="Nome do status" autofocus />
-                        <label asp-for="Nome" class="text-body-secondary fw-bold">Nome do Status <span class="text-danger">*</span></label>
+                        <input asp-for="Nome" class="form-control form-control-lg border-primary shadow-sm bg-white text-dark" placeholder="Nome da opção" autofocus />
+                        <label asp-for="Nome" class="text-dark fw-bold">Nome do Estado do Imóvel <span class="text-danger">*</span></label>
                         <span asp-validation-for="Nome" class="text-danger small fw-bold"></span>
                     </div>
 
