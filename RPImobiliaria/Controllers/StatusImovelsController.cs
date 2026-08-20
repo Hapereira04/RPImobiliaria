@@ -21,10 +21,33 @@ namespace RPImobiliaria.Controllers
             _context = context;
         }
 
-        // GET: StatusImovels
-        public async Task<IActionResult> Index()
+        // GET: Disponibilidades
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await _context.StatusImoveis.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+
+            var query = _context.StatusImoveis.AsQueryable();
+
+            // Lógica de pesquisa ignorando maiúsculas/minúsculas
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                var termo = searchString.ToLower();
+                query = query.Where(c => c.Nome.ToLower().Contains(termo));
+            }
+
+            // Lógica de Ordenação
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.Nome);
+                    break;
+                default:
+                    query = query.OrderBy(c => c.Nome);
+                    break;
+            }
+
+            return View(await query.ToListAsync());
         }
 
         // GET: StatusImovels/Details/5
