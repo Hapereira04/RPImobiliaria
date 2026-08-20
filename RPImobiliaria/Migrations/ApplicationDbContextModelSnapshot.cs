@@ -322,16 +322,8 @@ namespace RPImobiliaria.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CaminhoFotoPerfil")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ContentTypeFoto")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LicencaAMI")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nome")

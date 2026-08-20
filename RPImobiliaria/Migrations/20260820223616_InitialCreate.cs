@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RPImobiliaria.Migrations
 {
     /// <inheritdoc />
-    public partial class AtualizacaoViews : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -101,11 +101,8 @@ namespace RPImobiliaria.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Nome = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
                     Telemovel = table.Column<string>(type: "TEXT", nullable: true),
-                    LicencaAMI = table.Column<string>(type: "TEXT", nullable: true),
-                    CaminhoFotoPerfil = table.Column<string>(type: "TEXT", nullable: true),
-                    ContentTypeFoto = table.Column<string>(type: "TEXT", nullable: true),
                     ApplicationUserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

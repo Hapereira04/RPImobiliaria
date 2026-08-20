@@ -6,7 +6,6 @@
 
 @{
     string nomeApresentacao = "";
-    string caminhoFoto = ""; // <-- VARIÁVEL ALTERADA
     string emailUser = User.Identity?.Name;
 
     if (SignInManager.IsSignedIn(User))
@@ -21,26 +20,15 @@
 
         if (consultor != null)
         {
-            nomeApresentacao = consultor.Nome.Split(' ')[0]; // Apanha só o primeiro nome!
-
-            // NOVA LÓGICA: Lê a foto diretamente da pasta
-            if (!string.IsNullOrEmpty(consultor.CaminhoFotoPerfil))
-            {
-                caminhoFoto = consultor.CaminhoFotoPerfil;
-            }
+            nomeApresentacao = consultor.Nome.Split(' ')[0]; // Primeiro nome
         }
         else if (cliente != null)
         {
             nomeApresentacao = cliente.Nome.Split(' ')[0];
-
-            if (!string.IsNullOrEmpty(cliente.CaminhoFotoPerfil))
-            {
-                caminhoFoto = cliente.CaminhoFotoPerfil;
-            }
         }
         else
         {
-            // Se for o nosso Super Admin (que não está nas tabelas)
+            // Se for Administrador
             nomeApresentacao = "Administrador";
         }
     }
@@ -51,16 +39,7 @@
     {
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-3 rounded-pill" style="background: rgba(255,255,255,0.05);" href="#" id="userProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-
-                @if (!string.IsNullOrEmpty(caminhoFoto))
-                {
-                    <img src="@caminhoFoto" alt="Foto Perfil" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px; border: 2px solid var(--primary-color);" />
-                }
-                else
-                {
-                    <i class="bi bi-person-circle fs-3 text-secondary"></i>
-                }
-
+                <i class="bi bi-person-circle fs-3 text-secondary"></i>
                 <span class="fw-bold d-none d-md-inline text-white">Olá, @nomeApresentacao</span>
             </a>
 

@@ -6,14 +6,14 @@ namespace RPImobiliaria.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "O Nome é obrigatório.")]
         public string Nome { get; set; }
-        public string? Email { get; set; }
+
+        [Required(ErrorMessage = "O Email é obrigatório para o acesso ao sistema.")]
+        [EmailAddress(ErrorMessage = "Formato de email inválido.")]
+        public string Email { get; set; }
+
         public string? Telemovel { get; set; }
-        public string? LicencaAMI { get; set; }
-        [Display(Name = "Foto de Perfil")]
-        public string? CaminhoFotoPerfil { get; set; }
-        public string? ContentTypeFoto { get; set; }
 
         // Ligação à tabela de Logins do ASP.NET
         public string? ApplicationUserId { get; set; }

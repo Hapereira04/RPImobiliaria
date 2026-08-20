@@ -11,8 +11,8 @@ using RPImobiliaria.Data;
 namespace RPImobiliaria.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260820105259_AtualizacaoViews")]
-    partial class AtualizacaoViews
+    [Migration("20260820223616_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -325,16 +325,8 @@ namespace RPImobiliaria.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CaminhoFotoPerfil")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ContentTypeFoto")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LicencaAMI")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nome")

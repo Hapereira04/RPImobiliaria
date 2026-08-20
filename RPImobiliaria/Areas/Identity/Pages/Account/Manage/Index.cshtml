@@ -5,82 +5,54 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+<h3 class="fw-bold text-body-emphasis mb-4">@ViewData["Title"]</h3>
+
+<partial name="_StatusMessage" for="StatusMessage" />
 
 @if (TempData["MensagemSucesso"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-5 border-success" role="alert">
-        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-        <strong>Sucesso!</strong> @TempData["MensagemSucesso"]
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensagemSucesso"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
 <div class="row">
     <div class="col-md-8 col-lg-6">
+        <form id="profile-form" method="post" class="card shadow-sm border-0 border-top border-5 border-primary">
+            <div class="card-body p-4 p-md-5">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm" role="alert"></div>
 
-        <form id="profile-form" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+                <div class="form-floating mb-4">
+                    <input asp-for="Username" class="form-control border-secondary-subtle bg-light text-muted" placeholder="Email" disabled />
+                    <label asp-for="Username" class="text-dark fw-bold">Endereço de Email (Login)</label>
+                </div>
 
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body p-4 text-center">
+                <div class="form-floating mb-4">
+                    <input asp-for="Input.Nome" class="form-control border-primary shadow-sm bg-white text-dark" placeholder="O seu nome" />
+                    <label asp-for="Input.Nome" class="text-dark fw-bold">Nome Completo</label>
+                    <span asp-validation-for="Input.Nome" class="text-danger small fw-bold"></span>
+                </div>
 
-                    <!-- NOVA LÓGICA: Verifica se o CaminhoFotoAtual existe -->
-                    @if (!string.IsNullOrEmpty(Model.Input.CaminhoFotoAtual))
-                    {
-                        <img src="@Model.Input.CaminhoFotoAtual" class="rounded-circle shadow-sm mb-3 object-fit-cover" style="width: 140px; height: 140px; border: 3px solid var(--primary-color);" alt="Foto Atual" />
-                    }
-                    else
-                    {
-                        <i class="bi bi-person-circle text-secondary mb-3 d-block" style="font-size: 6rem;"></i>
-                    }
+                <div class="form-floating mb-4">
+                    <input asp-for="Input.Telemovel" class="form-control border-primary shadow-sm bg-white text-dark" placeholder="O seu telemóvel" />
+                    <label asp-for="Input.Telemovel" class="text-dark fw-bold">Telemóvel</label>
+                    <span asp-validation-for="Input.Telemovel" class="text-danger small fw-bold"></span>
+                </div>
 
-                    <div class="mb-3 text-start mt-3">
-                        <label asp-for="Input.FotoUpload" class="form-label fw-bold text-muted"><i class="bi bi-camera"></i> Alterar Foto de Perfil</label>
-                        <input asp-for="Input.FotoUpload" class="form-control" type="file" accept="image/*" />
-                        <span asp-validation-for="Input.FotoUpload" class="text-danger small"></span>
+                @if (Model.Input.IsCliente)
+                {
+                    <div class="form-floating mb-4">
+                        <input asp-for="Input.NIF" class="form-control border-primary shadow-sm bg-white text-dark" placeholder="O seu NIF" />
+                        <label asp-for="Input.NIF" class="text-dark fw-bold">NIF</label>
+                        <span asp-validation-for="Input.NIF" class="text-danger small fw-bold"></span>
                     </div>
-                </div>
+                }
+
+                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary fw-bold shadow-sm">
+                    <i class="bi bi-save me-1"></i> Guardar Alterações
+                </button>
             </div>
-
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Email" disabled />
-                <label asp-for="Username" class="form-label">Email de Login</label>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Nome" class="form-control" placeholder="Nome" />
-                <label asp-for="Input.Nome" class="form-label"></label>
-                <span asp-validation-for="Input.Nome" class="text-danger small"></span>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Telemovel" class="form-control" placeholder="Telemóvel" />
-                <label asp-for="Input.Telemovel" class="form-label"></label>
-                <span asp-validation-for="Input.Telemovel" class="text-danger small"></span>
-            </div>
-
-            @if (Model.Input.IsConsultor)
-            {
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.LicencaAMI" class="form-control border-primary" placeholder="Licença AMI" />
-                    <label asp-for="Input.LicencaAMI" class="form-label fw-bold text-primary">Licença AMI</label>
-                    <span asp-validation-for="Input.LicencaAMI" class="text-danger small"></span>
-                </div>
-            }
-
-            @if (Model.Input.IsCliente)
-            {
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.NIF" class="form-control border-success" placeholder="NIF" />
-                    <label asp-for="Input.NIF" class="form-label fw-bold text-success">Número de Contribuinte (NIF)</label>
-                    <span asp-validation-for="Input.NIF" class="text-danger small"></span>
-                </div>
-            }
-
-            <button id="update-profile-button" type="submit" class="btn btn-primary btn-lg w-100 mt-3 fw-bold shadow">
-                <i class="bi bi-floppy"></i> Guardar Alterações
-            </button>
         </form>
     </div>
 </div>
