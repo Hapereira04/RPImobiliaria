@@ -1,93 +1,428 @@
 @model RPImobiliaria.Models.Imovel
 @{
     ViewData["Title"] = Model.Titulo;
-    var fotos = Model.Fotos.OrderBy(f => f.Ordem).ToList();
+    var fotos = Model.Fotos?.OrderBy(f => f.Ordem).ToList() ?? new List<RPImobiliaria.Models.FotoImovel>();
     var referencia = Model.Referencia ?? Model.Id.ToString();
     var precoM2 = Model.AreaUtil > 0 ? Model.Preco / (decimal)Model.AreaUtil : 0;
-    var localizacao = string.Join(", ", new[] { Model.Freguesia?.Nome, Model.Freguesia?.Concelho?.Nome, Model.Freguesia?.Concelho?.Distrito?.Nome }.Where(x => !string.IsNullOrWhiteSpace(x)));
-    var caracteristicas = Model.Caracteristicas.Where(c => c.Caracteristica?.GrupoCaracteristica is not null).GroupBy(c => c.Caracteristica!.GrupoCaracteristica!.Nome).OrderBy(g => g.Key);
+
+    var localizacao = string.Join(", ", new[] {
+        Model.Freguesia?.Nome,
+        Model.Freguesia?.Concelho?.Nome,
+        Model.Freguesia?.Concelho?.Distrito?.Nome
+    }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+    var caracteristicas = Model.Caracteristicas?
+            .Where(c => c.Caracteristica?.GrupoCaracteristica is not null)
+            .GroupBy(c => c.Caracteristica!.GrupoCaracteristica!.Nome)
+            .OrderBy(g => g.Key) ?? Enumerable.Empty<IGrouping<string, RPImobiliaria.Models.ImovelCaracteristica>>();
+
     var equipa = User.IsInRole("Admin") || User.IsInRole("Consultor");
 }
 
 <style>
-    .imovel-gallery { background: #0f172a; min-height: 420px; }
-    .imovel-gallery img { height: min(64vh, 650px); width: 100%; object-fit: cover; }
-    .gallery-thumb { width: 72px; height: 54px; border: 2px solid transparent; object-fit: cover; opacity: .7; cursor: pointer; }
-    .gallery-thumb.active, .gallery-thumb:hover { border-color: #fff; opacity: 1; }
-    .detail-stat { border-radius: 1rem; background: var(--bs-tertiary-bg); height: 100%; }
-    .detail-stat i { color: var(--bs-primary); font-size: 1.3rem; }
-    .contact-card { top: 1.25rem; border-radius: 1rem; overflow: hidden; }
-    .spec-row:last-child { border-bottom: 0 !important; }
+    /* CAIXA DO CARROSSEL FIXA (Acaba com o ecrã a tremer/ajustar) */
+    .imovel-carousel-wrapper {
+        height: 70vh; /* Ocupa 70% da altura do ecrã */
+        min-height: 500px;
+        max-height: 750px;
+        width: 100%;
+        background-color: var(--bs-body-bg); /* Fundo igual ao do site */
+    }
+
+        .imovel-carousel-wrapper .carousel-inner,
+        .imovel-carousel-wrapper .carousel-item {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
+        .imovel-carousel-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Garante que a foto nunca é cortada, criando as bordas naturais */
+            cursor: zoom-in;
+        }
+
+    /* Miniaturas na base */
+    .gallery-thumb {
+        width: 80px;
+        height: 60px;
+        border: 2px solid transparent;
+        object-fit: cover;
+        opacity: 0.6;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+        .gallery-thumb.active, .gallery-thumb:hover {
+            border-color: var(--bs-primary);
+            opacity: 1;
+        }
+
+    /* Cartões de estatísticas forçados a Branco/Preto */
+    .detail-stat {
+        border-radius: 1rem;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        height: 100%;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+
+        .detail-stat i {
+            color: var(--bs-primary);
+            font-size: 1.3rem;
+        }
+
+    .contact-card {
+        top: 1.25rem;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .spec-row:last-child {
+        border-bottom: 0 !important;
+    }
 </style>
 
+<!-- BREADCRUMB -->
 <section class="bg-body-tertiary border-bottom">
     <div class="container py-3 d-flex flex-wrap justify-content-between gap-2 align-items-center">
-        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Início</a></li><li class="breadcrumb-item"><a asp-action="Index">Imóveis</a></li><li class="breadcrumb-item active text-truncate" aria-current="page">@Model.Titulo</li></ol></nav>
-        @if (equipa) { <div class="d-flex gap-2"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square me-1"></i>Editar</a><a asp-action="Gestao" class="btn btn-sm btn-outline-secondary">Gestão</a></div> }
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none fw-bold">Início</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none fw-bold">Imóveis</a></li>
+                <li class="breadcrumb-item active text-body-emphasis text-truncate fw-medium" aria-current="page">@Model.Titulo</li>
+            </ol>
+        </nav>
+        @if (equipa)
+        {
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i>Editar</a>
+                <a asp-action="Gestao" class="btn btn-sm btn-outline-secondary fw-bold shadow-sm">Gestão</a>
+            </div>
+        }
     </div>
 </section>
 
-<section class="imovel-gallery position-relative">
-    @if (fotos.Any())
-    {
-        <div id="imovelCarousel" class="carousel slide" data-bs-ride="false">
-            <div class="carousel-inner">
-                @for (var indice = 0; indice < fotos.Count; indice++)
+<!-- GALERIA DE FOTOS LARGAS E FIXAS -->
+<section class="bg-body-tertiary pb-4">
+    <!-- container-xl para as fotos ocuparem muito mais espaço de um lado ao outro -->
+    <div class="container-xl pt-4">
+        @if (fotos.Any())
+        {
+            <div id="imovelCarousel" class="carousel slide bg-body rounded-4 shadow-sm overflow-hidden imovel-carousel-wrapper" data-bs-ride="false">
+                <div class="carousel-inner">
+                    @for (var indice = 0; indice < fotos.Count; indice++)
+                    {
+                        <div class="carousel-item @(indice == 0 ? "active" : "")" onclick="abrirFullscreen(@indice)">
+                            <img src="@fotos[indice].CaminhoImagem" alt="@Model.Titulo - fotografia @(indice + 1)" title="Clique para expandir" />
+                        </div>
+                    }
+                </div>
+                @if (fotos.Count > 1)
                 {
-                    <div class="carousel-item @(indice == 0 ? "active" : "")"><img src="@fotos[indice].CaminhoImagem" alt="@Model.Titulo - fotografia @(indice + 1)" /></div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#imovelCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#imovelCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
+                        <span class="visually-hidden">Seguinte</span>
+                    </button>
                 }
             </div>
+
             @if (fotos.Count > 1)
             {
-                <button class="carousel-control-prev" type="button" data-bs-target="#imovelCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Anterior</span></button>
-                <button class="carousel-control-next" type="button" data-bs-target="#imovelCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Seguinte</span></button>
+                <!-- Miniaturas colocadas por baixo de forma arrumada -->
+                <div class="d-flex justify-content-center gap-2 mt-3 overflow-auto pb-2 px-1">
+                    @for (var indice = 0; indice < fotos.Count; indice++)
+                    {
+                        <button type="button" class="p-0 bg-transparent border-0 flex-shrink-0" data-bs-target="#imovelCarousel" data-bs-slide-to="@indice" aria-label="Ver fotografia @(indice + 1)">
+                            <img class="gallery-thumb @(indice == 0 ? "active" : "")" src="@fotos[indice].CaminhoImagem" alt="" />
+                        </button>
+                    }
+                </div>
             }
-        </div>
-        @if (fotos.Count > 1)
-        {
-            <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex gap-2 overflow-auto mw-100 px-3">@for (var indice = 0; indice < fotos.Count; indice++) { <button type="button" class="p-0 bg-transparent border-0" data-bs-target="#imovelCarousel" data-bs-slide-to="@indice" aria-label="Ver fotografia @(indice + 1)"><img class="gallery-thumb rounded @(indice == 0 ? "active" : "")" src="@fotos[indice].CaminhoImagem" alt="" /></button> }</div>
         }
-    }
-    else
-    {
-        <div class="d-flex flex-column gap-2 align-items-center justify-content-center text-white" style="min-height: 420px;"><i class="bi bi-house display-3 opacity-50"></i><span>Fotografias disponíveis brevemente</span></div>
-    }
+        else
+        {
+            <div class="d-flex flex-column gap-2 align-items-center justify-content-center bg-body rounded-4 shadow-sm text-muted imovel-carousel-wrapper">
+                <i class="bi bi-house display-3 opacity-50"></i>
+                <span class="fw-bold">Fotografias disponíveis brevemente</span>
+            </div>
+        }
+    </div>
 </section>
 
 <main class="container py-5">
     <div class="row g-5">
+
+        <!-- CONTEÚDO PRINCIPAL (Coluna da Esquerda) -->
         <div class="col-lg-8">
-            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-                <div>
-                    <div class="d-flex gap-2 flex-wrap mb-3"><span class="badge text-bg-primary px-3 py-2">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>@if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome)) { <span class="badge text-bg-light border px-3 py-2">@Model.StatusImovel.Nome</span> }</div>
-                    <h1 class="display-6 fw-bold mb-2">@Model.Titulo</h1>
-                    <p class="text-body-secondary mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)</p>
+
+            <!-- CABEÇALHO DO IMÓVEL -->
+            <div class="bg-white p-4 rounded-4 shadow-sm border border-secondary-subtle mb-4">
+                <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            <!-- TEXTO A PRETO COM FUNDO BRANCO PARA "COMPRAR/VENDER" -->
+                            <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome))
+                            {
+                                <span class="badge bg-white text-dark border border-secondary-subtle shadow-sm px-3 py-2 fw-bold">@Model.StatusImovel.Nome</span>
+                            }
+                        </div>
+                        <h1 class="display-6 fw-bold mb-2 text-dark">@Model.Titulo</h1>
+                        <p class="mb-0 fw-bold" style="color: #6c757d;">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)
+                        </p>
+                    </div>
+                    <div class="text-lg-end">
+                        <div class="display-6 fw-bold" style="color: #198754 !important;">@Model.Preco.ToString("N0") €</div>
+                        <span class="small fw-bold" style="color: #6c757d;">Ref. @referencia</span>
+                    </div>
                 </div>
-                <div class="text-lg-end"><div class="display-6 fw-bold text-primary">@Model.Preco.ToString("N0") €</div><span class="text-body-secondary small">Ref. @referencia</span></div>
             </div>
 
+            <!-- QUADRADOS DE DESTAQUE (Brancos) -->
             <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
-                <div class="col"><div class="detail-stat p-3"><i class="bi bi-door-open d-block mb-2"></i><span class="small text-body-secondary d-block">Quartos</span><strong>T@(Model.Quartos)</strong></div></div>
-                <div class="col"><div class="detail-stat p-3"><i class="bi bi-droplet d-block mb-2"></i><span class="small text-body-secondary d-block">Casas de banho</span><strong>@Model.CasasBanho WC</strong></div></div>
-                <div class="col"><div class="detail-stat p-3"><i class="bi bi-aspect-ratio d-block mb-2"></i><span class="small text-body-secondary d-block">Área útil</span><strong>@Model.AreaUtil.ToString("N0") m²</strong></div></div>
-                <div class="col"><div class="detail-stat p-3"><i class="bi bi-cash-coin d-block mb-2"></i><span class="small text-body-secondary d-block">Preço / m²</span><strong>@(precoM2 > 0 ? precoM2.ToString("N0") + " €" : "—")</strong></div></div>
+                <div class="col">
+                    <div class="detail-stat p-3 text-center">
+                        <i class="bi bi-door-open d-block mb-2"></i>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Quartos</span>
+                        <strong class="text-dark fs-5">T@(Model.Quartos)</strong>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-stat p-3 text-center">
+                        <i class="bi bi-droplet d-block mb-2"></i>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Casas de banho</span>
+                        <strong class="text-dark fs-5">@Model.CasasBanho WC</strong>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-stat p-3 text-center">
+                        <i class="bi bi-aspect-ratio d-block mb-2"></i>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Área útil</span>
+                        <strong class="text-dark fs-5">@Model.AreaUtil.ToString("N0") m²</strong>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="detail-stat p-3 text-center">
+                        <i class="bi bi-cash-coin d-block mb-2"></i>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Preço / m²</span>
+                        <strong class="text-dark fs-5">@(precoM2 > 0 ? precoM2.ToString("N0") + " €" : "—")</strong>
+                    </div>
+                </div>
             </div>
 
-            <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Sobre este imóvel</h2><p class="lh-lg text-body-emphasis mb-0" style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Descricao) ? "Contacte-nos para conhecer todos os detalhes deste imóvel." : Model.Descricao)</p></section>
+            <!-- DESCRIÇÃO -->
+            <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+                <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Sobre este imóvel</h2>
+                <p class="lh-lg text-dark mb-0 fw-medium" style="white-space: pre-line;">
+                    @(string.IsNullOrWhiteSpace(Model.Descricao) ? "Contacte-nos para conhecer todos os detalhes deste imóvel." : Model.Descricao)
+                </p>
+            </section>
 
-            <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Detalhes</h2><div class="row g-0 border rounded overflow-hidden"><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Tipo de imóvel</span><strong>@(Model.CategoriaImovel?.Nome ?? "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Estado</span><strong>@(Model.EstadoImovel?.Nome ?? "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Área bruta</span><strong>@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("N0") + " m²" : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Estacionamento</span><strong>@(Model.Estacionamento > 0 ? Model.Estacionamento + " lugar(es)" : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Ano de construção</span><strong>@(Model.AnoConstrucao > 0 ? Model.AnoConstrucao.ToString() : "—")</strong></div><div class="col-md-6 p-3 border-bottom spec-row"><span class="text-body-secondary small d-block">Certificado energético</span><strong>@(Model.CertificadoEnergetico?.Nome ?? "—")</strong></div></div></section>
+            <!-- DETALHES TÉCNICOS -->
+            <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+                <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Detalhes</h2>
+                <div class="row g-0 border border-secondary-subtle rounded overflow-hidden">
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Tipo de imóvel</span>
+                        <strong class="text-dark">@(Model.CategoriaImovel?.Nome ?? "—")</strong>
+                    </div>
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Estado</span>
+                        <strong class="text-dark">@(Model.EstadoImovel?.Nome ?? "—")</strong>
+                    </div>
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Área bruta</span>
+                        <strong class="text-dark">@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("N0") + " m²" : "—")</strong>
+                    </div>
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Estacionamento</span>
+                        <strong class="text-dark">@(Model.Estacionamento > 0 ? Model.Estacionamento + " lugar(es)" : "—")</strong>
+                    </div>
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Ano de construção</span>
+                        <strong class="text-dark">@(Model.AnoConstrucao > 0 ? Model.AnoConstrucao.ToString() : "—")</strong>
+                    </div>
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Certificado energético</span>
+                        <strong class="text-dark">@(Model.CertificadoEnergetico?.Nome ?? "—")</strong>
+                    </div>
+                </div>
+            </section>
 
+            <!-- CARACTERÍSTICAS -->
             @if (caracteristicas.Any())
             {
-                <section class="mb-5"><h2 class="h4 fw-bold border-bottom pb-3 mb-3">Características</h2><div class="row g-3">@foreach (var grupo in caracteristicas) { <div class="col-md-6"><div class="border rounded-4 h-100 p-3"><h3 class="h6 fw-bold mb-3">@grupo.Key</h3><div class="d-flex flex-wrap gap-2">@foreach (var item in grupo) { <span class="badge text-bg-light border fw-normal"> <i class="bi bi-check2 text-success me-1"></i>@item.Caracteristica!.Nome</span> }</div></div></div> }</div></section>
+                <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+                    <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Características</h2>
+                    <div class="row g-3">
+                        @foreach (var grupo in caracteristicas)
+                        {
+                            <div class="col-md-6">
+                                <div class="border border-secondary-subtle rounded-4 h-100 p-3 bg-white">
+                                    <h3 class="h6 fw-bold mb-3 text-dark">@grupo.Key</h3>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var item in grupo)
+                                        {
+                                            <span class="badge bg-white text-dark border border-secondary-subtle fw-bold shadow-sm">
+                                                <i class="bi bi-check-circle-fill text-success me-1"></i>@item.Caracteristica!.Nome
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
             }
 
+            <!-- INFORMAÇÃO INTERNA (Visível apenas para equipa) -->
             @if (equipa)
             {
-                <section class="card border-warning-subtle bg-warning bg-opacity-10 mb-4"><div class="card-header bg-transparent border-warning-subtle fw-bold"><i class="bi bi-shield-lock me-2"></i>Informação interna</div><div class="card-body"><div class="row g-3"><div class="col-md-6"><span class="text-body-secondary small d-block">Morada exata</span><strong>@(Model.MoradaExata ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Contrato</span><strong>@(Model.NumeroContrato ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Comissão prevista</span><strong>@(Model.ValorComissao?.ToString("C0") ?? "—")</strong></div><div class="col-md-6"><span class="text-body-secondary small d-block">Notas</span><strong>@(Model.ObservacoesInternas ?? "—")</strong></div></div>@if (Model.Documentos.Any()) { <hr /><div class="d-flex flex-wrap gap-2">@foreach (var documento in Model.Documentos) { <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark"><i class="bi bi-file-earmark-arrow-down me-1"></i>@documento.NomeFicheiro</a> }</div> }</div></section>
+                <section class="card border-warning-subtle bg-white mb-4 shadow-sm border-start border-5 border-warning">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
+                        <i class="bi bi-shield-lock-fill text-warning me-2"></i>Informação Interna (Privada)
+                    </div>
+                    <div class="card-body bg-white p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <span class="small d-block fw-bold" style="color: #6c757d;">Morada exata</span>
+                                <strong class="text-dark">@(Model.MoradaExata ?? "—")</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="small d-block fw-bold" style="color: #6c757d;">Contrato</span>
+                                <strong class="text-dark">@(Model.NumeroContrato ?? "—")</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="small d-block fw-bold" style="color: #6c757d;">Comissão prevista</span>
+                                <strong class="text-success fs-5">@(Model.ValorComissao?.ToString("C0") ?? "—")</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="small d-block fw-bold" style="color: #6c757d;">Notas internas</span>
+                                <strong class="text-dark">@(Model.ObservacoesInternas ?? "—")</strong>
+                            </div>
+                        </div>
+                        @if (Model.Documentos != null && Model.Documentos.Any())
+                        {
+                            <hr class="border-secondary-subtle" />
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <span class="w-100 small fw-bold" style="color: #6c757d;">Documentos (PDF/DOC)</span>
+                                @foreach (var documento in Model.Documentos)
+                                {
+                                    <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark fw-bold shadow-sm">
+                                        <i class="bi bi-file-earmark-arrow-down-fill text-danger me-1"></i>@documento.NomeFicheiro
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </section>
             }
         </div>
 
-        <aside class="col-lg-4"><div class="card contact-card border-0 shadow-sm position-sticky"><div class="card-body p-4"><p class="text-uppercase text-primary fw-bold small mb-2">Tem interesse?</p><h2 class="h4 fw-bold mb-3">Fale connosco sobre este imóvel.</h2>@if (Model.Consultor is not null) { <div class="d-flex align-items-center gap-3 border-top border-bottom py-3 mb-4"><div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 48px;height:48px;">@Model.Consultor.Nome[..1].ToUpper()</div><div><strong class="d-block">@Model.Consultor.Nome</strong><a href="tel:@Model.Consultor.Telemovel" class="small text-decoration-none">@Model.Consultor.Telemovel</a></div></div> }<form asp-controller="Home" asp-action="EnviarContacto" method="post"><input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" /><div class="form-floating mb-2"><input name="Nome" class="form-control" placeholder="Nome" required /><label>O seu nome</label></div><div class="form-floating mb-2"><input name="Contacto" class="form-control" placeholder="Telefone ou e-mail" required /><label>Telefone ou e-mail</label></div><div class="form-floating mb-3"><textarea name="Mensagem" class="form-control" placeholder="Mensagem" style="height: 110px" required>Gostaria de receber mais informações sobre o imóvel Ref. @referencia.</textarea><label>Mensagem</label></div><button class="btn btn-primary w-100 fw-bold" type="submit">Pedir contacto <i class="bi bi-send ms-1"></i></button></form></div></div></aside>
+        <!-- FORMULÁRIO DE CONTACTO LATERAL -->
+        <aside class="col-lg-4">
+            <div class="card contact-card border border-primary-subtle shadow-lg position-sticky bg-white" style="top: 2rem;">
+                <div class="card-body p-4 bg-white">
+                    <p class="text-uppercase text-primary fw-bold small mb-2"><i class="bi bi-chat-dots-fill me-1"></i> Tem interesse?</p>
+                    <h2 class="h4 fw-bold mb-3 text-dark">Fale connosco sobre este imóvel.</h2>
+
+                    @if (Model.Consultor is not null)
+                    {
+                        <div class="d-flex align-items-center gap-3 border-top border-bottom border-secondary-subtle py-3 mb-4">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm border border-primary-subtle" style="width: 48px;height:48px; font-size: 1.2rem;">
+                                @Model.Consultor.Nome[..1].ToUpper()
+                            </div>
+                            <div>
+                                <strong class="d-block text-dark">@Model.Consultor.Nome</strong>
+                                <a href="tel:@Model.Consultor.Telemovel" class="small text-decoration-none fw-bold" style="color: #6c757d;">
+                                    <i class="bi bi-telephone-fill text-success me-1"></i> @Model.Consultor.Telemovel
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <form asp-controller="Home" asp-action="EnviarContacto" method="post">
+                        <input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" />
+
+                        <div class="form-floating mb-2">
+                            <input name="Nome" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Nome" required />
+                            <label class="text-dark fw-bold">O seu nome</label>
+                        </div>
+                        <div class="form-floating mb-2">
+                            <input name="Contacto" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Telefone ou e-mail" required />
+                            <label class="text-dark fw-bold">Telefone ou e-mail</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea name="Mensagem" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Mensagem" style="height: 110px" required>Gostaria de receber mais informações sobre o imóvel Ref. @referencia.</textarea>
+                            <label class="text-dark fw-bold">Mensagem</label>
+                        </div>
+                        <button class="btn btn-primary w-100 fw-bold shadow-sm p-3" type="submit">
+                            Pedir contacto <i class="bi bi-send-fill ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
     </div>
 </main>
+
+<!-- MODAL ECRÃ CHEIO (FULLSCREEN) -->
+<div class="modal fade" id="fotoFullscreenModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+
+            <!-- BOTÃO DE FECHAR (X) COM Z-INDEX MÁXIMO E FUNDO PROTETOR -->
+            <div class="position-absolute top-0 end-0 p-4" style="z-index: 9999;">
+                <button type="button" class="btn-close btn-close-white shadow-lg" data-bs-dismiss="modal" aria-label="Fechar" style="background-color: rgba(0,0,0,0.6); padding: 15px; border-radius: 50%; opacity: 1;"></button>
+            </div>
+
+            <div class="modal-body d-flex align-items-center justify-content-center p-0">
+                <div id="carouselFullscreen" class="carousel slide w-100 h-100" data-bs-ride="false">
+                    <div class="carousel-inner w-100 h-100 d-flex align-items-center">
+                        @for (var i = 0; i < fotos.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "") w-100 h-100">
+                                <img src="@fotos[i].CaminhoImagem" class="d-block w-100 h-100" style="object-fit: contain;" alt="Foto @(i + 1)">
+                            </div>
+                        }
+                    </div>
+                    @if (fotos.Count > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="prev" style="z-index: 1050;">
+                            <span class="carousel-control-prev-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="next" style="z-index: 1050;">
+                            <span class="carousel-control-next-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="visually-hidden">Seguinte</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // Função para abrir o modal de Ecrã Cheio exatamente na foto clicada
+        function abrirFullscreen(index) {
+            const modal = new bootstrap.Modal(document.getElementById('fotoFullscreenModal'));
+
+            // Sincroniza o carrossel do ecrã cheio para ir para a foto certa
+            const carouselFullscreen = document.getElementById('carouselFullscreen');
+            const bsCarousel = bootstrap.Carousel.getOrCreateInstance(carouselFullscreen);
+            bsCarousel.to(index);
+
+            modal.show();
+        }
+    </script>
+}

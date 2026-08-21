@@ -1,23 +1,95 @@
 @model RPImobiliaria.Models.Imovel
 
-<div class="row g-3" data-localizacao-cascata>
+<div class="row g-3" id="localizacaoCascataContainer">
+    <!-- DISTRITO -->
     <div class="col-md-4 form-floating">
-        <select class="form-select bg-body text-body-emphasis border-secondary-subtle" id="DistritoId" asp-items="ViewBag.DistritoId">
+        <select class="form-select bg-white text-dark border-secondary-subtle" id="DistritoId" name="DistritoId" asp-items="ViewBag.DistritoId">
             <option value="">Selecione o distrito</option>
         </select>
-        <label for="DistritoId">Distrito</label>
+        <label for="DistritoId" class="text-dark fw-bold">Distrito</label>
     </div>
+
+    <!-- CONCELHO -->
     <div class="col-md-4 form-floating">
-        <select class="form-select bg-body text-body-emphasis border-secondary-subtle" id="ConcelhoId" asp-items="ViewBag.ConcelhoId" disabled="@(ViewBag.DistritoId?.SelectedValue == null)">
+        <!-- Retirado o disabled automático do Razor para evitar conflitos -->
+        <select class="form-select bg-white text-dark border-secondary-subtle" id="ConcelhoId" name="ConcelhoId" asp-items="ViewBag.ConcelhoId">
             <option value="">Selecione o concelho</option>
         </select>
-        <label for="ConcelhoId">Concelho / Cidade</label>
+        <label for="ConcelhoId" class="text-dark fw-bold">Concelho / Cidade</label>
     </div>
+
+    <!-- FREGUESIA -->
     <div class="col-md-4 form-floating">
-        <select asp-for="FreguesiaId" class="form-select bg-body text-body-emphasis border-secondary-subtle" id="FreguesiaId" asp-items="ViewBag.FreguesiaId" disabled="@(ViewBag.ConcelhoId?.SelectedValue == null)">
+        <!-- Retirado o disabled automático do Razor para evitar conflitos -->
+        <select asp-for="FreguesiaId" class="form-select bg-white text-dark border-secondary-subtle" id="FreguesiaId" asp-items="ViewBag.FreguesiaId">
             <option value="">Selecione a freguesia</option>
         </select>
-        <label asp-for="FreguesiaId">Freguesia</label>
+        <label asp-for="FreguesiaId" class="text-dark fw-bold">Freguesia</label>
         <span asp-validation-for="FreguesiaId" class="text-danger small"></span>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const distritoSelect = document.getElementById("DistritoId");
+        const concelhoSelect = document.getElementById("ConcelhoId");
+        const freguesiaSelect = document.getElementById("FreguesiaId");
+
+        if (distritoSelect && concelhoSelect && freguesiaSelect) {
+
+            // 1. BLOQUEIO INICIAL INTELIGENTE (Só bloqueia se estiver vazio, feito pelo JavaScript)
+            if (!distritoSelect.value) concelhoSelect.disabled = true;
+            if (!concelhoSelect.value) freguesiaSelect.disabled = true;
+
+            // 2. Quando muda o Distrito
+            distritoSelect.addEventListener("change", async function() {
+                const distritoId = this.value;
+
+                // Limpa e bloqueia os de baixo
+                concelhoSelect.innerHTML = '<option value="">Selecione o concelho</option>';
+                freguesiaSelect.innerHTML = '<option value="">Selecione a freguesia</option>';
+                freguesiaSelect.disabled = true;
+
+                if (distritoId) {
+                    concelhoSelect.disabled = false;
+                    try {
+                        const response = await fetch(`/Imovels/ObterConcelhos?distritoId=${distritoId}`);
+                        const data = await response.json();
+                        data.forEach(c => {
+                            // Proteção infalível: Funciona quer a resposta venha como "id" ou "Id"
+                            const cId = c.id !== undefined ? c.id : c.Id;
+                            const cNome = c.nome !== undefined ? c.nome : c.Nome;
+                            concelhoSelect.add(new Option(cNome, cId));
+                        });
+                    } catch (error) { console.error("Erro ao carregar concelhos", error); }
+                } else {
+                    concelhoSelect.disabled = true;
+                }
+            });
+
+            // 3. Quando muda o Concelho
+            concelhoSelect.addEventListener("change", async function() {
+                const concelhoId = this.value;
+
+                // Limpa as Freguesias
+                freguesiaSelect.innerHTML = '<option value="">Selecione a freguesia</option>';
+
+                if (concelhoId) {
+                    freguesiaSelect.disabled = false;
+                    try {
+                        const response = await fetch(`/Imovels/ObterFreguesias?concelhoId=${concelhoId}`);
+                        const data = await response.json();
+                        data.forEach(f => {
+                            // Proteção infalível: Funciona quer a resposta venha como "id" ou "Id"
+                            const fId = f.id !== undefined ? f.id : f.Id;
+                            const fNome = f.nome !== undefined ? f.nome : f.Nome;
+                            freguesiaSelect.add(new Option(fNome, fId));
+                        });
+                    } catch (error) { console.error("Erro ao carregar freguesias", error); }
+                } else {
+                    freguesiaSelect.disabled = true;
+                }
+            });
+        }
+    });
+</script>

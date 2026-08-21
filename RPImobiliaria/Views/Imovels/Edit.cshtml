@@ -1,14 +1,16 @@
 ﻿@model RPImobiliaria.Models.Imovel
 @{
-    ViewData["Title"] = "Editar Imóvel"; var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>; var caracsAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
+    ViewData["Title"] = "Editar Imóvel - " + Model.Titulo;
+    var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
+    var caracteristicasAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
 }
 
 <style>
     .dropzone-area {
         border: 2px dashed var(--bs-primary);
         border-radius: 8px;
-        background-color: var(--bs-tertiary-bg);
-        color: var(--bs-body-color);
+        background-color: #ffffff;
+        color: #212529;
         padding: 40px 20px;
         text-align: center;
         cursor: pointer;
@@ -16,7 +18,7 @@
     }
 
         .dropzone-area:hover, .dropzone-area.dragover {
-            background-color: var(--bs-secondary-bg);
+            background-color: #f8f9fa;
             border-color: var(--bs-success);
         }
 
@@ -35,7 +37,7 @@
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         cursor: grab;
-        background: var(--bs-secondary-bg);
+        background: #f8f9fa;
         transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
@@ -69,7 +71,6 @@
             gap: 10px;
             opacity: 0;
             transition: opacity 0.2s;
-            z-index: 5;
         }
 
         .photo-thumbnail:hover .photo-actions {
@@ -92,81 +93,127 @@
 
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-pencil-square text-primary me-2"></i> @ViewData["Title"]</h2>
+        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-pencil-square text-primary me-2"></i> Editar Imóvel</h2>
         <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <form asp-action="Edit" enctype="multipart/form-data" id="formEdit">
+    <form asp-action="Edit" enctype="multipart/form-data" id="imovelForm">
+
+        <!-- CAMPOS OCULTOS CORRIGIDOS COM OS NOMES EXATOS DO SEU MODELO -->
         <input type="hidden" asp-for="Id" />
-        <input type="hidden" name="existingPhotoOrder" id="existingPhotoOrder" />
+        <input type="hidden" asp-for="DataRegisto" />
+        <input type="hidden" asp-for="ConsultorId" />
+
+        <input type="hidden" id="fotosRemovidasInput" name="FotosRemovidasIds" value="" />
 
         <div class="row">
+            <!-- COLUNA PRINCIPAL -->
             <div class="col-lg-8">
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-info-circle me-1"></i> Dados Base</div>
+
+                <!-- DADOS BASE -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-info-circle text-primary me-1"></i> Dados Base
+                    </div>
                     <div class="card-body p-4">
                         <div class="row g-3 mb-3">
-                            <div class="col-md-4 form-floating"><input asp-for="Referencia" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Ref" /><label asp-for="Referencia">Referência (Ex: REF-001)</label></div>
-                            <div class="col-md-8 form-floating"><input asp-for="Titulo" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Título" /><label asp-for="Titulo">Título do Anúncio</label></div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Referencia" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Ref" />
+                                <label asp-for="Referencia" class="text-dark fw-bold">Referência (Ex: REF-001)</label>
+                            </div>
+                            <div class="col-md-8 form-floating">
+                                <input asp-for="Titulo" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Título" />
+                                <label asp-for="Titulo" class="text-dark fw-bold">Título do Anúncio</label>
+                            </div>
                         </div>
-                        <div class="mb-3"><label class="form-label text-body-secondary fw-bold small text-uppercase">Descrição</label><textarea asp-for="Descricao" class="form-control bg-body text-body-emphasis border-secondary-subtle" rows="4"></textarea></div>
-                        <div class="mb-2"><label class="form-label text-body-secondary fw-bold small text-uppercase">Localização</label>@await Html.PartialAsync("_LocalizacaoSelector", Model)</div>
+                        <div class="mb-3">
+                            <label class="form-label text-dark fw-bold small text-uppercase">Descrição</label>
+                            <textarea asp-for="Descricao" class="form-control bg-white text-dark border-secondary-subtle" rows="4"></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-dark fw-bold small text-uppercase">Localização</label>
+                            @await Html.PartialAsync("_LocalizacaoSelector", Model)
+                        </div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-camera me-1"></i> Galeria de Fotografias (Arraste para ordenar)</div>
+                <!-- GALERIA -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-camera text-primary me-1"></i> Galeria de Fotografias
+                    </div>
                     <div class="card-body p-4">
-                        <div id="photoTrack" class="gallery-container mb-4">
-                            @if (Model.Fotos != null && Model.Fotos.Any())
-                            {
-                                @foreach (var foto in Model.Fotos.OrderBy(f => f.Ordem))
-                                {
-                                    <div class="photo-thumbnail rounded draggable-element" draggable="true" data-foto-id="@foto.Id">
-                                        <div class="photo-badge bg-primary"></div>
-                                        <img src="@foto.CaminhoImagem" alt="Foto">
-                                        <div class="photo-actions"><button type="button" class="btn btn-sm btn-light rounded-circle btn-zoom" onclick="abrirZoom('@foto.CaminhoImagem')"><i class="bi bi-search"></i></button></div>
-                                    </div>
-                                }
-                            }
-                        </div>
-                        <label class="form-label text-body-secondary fw-bold small text-uppercase">Adicionar Novas Fotos</label>
                         <input type="file" id="fotosInputReal" name="novasFotos" multiple accept="image/*" class="d-none" />
-                        <div id="dropzone" class="dropzone-area"><i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i><h5 class="mt-2 text-body-emphasis">Clique ou arraste novas fotos</h5></div>
+                        <div id="dropzone" class="dropzone-area">
+                            <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="mt-2 text-dark fw-bold">Clique ou arraste novas fotos</h5>
+                        </div>
+                        <div id="gallery" class="gallery-container"></div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-rulers me-1"></i> Áreas e Divisões</div>
+                <!-- ÁREAS E DIVISÕES -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-rulers text-primary me-1"></i> Áreas e Divisões
+                    </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
-                            <div class="col-md-3 form-floating"><input asp-for="AreaUtil" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" step="0.01" /><label asp-for="AreaUtil">Área Útil (m²)</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="AreaBruta" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" step="0.01" /><label asp-for="AreaBruta">Área Bruta (m²)</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="Quartos" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" /><label asp-for="Quartos">Quartos</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="CasasBanho" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" /><label asp-for="CasasBanho">WC</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="Estacionamento" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" /><label asp-for="Estacionamento">Garagem</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="Piso" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" /><label asp-for="Piso">Piso</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="AnoConstrucao" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" /><label asp-for="AnoConstrucao">Construção</label></div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="AreaUtil" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Útil" />
+                                <label asp-for="AreaUtil" class="text-dark fw-bold">Área Útil (m²)</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="AreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" />
+                                <label asp-for="AreaBruta" class="text-dark fw-bold">Área Bruta (m²)</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="Quartos" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Quartos" />
+                                <label asp-for="Quartos" class="text-dark fw-bold">Quartos</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="CasasBanho" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="WC" />
+                                <label asp-for="CasasBanho" class="text-dark fw-bold">WC</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Estacionamento" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Garagem" />
+                                <label asp-for="Estacionamento" class="text-dark fw-bold">Garagem</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Piso" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Piso" />
+                                <label asp-for="Piso" class="text-dark fw-bold">Andar/Piso</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="AnoConstrucao" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Ano" />
+                                <label asp-for="AnoConstrucao" class="text-dark fw-bold">Construção</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- CARACTERÍSTICAS -->
                 @if (grupos != null && grupos.Any())
                 {
-                    <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                        <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-ui-checks-grid me-1"></i> Características</div>
+                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                        <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                            <i class="bi bi-ui-checks-grid text-primary me-1"></i> Características
+                        </div>
                         <div class="card-body p-4">
                             <div class="row">
                                 @foreach (var grupo in grupos)
                                 {
                                     <div class="col-md-6 mb-4">
-                                        <h6 class="fw-bold text-body-emphasis border-bottom border-secondary-subtle pb-2 mb-3">@grupo.Nome</h6>
+                                        <h6 class="fw-bold text-dark border-bottom border-secondary-subtle pb-2 mb-3">@grupo.Nome</h6>
                                         <div class="row">
                                             @foreach (var carac in grupo.Caracteristicas)
                                             {
-                                                bool isChecked = caracsAtuais.Contains(carac.Id);
+                                                <!-- AQUI LÊ A MOCHILA DO CONTROLLER PARA MARCAR AS CAIXINHAS -->
+                                                var marcada = caracteristicasAtuais.Contains(carac.Id);
                                                 <div class="col-12 mb-2">
-                                                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id" @(isChecked ? "checked" : "")><label class="form-check-label text-body-secondary" for="carac_@carac.Id">@carac.Nome</label></div>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id" @(marcada ? "checked" : "")>
+                                                        <label class="form-check-label text-dark fw-medium" for="carac_@carac.Id">@carac.Nome</label>
+                                                    </div>
                                                 </div>
                                             }
                                         </div>
@@ -177,54 +224,70 @@
                     </div>
                 }
 
-                <div class="card shadow-sm bg-body-tertiary border-start border-5 border-warning mb-4">
-                    <div class="card-header bg-transparent fw-bold text-warning py-3"><i class="bi bi-eye-slash-fill me-1"></i> Dados Privados (Equipa)</div>
+                <!-- DADOS PRIVADOS -->
+                <div class="card shadow-sm bg-white border-start border-5 border-warning mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
+                        <i class="bi bi-eye-slash-fill text-warning me-1"></i> Dados Privados (Equipa)
+                    </div>
                     <div class="card-body p-4">
-                        <div class="form-floating mb-3"><input asp-for="MoradaExata" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Morada" /><label asp-for="MoradaExata">Morada Exata</label></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="MoradaExata" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Morada" />
+                            <label asp-for="MoradaExata" class="text-dark fw-bold">Morada Exata</label>
+                        </div>
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6 form-floating"><input asp-for="NumeroContrato" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Contrato" /><label asp-for="NumeroContrato">Nº Contrato</label></div>
-                            <div class="col-md-6 form-floating"><input asp-for="ValorComissao" class="form-control bg-body text-success fw-bold border-secondary-subtle" type="number" step="0.01" /><label asp-for="ValorComissao">Comissão Prevista (€)</label></div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="NumeroContrato" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Contrato" />
+                                <label asp-for="NumeroContrato" class="text-dark fw-bold">Nº Contrato</label>
+                            </div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" style="color: #198754 !important;" type="number" step="0.01" placeholder="Comissão" />
+                                <label asp-for="ValorComissao" class="text-dark fw-bold">Comissão Prevista (€)</label>
+                            </div>
                         </div>
-
-                        <div class="mb-3 p-3 border border-warning-subtle rounded bg-body">
-                            <label class="form-label text-warning small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf me-1"></i> Documentos Atuais</label>
-                            @if (Model.Documentos != null && Model.Documentos.Any())
-                            {
-                                <ul class="list-group list-group-flush border mb-3">
-                                    @foreach (var doc in Model.Documentos)
-                                    {
-                                        <li class="list-group-item d-flex justify-content-between align-items-center bg-body text-body-emphasis border-secondary-subtle">
-                                            <a href="@doc.CaminhoFicheiro" target="_blank" class="text-decoration-none">@doc.NomeFicheiro</a>
-                                            <div class="form-check text-danger m-0"><input class="form-check-input" type="checkbox" name="documentosRemover" value="@doc.Id"><label class="form-check-label small fw-bold">Apagar</label></div>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                            <label class="form-label text-warning small text-uppercase fw-bold mt-2"><i class="bi bi-cloud-arrow-up me-1"></i> Adicionar Novos Documentos</label>
-                            <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-body text-body-emphasis border-warning-subtle" />
+                        <div class="mb-3 p-3 border border-warning-subtle rounded bg-white">
+                            <label class="form-label text-dark small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf text-warning me-1"></i> Novos Docs Privados (Opcional)</label>
+                            <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-white text-dark border-warning-subtle" />
                         </div>
-                        <div class="form-floating"><textarea asp-for="ObservacoesInternas" class="form-control bg-body text-body-emphasis border-secondary-subtle" style="height: 80px"></textarea><label asp-for="ObservacoesInternas">Notas Internas</label></div>
+                        <div class="form-floating">
+                            <textarea asp-for="ObservacoesInternas" class="form-control bg-white text-dark border-secondary-subtle" style="height: 80px"></textarea>
+                            <label asp-for="ObservacoesInternas" class="text-dark fw-bold">Notas Internas</label>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- BARRA LATERAL -->
             <div class="col-lg-4">
                 <div class="card shadow-lg border-primary mb-4 position-sticky" style="top: 1rem;">
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
                         <div class="input-group input-group-lg mb-4">
-                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center text-success bg-body border-0" />
-                            <span class="input-group-text fw-bold bg-body border-0 text-body-emphasis">€</span>
+                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" />
+                            <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
                         </div>
-                        <div class="bg-body-tertiary rounded p-3 text-start text-body-emphasis mb-4 border border-secondary-subtle">
-                            <label asp-for="TipoNegocioId" class="form-label small fw-bold">Tipo Negócio</label><select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis border-primary" asp-items="ViewBag.TipoNegocioId"></select>
-                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold">Categoria</label><select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.CategoriaImovelId"></select>
-                            <label asp-for="EstadoImovelId" class="form-label small fw-bold">Estado</label><select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.EstadoImovelId"></select>
-                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold">Cl. Energética</label><select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.CertificadoEnergeticoId"></select>
-                            <label asp-for="StatusImovelId" class="form-label small fw-bold">Status do Anúncio</label><select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.StatusImovelId"></select>
-                            <label class="form-label small fw-bold text-success">Proprietário (Cliente)</label><select name="clienteProprietarioId" class="form-select form-select-sm bg-body text-body-emphasis border-success" asp-items="ViewBag.ListaClientes"><option value="">-- Opcional --</option></select>
+
+                        <div class="bg-white rounded p-3 text-start text-dark mb-4 border border-secondary-subtle">
+                            <label asp-for="TipoNegocioId" class="form-label small fw-bold text-dark">Tipo Negócio</label>
+                            <select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 bg-white text-dark border-primary" asp-items="ViewBag.TipoNegocioId"></select>
+
+                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold text-dark">Categoria</label>
+                            <select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CategoriaImovelId"></select>
+
+                            <label asp-for="EstadoImovelId" class="form-label small fw-bold text-dark">Estado</label>
+                            <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.EstadoImovelId"></select>
+
+                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold text-dark">Cl. Energética</label>
+                            <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CertificadoEnergeticoId"></select>
+
+                            <label asp-for="StatusImovelId" class="form-label small fw-bold text-dark">Status do Anúncio</label>
+                            <select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.StatusImovelId"></select>
+
+                            <label class="form-label small fw-bold text-dark">Proprietário (Cliente)</label>
+                            <select name="clienteProprietarioId" class="form-select form-select-sm bg-white text-dark border-success" asp-items="ViewBag.ListaClientes">
+                                <option value="">-- Opcional --</option>
+                            </select>
                         </div>
-                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Gravar Alterações</button>
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Guardar Alterações</button>
                     </div>
                 </div>
             </div>
@@ -232,28 +295,126 @@
     </form>
 </div>
 
-<div class="modal fade" id="fotoZoomModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content bg-transparent border-0"><div class="modal-body text-center position-relative p-0"><button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button><img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;"></div></div></div></div>
+<!-- MODAL ZOOM E SCRIPT DE FOTOS -->
+<div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center position-relative p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 10;"></button>
+                <img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        const photoTrack = document.getElementById('photoTrack'); let ficheirosEmMemoria = []; let fotoIdCounter = 0; const dropzone = document.getElementById('dropzone'); const inputReal = document.getElementById('fotosInputReal'); const form = document.getElementById('formEdit'); const zoomImagem = document.getElementById('zoomImagem'); const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
-        document.addEventListener("DOMContentLoaded", () => { inicializarDraggablesUnificados(); updateAllBadges(); updateSubmissionData(); });
-        function inicializarDraggablesUnificados() { const allDraggables = photoTrack.querySelectorAll('.draggable-element'); allDraggables.forEach(thumb => { thumb.removeEventListener('dragstart', handleDragStart); thumb.removeEventListener('dragover', handleDragOver); thumb.removeEventListener('dragleave', handleDragLeave); thumb.removeEventListener('drop', handleDrop); thumb.removeEventListener('dragend', handleDragEnd); thumb.addEventListener('dragstart', handleDragStart); thumb.addEventListener('dragover', handleDragOver); thumb.addEventListener('dragleave', handleDragLeave); thumb.addEventListener('drop', handleDrop); thumb.addEventListener('dragend', handleDragEnd); }); }
-        dropzone.addEventListener('click', () => inputReal.click()); dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }); dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); Array.from(e.dataTransfer.files).forEach(f => { if (f.type.startsWith("image/")) { const reader = new FileReader(); reader.readAsDataURL(f); reader.onload = (ev) => criarThumbnailNova(fotoIdCounter++, f, ev.target.result); } }); });
-        inputReal.addEventListener('change', (e) => { Array.from(e.target.files).forEach(f => { if (f.type.startsWith("image/")) { const reader = new FileReader(); reader.readAsDataURL(f); reader.onload = (ev) => criarThumbnailNova(fotoIdCounter++, f, ev.target.result); } }); inputReal.value = ''; });
-        function criarThumbnailNova(id, file, dataUrl) { ficheirosEmMemoria.push({ id: id, file: file, dataUrl: dataUrl }); const thumb = document.createElement('div'); thumb.className = 'photo-thumbnail draggable-element'; thumb.draggable = true; thumb.dataset.novoId = id; thumb.innerHTML = `<div class="photo-badge bg-primary"></div><img src="${dataUrl}"><div class="photo-actions"><button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${dataUrl}')"><i class="bi bi-search"></i></button><button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFotoNova(${id})"><i class="bi bi-trash"></i></button></div>`; photoTrack.appendChild(thumb); inicializarDraggablesUnificados(); updateAllBadges(); updateSubmissionData(); }
-        function removerFotoNova(id) { ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id); const thumb = photoTrack.querySelector(`.photo-thumbnail[data-novo-id="${id}"]`); if (thumb) thumb.remove(); updateAllBadges(); updateSubmissionData(); }
+        let ficheirosEmMemoria = [
+                    @if (Model.Fotos != null)
+            {
+                int idFalso = -1000;
+                            foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
+                {
+                    <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
+                            }
+            }
+                ];
+
+        let fotosRemovidasIds = [];
+        let fotoIdCounter = 0;
+
+        const dropzone = document.getElementById('dropzone');
+        const inputReal = document.getElementById('fotosInputReal');
+        const gallery = document.getElementById('gallery');
+        const form = document.getElementById('imovelForm');
+        const zoomImagem = document.getElementById('zoomImagem');
+        const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
+
+        dropzone.addEventListener('click', () => inputReal.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); processarFicheiros(e.dataTransfer.files); });
+        inputReal.addEventListener('change', (e) => { processarFicheiros(e.target.files); inputReal.value = ''; });
+
+        function processarFicheiros(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e) => {
+                        ficheirosEmMemoria.push({ id: fotoIdCounter++, isServer: false, file: file, dataUrl: e.target.result });
+                        desenharGaleria();
+                    };
+                }
+            });
+        }
+
+        function desenharGaleria() {
+            gallery.innerHTML = '';
+            ficheirosEmMemoria.forEach((item, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-thumbnail';
+                thumb.draggable = true;
+                thumb.dataset.id = item.id;
+                const badgeText = index === 0 ? '<i class="bi bi-star-fill text-warning"></i> Capa' : (index + 1);
+                thumb.innerHTML = `<div class="photo-badge">${badgeText}</div><img src="${item.dataUrl}"><div class="photo-actions"><button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button><button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button></div>`;
+                thumb.addEventListener('dragstart', handleDragStart);
+                thumb.addEventListener('dragover', handleDragOver);
+                thumb.addEventListener('dragleave', handleDragLeave);
+                thumb.addEventListener('drop', handleDrop);
+                thumb.addEventListener('dragend', handleDragEnd);
+                gallery.appendChild(thumb);
+            });
+
+            // Adicionar input escondido com a ordem atual das fotos para mandar para o C#
+            let orderInput = document.getElementById('existingPhotoOrder');
+            if (!orderInput) {
+                orderInput = document.createElement('input');
+                orderInput.type = 'hidden';
+                orderInput.id = 'existingPhotoOrder';
+                orderInput.name = 'existingPhotoOrder';
+                form.appendChild(orderInput);
+            }
+            orderInput.value = ficheirosEmMemoria.map(f => f.isServer ? `old_${f.idServer}` : `new_${ficheirosEmMemoria.filter(x => !x.isServer).indexOf(f)}`).join(',');
+        }
+
+        function removerFoto(id) {
+            const index = ficheirosEmMemoria.findIndex(f => f.id === id);
+            if (index > -1) {
+                const fotoRemover = ficheirosEmMemoria[index];
+                if (fotoRemover.isServer) {
+                    fotosRemovidasIds.push(fotoRemover.idServer);
+                    document.getElementById('fotosRemovidasInput').value = fotosRemovidasIds.join(',');
+                }
+                ficheirosEmMemoria.splice(index, 1);
+                desenharGaleria();
+            }
+        }
+
         function abrirZoom(srcData) { zoomImagem.src = srcData; zoomModal.show(); }
-        function updateAllBadges() { const allDraggables = photoTrack.querySelectorAll('.draggable-element'); allDraggables.forEach((thumb, index) => { const badge = thumb.querySelector('.photo-badge'); if (!badge) return; if (index === 0) { badge.innerHTML = '<i class="bi bi-star-fill text-warning"></i> Capa'; badge.className = 'photo-badge bg-primary'; } else { badge.innerHTML = (index + 1); badge.className = 'photo-badge bg-secondary'; } }); }
-        function updateSubmissionData() { const finalOrder = []; let newFileIndex = 0; const dt = new DataTransfer(); const allDraggables = photoTrack.querySelectorAll('.draggable-element'); allDraggables.forEach(thumb => { if (thumb.dataset.fotoId) { finalOrder.push('old_' + thumb.dataset.fotoId); } else if (thumb.dataset.novoId) { finalOrder.push('new_' + newFileIndex); newFileIndex++; const novoId = parseInt(thumb.dataset.novoId); const itemData = ficheirosEmMemoria.find(item => item.id === novoId); if (itemData && itemData.file) dt.items.add(itemData.file); } }); document.getElementById('existingPhotoOrder').value = finalOrder.join(','); document.getElementById('fotosInputReal').files = dt.files; }
-        let itemArrastado = null; function handleDragStart(e) { itemArrastado = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; } function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (itemArrastado !== this) this.classList.add('drag-over'); return false; } function handleDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleDrop(e) { e.stopPropagation(); e.preventDefault(); this.classList.remove('drag-over'); if (itemArrastado !== this) { const all = Array.from(photoTrack.querySelectorAll('.draggable-element')); const arrastadoIndex = all.indexOf(itemArrastado); const alvoIndex = all.indexOf(this); if (arrastadoIndex < alvoIndex) this.after(itemArrastado); else this.before(itemArrastado); updateAllBadges(); updateSubmissionData(); } return false; }
-        function handleDragEnd() { this.classList.remove('dragging'); photoTrack.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over')); }
-        form.addEventListener('submit', function() { updateSubmissionData(); });
+
+        let itemArrastado = null;
+        function handleDragStart(e) { itemArrastado = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (itemArrastado !== this) { this.classList.add('drag-over'); } return false; }
+        function handleDragLeave(e) { this.classList.remove('drag-over'); }
+        function handleDrop(e) { e.stopPropagation(); this.classList.remove('drag-over'); if (itemArrastado !== this) { const idArrastado = parseInt(itemArrastado.dataset.id); const idAlvo = parseInt(this.dataset.id); const indexArrastado = ficheirosEmMemoria.findIndex(f => f.id === idArrastado); const indexAlvo = ficheirosEmMemoria.findIndex(f => f.id === idAlvo); const ficheiroMover = ficheirosEmMemoria.splice(indexArrastado, 1)[0]; ficheirosEmMemoria.splice(indexAlvo, 0, ficheiroMover); desenharGaleria(); } return false; }
+        function handleDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over')); }
+
+        form.addEventListener('submit', (e) => {
+            const dt = new DataTransfer();
+            ficheirosEmMemoria.forEach(item => {
+                if (!item.isServer && item.file) {
+                    dt.items.add(item.file);
+                }
+            });
+            inputReal.files = dt.files;
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            desenharGaleria();
+        });
     </script>
-    <script src="~/js/localizacao-cascata.js" asp-append-version="true"></script>
 }

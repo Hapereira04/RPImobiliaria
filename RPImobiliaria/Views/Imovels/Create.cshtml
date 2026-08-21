@@ -1,14 +1,15 @@
 ﻿@model RPImobiliaria.Models.Imovel
 @{
-    ViewData["Title"] = "Angariar Novo Imóvel"; var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
+    ViewData["Title"] = "Angariar Novo Imóvel";
+    var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
 }
 
 <style>
     .dropzone-area {
         border: 2px dashed var(--bs-primary);
         border-radius: 8px;
-        background-color: var(--bs-tertiary-bg);
-        color: var(--bs-body-color);
+        background-color: #ffffff; /* Fundo branco forçado */
+        color: #212529; /* Texto escuro forçado */
         padding: 40px 20px;
         text-align: center;
         cursor: pointer;
@@ -16,7 +17,7 @@
     }
 
         .dropzone-area:hover, .dropzone-area.dragover {
-            background-color: var(--bs-secondary-bg);
+            background-color: #f8f9fa; /* Cinza muito claro ao passar o rato */
             border-color: var(--bs-success);
         }
 
@@ -35,7 +36,7 @@
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         cursor: grab;
-        background: var(--bs-secondary-bg);
+        background: #f8f9fa;
         transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
@@ -97,60 +98,110 @@
 
     <form asp-action="Create" enctype="multipart/form-data" id="imovelForm">
         <div class="row">
+            <!-- COLUNA PRINCIPAL -->
             <div class="col-lg-8">
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-info-circle me-1"></i> Dados Base</div>
+
+                <!-- DADOS BASE -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-info-circle text-primary me-1"></i> Dados Base
+                    </div>
                     <div class="card-body p-4">
                         <div class="row g-3 mb-3">
-                            <div class="col-md-4 form-floating"><input asp-for="Referencia" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Ref" /><label asp-for="Referencia">Referência (Ex: REF-001)</label></div>
-                            <div class="col-md-8 form-floating"><input asp-for="Titulo" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Título" /><label asp-for="Titulo">Título do Anúncio</label></div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Referencia" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Ref" />
+                                <label asp-for="Referencia" class="text-dark fw-bold">Referência (Ex: REF-001)</label>
+                            </div>
+                            <div class="col-md-8 form-floating">
+                                <input asp-for="Titulo" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Título" />
+                                <label asp-for="Titulo" class="text-dark fw-bold">Título do Anúncio</label>
+                            </div>
                         </div>
-                        <div class="mb-3"><label class="form-label text-body-secondary fw-bold small text-uppercase">Descrição</label><textarea asp-for="Descricao" class="form-control bg-body text-body-emphasis border-secondary-subtle" rows="4"></textarea></div>
-                        <div class="mb-2"><label class="form-label text-body-secondary fw-bold small text-uppercase">Localização</label>@await Html.PartialAsync("_LocalizacaoSelector", Model)</div>
+                        <div class="mb-3">
+                            <label class="form-label text-dark fw-bold small text-uppercase">Descrição</label>
+                            <textarea asp-for="Descricao" class="form-control bg-white text-dark border-secondary-subtle" rows="4"></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-dark fw-bold small text-uppercase">Localização</label>
+                            @await Html.PartialAsync("_LocalizacaoSelector", Model)
+                        </div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-camera me-1"></i> Galeria de Fotografias</div>
+                <!-- GALERIA -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-camera text-primary me-1"></i> Galeria de Fotografias
+                    </div>
                     <div class="card-body p-4">
                         <input type="file" id="fotosInputReal" name="fotosUpload" multiple accept="image/*" class="d-none" />
-                        <div id="dropzone" class="dropzone-area"><i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i><h5 class="mt-2 text-body-emphasis">Clique ou arraste as fotos</h5></div>
+                        <div id="dropzone" class="dropzone-area">
+                            <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="mt-2 text-dark fw-bold">Clique ou arraste as fotos</h5>
+                        </div>
                         <div id="gallery" class="gallery-container"></div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                    <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-rulers me-1"></i> Áreas e Divisões</div>
+                <!-- ÁREAS E DIVISÕES -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                        <i class="bi bi-rulers text-primary me-1"></i> Áreas e Divisões
+                    </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
-                            <div class="col-md-3 form-floating"><input asp-for="AreaUtil" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" step="0.01" placeholder="Área Útil" /><label asp-for="AreaUtil">Área Útil (m²)</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="AreaBruta" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" /><label asp-for="AreaBruta">Área Bruta (m²)</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="Quartos" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" placeholder="Quartos" /><label asp-for="Quartos">Quartos</label></div>
-                            <div class="col-md-3 form-floating"><input asp-for="CasasBanho" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" placeholder="WC" /><label asp-for="CasasBanho">WC</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="Estacionamento" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" placeholder="Garagem" /><label asp-for="Estacionamento">Garagem</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="Piso" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" placeholder="Piso" /><label asp-for="Piso">Andar/Piso</label></div>
-                            <div class="col-md-4 form-floating"><input asp-for="AnoConstrucao" class="form-control bg-body text-body-emphasis border-secondary-subtle" type="number" placeholder="Ano" /><label asp-for="AnoConstrucao">Construção</label></div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="AreaUtil" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Útil" />
+                                <label asp-for="AreaUtil" class="text-dark fw-bold">Área Útil (m²)</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="AreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" />
+                                <label asp-for="AreaBruta" class="text-dark fw-bold">Área Bruta (m²)</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="Quartos" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Quartos" />
+                                <label asp-for="Quartos" class="text-dark fw-bold">Quartos</label>
+                            </div>
+                            <div class="col-md-3 form-floating">
+                                <input asp-for="CasasBanho" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="WC" />
+                                <label asp-for="CasasBanho" class="text-dark fw-bold">WC</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Estacionamento" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Garagem" />
+                                <label asp-for="Estacionamento" class="text-dark fw-bold">Garagem</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="Piso" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Piso" />
+                                <label asp-for="Piso" class="text-dark fw-bold">Andar/Piso</label>
+                            </div>
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="AnoConstrucao" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Ano" />
+                                <label asp-for="AnoConstrucao" class="text-dark fw-bold">Construção</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- CARACTERÍSTICAS -->
                 @if (grupos != null && grupos.Any())
                 {
-                    <div class="card shadow-sm border-secondary-subtle bg-body-tertiary mb-4">
-                        <div class="card-header bg-body border-bottom border-secondary-subtle py-3 fw-bold text-primary"><i class="bi bi-ui-checks-grid me-1"></i> Características</div>
+                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                        <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
+                            <i class="bi bi-ui-checks-grid text-primary me-1"></i> Características
+                        </div>
                         <div class="card-body p-4">
                             <div class="row">
                                 @foreach (var grupo in grupos)
                                 {
                                     <div class="col-md-6 mb-4">
-                                        <h6 class="fw-bold text-body-emphasis border-bottom border-secondary-subtle pb-2 mb-3">@grupo.Nome</h6>
+                                        <h6 class="fw-bold text-dark border-bottom border-secondary-subtle pb-2 mb-3">@grupo.Nome</h6>
                                         <div class="row">
                                             @foreach (var carac in grupo.Caracteristicas)
                                             {
                                                 <div class="col-12 mb-2">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id">
-                                                        <label class="form-check-label text-body-secondary" for="carac_@carac.Id">@carac.Nome</label>
+                                                        <label class="form-check-label text-dark fw-medium" for="carac_@carac.Id">@carac.Nome</label>
                                                     </div>
                                                 </div>
                                             }
@@ -162,38 +213,68 @@
                     </div>
                 }
 
-                <div class="card shadow-sm bg-body-tertiary border-start border-5 border-warning mb-4">
-                    <div class="card-header bg-transparent fw-bold text-warning py-3"><i class="bi bi-eye-slash-fill me-1"></i> Dados Privados (Equipa)</div>
+                <!-- DADOS PRIVADOS -->
+                <div class="card shadow-sm bg-white border-start border-5 border-warning mb-4">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
+                        <i class="bi bi-eye-slash-fill text-warning me-1"></i> Dados Privados (Equipa)
+                    </div>
                     <div class="card-body p-4">
-                        <div class="form-floating mb-3"><input asp-for="MoradaExata" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Morada" /><label asp-for="MoradaExata">Morada Exata</label></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="MoradaExata" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Morada" />
+                            <label asp-for="MoradaExata" class="text-dark fw-bold">Morada Exata</label>
+                        </div>
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6 form-floating"><input asp-for="NumeroContrato" class="form-control bg-body text-body-emphasis border-secondary-subtle" placeholder="Contrato" /><label asp-for="NumeroContrato">Nº Contrato</label></div>
-                            <div class="col-md-6 form-floating"><input asp-for="ValorComissao" class="form-control bg-body text-success fw-bold border-secondary-subtle" type="number" step="0.01" placeholder="Comissão" /><label asp-for="ValorComissao">Comissão Prevista (€)</label></div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="NumeroContrato" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Contrato" />
+                                <label asp-for="NumeroContrato" class="text-dark fw-bold">Nº Contrato</label>
+                            </div>
+                            <div class="col-md-6 form-floating">
+                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" style="color: #198754 !important;" type="number" step="0.01" placeholder="Comissão" />
+                                <label asp-for="ValorComissao" class="text-dark fw-bold">Comissão Prevista (€)</label>
+                            </div>
                         </div>
-                        <div class="mb-3 p-3 border border-warning-subtle rounded bg-body">
-                            <label class="form-label text-warning small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf me-1"></i> Documentos Privados (PDF, DOC)</label>
-                            <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-body text-body-emphasis border-warning-subtle" />
+                        <div class="mb-3 p-3 border border-warning-subtle rounded bg-white">
+                            <label class="form-label text-dark small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf text-warning me-1"></i> Documentos Privados (PDF, DOC)</label>
+                            <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-white text-dark border-warning-subtle" />
                         </div>
-                        <div class="form-floating"><textarea asp-for="ObservacoesInternas" class="form-control bg-body text-body-emphasis border-secondary-subtle" style="height: 80px"></textarea><label asp-for="ObservacoesInternas">Notas Internas</label></div>
+                        <div class="form-floating">
+                            <textarea asp-for="ObservacoesInternas" class="form-control bg-white text-dark border-secondary-subtle" style="height: 80px"></textarea>
+                            <label asp-for="ObservacoesInternas" class="text-dark fw-bold">Notas Internas</label>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- BARRA LATERAL -->
             <div class="col-lg-4">
                 <div class="card shadow-lg border-primary mb-4 position-sticky" style="top: 1rem;">
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
                         <div class="input-group input-group-lg mb-4">
-                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center text-success bg-body text-body-emphasis border-0" />
-                            <span class="input-group-text fw-bold bg-body border-0 text-body-emphasis">€</span>
+                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" />
+                            <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
                         </div>
-                        <div class="bg-body-tertiary rounded p-3 text-start text-body-emphasis mb-4 border border-secondary-subtle">
-                            <label asp-for="TipoNegocioId" class="form-label small fw-bold">Tipo Negócio</label><select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis border-primary" asp-items="ViewBag.TipoNegocioId"></select>
-                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold">Categoria</label><select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.CategoriaImovelId"></select>
-                            <label asp-for="EstadoImovelId" class="form-label small fw-bold">Estado</label><select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.EstadoImovelId"></select>
-                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold">Cl. Energética</label><select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.CertificadoEnergeticoId"></select>
-                            <label asp-for="StatusImovelId" class="form-label small fw-bold">Status do Anúncio</label><select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-body text-body-emphasis" asp-items="ViewBag.StatusImovelId"></select>
-                            <label class="form-label small fw-bold text-success">Proprietário (Cliente)</label><select name="clienteProprietarioId" class="form-select form-select-sm bg-body text-body-emphasis border-success" asp-items="ViewBag.ListaClientes"><option value="">-- Opcional --</option></select>
+
+                        <div class="bg-white rounded p-3 text-start text-dark mb-4 border border-secondary-subtle">
+                            <label asp-for="TipoNegocioId" class="form-label small fw-bold text-dark">Tipo Negócio</label>
+                            <select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 bg-white text-dark border-primary" asp-items="ViewBag.TipoNegocioId"></select>
+
+                            <label asp-for="CategoriaImovelId" class="form-label small fw-bold text-dark">Categoria</label>
+                            <select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CategoriaImovelId"></select>
+
+                            <label asp-for="EstadoImovelId" class="form-label small fw-bold text-dark">Estado</label>
+                            <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.EstadoImovelId"></select>
+
+                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold text-dark">Cl. Energética</label>
+                            <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CertificadoEnergeticoId"></select>
+
+                            <label asp-for="StatusImovelId" class="form-label small fw-bold text-dark">Status do Anúncio</label>
+                            <select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.StatusImovelId"></select>
+
+                            <label class="form-label small fw-bold text-dark">Proprietário (Cliente)</label>
+                            <select name="clienteProprietarioId" class="form-select form-select-sm bg-white text-dark border-success" asp-items="ViewBag.ListaClientes">
+                                <option value="">-- Opcional --</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-cloud-arrow-up-fill me-2"></i> Gravar Angariação</button>
                     </div>
@@ -204,7 +285,16 @@
 </div>
 
 <!-- MODAL ZOOM E SCRIPT DE FOTOS -->
-<div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content bg-transparent border-0"><div class="modal-body text-center position-relative p-0"><button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 10;"></button><img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;"></div></div></div></div>
+<div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center position-relative p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" style="z-index: 10;"></button>
+                <img id="zoomImagem" src="" class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{
@@ -225,5 +315,6 @@
         function handleDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over')); }
         form.addEventListener('submit', (e) => { const dt = new DataTransfer(); ficheirosEmMemoria.forEach(item => dt.items.add(item.file)); inputReal.files = dt.files; });
     </script>
-    <script src="~/js/localizacao-cascata.js" asp-append-version="true"></script>
+    <!-- NOTA: Se você tiver o "_LocalizacaoSelector.cshtml" num script externo, lembre-se de o manter carregado abaixo! -->
+    <!-- <script src="~/js/localizacao-cascas.js"></script> -->
 }
