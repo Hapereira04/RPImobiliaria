@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<RPImobiliaria.Models.Imovel>
+@{
     ViewData["Title"] = "Página Inicial";
 }
 
@@ -82,18 +83,17 @@
         display: block;
         text-decoration: none;
         position: relative;
-        border-radius: 15px; /* Define as curvas aqui */
+        border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         background-color: transparent;
-        overflow: hidden; /* <-- O SEGREDO: Corta a foto e o banner que saírem fora das curvas! */
-        transform: translateZ(0); /* Resolve bugs de curvas no Safari/iPhone */
+        overflow: hidden;
+        transform: translateZ(0);
     }
 
     .carousel-item img {
         height: 500px;
         width: 100%;
         object-fit: cover;
-        /* Não precisa de border-radius, o contentor corta as pontas */
         transition: transform 0.3s ease;
     }
 
@@ -136,8 +136,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            border-radius: 0; /* O contentor principal é que faz a curva inferior */
-            margin-top: -1px; /* Remove qualquer risco de fundo a aparecer no meio */
+            border-radius: 0;
+            margin-top: -1px;
         }
     }
 </style>
@@ -147,7 +147,6 @@
     <!-- VÍDEO MP4 -->
     <video autoplay loop muted playsinline id="bg-video">
         <source src="~/videos/ovar-zoom.mp4" type="video/mp4">
-        <!-- Fundo de segurança -->
     </video>
 
     <div class="hero-overlay"></div>
@@ -175,65 +174,76 @@
             <div class="mx-auto mt-2" style="height: 4px; width: 60px; background-color: var(--bs-primary); border-radius: 2px;"></div>
         </div>
 
-        <div id="carroselDestaques" class="carousel slide carousel-fade" data-bs-ride="carousel">
-            <div class="carousel-inner">
+        @if (Model != null && Model.Any())
+        {
+            <div id="carroselDestaques" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-inner">
 
-                <!-- DESTAQUE 1 -->
-                <div class="carousel-item active" data-bs-interval="4000">
-                    <a href="/Imovels/Details/1" class="destaque-link">
-                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80" alt="Imóvel 1">
-                        <div class="imovel-card-overlay">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                <div>
-                                    <span class="badge bg-primary mb-2">Para Venda</span>
-                                    <h3 class="mb-1 fw-bold">Moradia T4 de Luxo</h3>
-                                    <p class="mb-0 text-light"><i class="bi bi-geo-alt-fill text-danger"></i> Câmara, Ovar</p>
+                    @{
+                        var index = 0;
+                    }
+                    @foreach (var imovel in Model)
+                    {
+                        var imagemDestaque = imovel.Fotos?.OrderBy(f => f.Ordem).FirstOrDefault()?.CaminhoImagem ?? "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80";
+                        var nomeFreguesia = imovel.Freguesia?.Nome;
+                        var nomeConcelho = imovel.Concelho?.Nome ?? imovel.Freguesia?.Concelho?.Nome;
+                        var nomeDistrito = imovel.Distrito?.Nome ?? imovel.Freguesia?.Concelho?.Distrito?.Nome;
+
+                        var locParts = new List<string>();
+                        if (!string.IsNullOrWhiteSpace(nomeFreguesia)) locParts.Add(nomeFreguesia);
+                        if (!string.IsNullOrWhiteSpace(nomeConcelho)) locParts.Add(nomeConcelho);
+                        if (!string.IsNullOrWhiteSpace(nomeDistrito)) locParts.Add(nomeDistrito);
+
+                        var localizacao = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização por indicar";
+                        <div class="carousel-item @(index == 0 ? "active" : "")" data-bs-interval="5000">
+                            <a asp-controller="Imovels" asp-action="Details" asp-route-id="@imovel.Id" class="destaque-link">
+                                <img src="@imagemDestaque" alt="@imovel.Titulo">
+                                <div class="imovel-card-overlay">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                        <div>
+                                            <span class="badge bg-primary mb-2">@(imovel.TipoNegocio?.Nome ?? "Destaque")</span>
+                                            <h3 class="mb-1 fw-bold">@imovel.Titulo</h3>
+                                            <p class="mb-0 text-light"><i class="bi bi-geo-alt-fill text-danger"></i> @localizacao</p>
+                                        </div>
+                                        <div class="text-end mt-2 mt-md-0">
+                                            <div class="preco-destaque">@imovel.Preco.ToString("N0") €</div>
+                                            <span class="btn btn-sm btn-light fw-bold mt-2">Ver Detalhes</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-end mt-2 mt-md-0">
-                                    <div class="preco-destaque">350.000 €</div>
-                                    <span class="btn btn-sm btn-light fw-bold mt-2">Ver Detalhes</span>
-                                </div>
-                            </div>
+                            </a>
                         </div>
-                    </a>
+                        index++;
+                    }
+
                 </div>
 
-                <!-- DESTAQUE 2 -->
-                <div class="carousel-item" data-bs-interval="4000">
-                    <a href="/Imovels/Details/2" class="destaque-link">
-                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" alt="Imóvel 2">
-                        <div class="imovel-card-overlay">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                <div>
-                                    <span class="badge bg-warning text-dark mb-2">Novo</span>
-                                    <h3 class="mb-1 fw-bold">Apartamento T3 Moderno</h3>
-                                    <p class="mb-0 text-light"><i class="bi bi-geo-alt-fill text-danger"></i> Furadouro, Ovar</p>
-                                </div>
-                                <div class="text-end mt-2 mt-md-0">
-                                    <div class="preco-destaque">210.000 €</div>
-                                    <span class="btn btn-sm btn-light fw-bold mt-2">Ver Detalhes</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
+                @if (Model.Count() > 1)
+                {
+                    <!-- Botões de Navegação -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carroselDestaques" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carroselDestaques" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                        <span class="visually-hidden">Próximo</span>
+                    </button>
+                }
             </div>
-
-            <!-- Botões de Navegação -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#carroselDestaques" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carroselDestaques" data-bs-slide="next">
-                <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                <span class="visually-hidden">Próximo</span>
-            </button>
-        </div>
+        }
+        else
+        {
+            <div class="text-center text-muted p-5 bg-body-tertiary rounded-4">
+                <i class="bi bi-stars display-4 mb-3 opacity-50"></i>
+                <h5>Ainda não existem imóveis em destaque.</h5>
+                <p>Os imóveis selecionados pela equipa aparecerão aqui.</p>
+            </div>
+        }
 
         <div class="text-center mt-5">
             <a asp-controller="Imovels" asp-action="Index" class="btn btn-outline-primary btn-lg fw-bold">
-                Ver todos os Imóveis <i class="bi bi-arrow-right"></i>
+                Ver todos os Imóveis <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
     </div>
@@ -252,7 +262,6 @@
                 </p>
 
                 <div class="d-flex align-items-center mb-4">
-                    <!-- Bola perfeita para o Telefone -->
                     <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 60px; height: 60px; flex-shrink: 0;">
                         <i class="bi bi-telephone-fill fs-4"></i>
                     </div>
@@ -263,7 +272,6 @@
                 </div>
 
                 <div class="d-flex align-items-center mb-4">
-                    <!-- Bola perfeita para a Localização -->
                     <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 60px; height: 60px; flex-shrink: 0;">
                         <i class="bi bi-geo-alt-fill fs-4"></i>
                     </div>

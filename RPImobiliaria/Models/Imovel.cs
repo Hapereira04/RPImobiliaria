@@ -9,6 +9,8 @@ namespace RPImobiliaria.Models
         [Display(Name = "Referência Interna")]
         public string? Referencia { get; set; }
 
+        public bool EmDestaque { get; set; } = false;
+
         // --- DADOS PÚBLICOS ---
         [Required]
         public string Titulo { get; set; }
@@ -34,6 +36,15 @@ namespace RPImobiliaria.Models
         public int NumeroFrentes { get; set; }
 
         // Localização (Pública)
+        // 1. A gaveta para guardar apenas o Distrito (se ele ficar por aqui)
+        public int? DistritoId { get; set; }
+        public virtual Distrito? Distrito { get; set; }
+
+        // 2. A gaveta para guardar o Concelho (se ele avançar mais um passo)
+        public int? ConcelhoId { get; set; }
+        public virtual Concelho? Concelho { get; set; }
+
+        // 3. A gaveta que já lá tinha (se ele preencher tudo)
         public int? FreguesiaId { get; set; }
         public virtual Freguesia? Freguesia { get; set; }
         public string? Zona { get; set; }

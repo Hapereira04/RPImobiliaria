@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Mail;
 using Microsoft.Extensions.Configuration; // Adicionar isto
 using RPImobiliaria.Models; // Confirma que o namespace do teu projeto está correto
+using RPImobiliaria.Data;
+using System.Diagnostics;    
+using System.Net;
+using System.Net.Mail;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPImobiliaria.Controllers
 {
@@ -11,17 +13,31 @@ namespace RPImobiliaria.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration; // Para ler o appsettings.json
+        private readonly ApplicationDbContext _context;
 
-        // Atualizar o construtor para receber as configurações
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        // Atualizar o construtor para receber as configurações e o contexto
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, ApplicationDbContext context)
         {
             _logger = logger;
             _configuration = configuration;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // Vai buscar até 3 imóveis que estejam em destaque, incluindo as fotos e a localização
+            var imoveisEmDestaque = await _context.Imoveis
+                .Include(i => i.Fotos)
+                .Include(i => i.TipoNegocio)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho)
+                .Where(i => i.EmDestaque)
+                .OrderByDescending(i => i.DataRegisto)
+                .Take(3)
+                .ToListAsync();
+
+            return View(imoveisEmDestaque);
         }
 
         public IActionResult QuemSomos()

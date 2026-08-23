@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RPImobiliaria.Data;
 
@@ -10,9 +11,11 @@ using RPImobiliaria.Data;
 namespace RPImobiliaria.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260823174047_AdicionarDestaque")]
+    partial class AdicionarDestaque
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.30");
@@ -524,9 +527,6 @@ namespace RPImobiliaria.Migrations
                     b.Property<int?>("CertificadoEnergeticoId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ConcelhoId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("ConsultorId")
                         .HasColumnType("INTEGER");
 
@@ -535,9 +535,6 @@ namespace RPImobiliaria.Migrations
 
                     b.Property<string>("Descricao")
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("DistritoId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("EmDestaque")
                         .HasColumnType("INTEGER");
@@ -597,11 +594,7 @@ namespace RPImobiliaria.Migrations
 
                     b.HasIndex("CertificadoEnergeticoId");
 
-                    b.HasIndex("ConcelhoId");
-
                     b.HasIndex("ConsultorId");
-
-                    b.HasIndex("DistritoId");
 
                     b.HasIndex("EstadoImovelId");
 
@@ -821,17 +814,9 @@ namespace RPImobiliaria.Migrations
                         .HasForeignKey("CertificadoEnergeticoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("RPImobiliaria.Models.Concelho", "Concelho")
-                        .WithMany()
-                        .HasForeignKey("ConcelhoId");
-
                     b.HasOne("RPImobiliaria.Models.Consultor", "Consultor")
                         .WithMany("ImoveisAngariados")
                         .HasForeignKey("ConsultorId");
-
-                    b.HasOne("RPImobiliaria.Models.Distrito", "Distrito")
-                        .WithMany()
-                        .HasForeignKey("DistritoId");
 
                     b.HasOne("RPImobiliaria.Models.EstadoImovel", "EstadoImovel")
                         .WithMany("Imoveis")
@@ -857,11 +842,7 @@ namespace RPImobiliaria.Migrations
 
                     b.Navigation("CertificadoEnergetico");
 
-                    b.Navigation("Concelho");
-
                     b.Navigation("Consultor");
-
-                    b.Navigation("Distrito");
 
                     b.Navigation("EstadoImovel");
 

@@ -43,6 +43,8 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.CertificadoEnergetico)
                 .Include(i => i.Fotos)
                 .Include(i => i.Caracteristicas)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
                 .AsQueryable();
 
@@ -116,16 +118,47 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.TipoNegocio)
                 .Include(i => i.StatusImovel)
                 .Include(i => i.Consultor)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho)
                 .AsQueryable();
 
-            if (!User.IsInRole("Admin"))
-            {
-                var userId = _userManager.GetUserId(User);
-                query = query.Where(i => i.Consultor != null && i.Consultor.ApplicationUserId == userId);
-            }
+            // RESTRIÇÃO REMOVIDA! 
+            // Apagámos o bloco 'if (!User.IsInRole("Admin"))' que impedia
+            // os consultores de verem os imóveis dos colegas. Agora todos vêem e editam tudo.
 
             return View(await query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id).ToListAsync());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Consultor")]
+        public async Task<IActionResult> AlternarDestaque(int id)
+        {
+            var imovel = await _context.Imoveis.FindAsync(id);
+            if (imovel == null) return NotFound();
+
+            if (!imovel.EmDestaque) // Se está a tentar DESTACAR o imóvel
+            {
+                var destaquesAtuais = await _context.Imoveis.CountAsync(i => i.EmDestaque);
+                if (destaquesAtuais >= 3)
+                {
+                    TempData["MensagemErro"] = "Já existem 3 imóveis em destaque! Retire a estrela de um imóvel antes de adicionar outro.";
+                    return RedirectToAction(nameof(Gestao));
+                }
+                imovel.EmDestaque = true;
+                TempData["MensagemSucesso"] = $"O imóvel {imovel.Referencia ?? imovel.Id.ToString()} foi colocado em destaque na página inicial!";
+            }
+            else // Se está a tentar REMOVER o destaque
+            {
+                imovel.EmDestaque = false;
+                TempData["MensagemSucesso"] = $"O destaque do imóvel {imovel.Referencia ?? imovel.Id.ToString()} foi removido.";
+            }
+
+            _context.Update(imovel);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Gestao));
         }
 
         [AllowAnonymous]
@@ -173,6 +206,8 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.Consultor)
                 .Include(i => i.Fotos)
                 .Include(i => i.Documentos)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
                 .Include(i => i.Caracteristicas).ThenInclude(ic => ic.Caracteristica).ThenInclude(c => c.GrupoCaracteristica)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -198,7 +233,7 @@ namespace RPImobiliaria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Create([Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel, int? clienteProprietarioId, List<int> selectedCaracteristicas, List<IFormFile> fotosUpload, List<IFormFile> documentosUpload)
+        public async Task<IActionResult> Create([Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel, int? clienteProprietarioId, List<int> selectedCaracteristicas, List<IFormFile> fotosUpload, List<IFormFile> documentosUpload)
         {
             ModelState.Remove("ConsultorId");
 
@@ -264,7 +299,7 @@ namespace RPImobiliaria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] Imovel imovel, List<int> selectedCaracteristicas, List<IFormFile> novasFotos, List<IFormFile> documentosUpload, List<int> documentosRemover, int? clienteProprietarioId)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] Imovel imovel, List<int> selectedCaracteristicas, List<IFormFile> novasFotos, List<IFormFile> documentosUpload, List<int> documentosRemover, int? clienteProprietarioId)
         {
             if (id != imovel.Id) return NotFound();
 
@@ -464,19 +499,32 @@ namespace RPImobiliaria.Controllers
             ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", clienteProprietarioId);
             ViewData["ConsultorId"] = new SelectList(_context.Consultores, "Id", "Nome", imovel?.ConsultorId);
 
-            var localizacaoSelecionada = imovel?.FreguesiaId is int freguesiaId
-                ? await _context.Freguesias.Include(f => f.Concelho).FirstOrDefaultAsync(f => f.Id == freguesiaId)
-                : null;
-            var distritoId = localizacaoSelecionada?.Concelho?.DistritoId;
-            var concelhoId = localizacaoSelecionada?.ConcelhoId;
+            // 1. Lê diretamente das novas gavetas da Base de Dados
+            int? distritoId = imovel?.DistritoId;
+            int? concelhoId = imovel?.ConcelhoId;
+            int? freguesiaId = imovel?.FreguesiaId;
 
+            // 2. Sistema de "Auto-cura" para imóveis antigos (que só tinham Freguesia preenchida)
+            if (distritoId == null && concelhoId == null && freguesiaId != null)
+            {
+                var locAntiga = await _context.Freguesias.Include(f => f.Concelho).FirstOrDefaultAsync(f => f.Id == freguesiaId);
+                if (locAntiga != null)
+                {
+                    distritoId = locAntiga.Concelho?.DistritoId;
+                    concelhoId = locAntiga.ConcelhoId;
+                }
+            }
+
+            // 3. Preenche as Dropdowns com base na informação correta
             ViewBag.DistritoId = new SelectList(_context.Distritos.OrderBy(d => d.Nome), "Id", "Nome", distritoId);
+
             ViewBag.ConcelhoId = new SelectList(
                 distritoId.HasValue ? _context.Concelhos.Where(c => c.DistritoId == distritoId).OrderBy(c => c.Nome) : Enumerable.Empty<Concelho>(),
                 "Id", "Nome", concelhoId);
+
             ViewBag.FreguesiaId = new SelectList(
                 concelhoId.HasValue ? _context.Freguesias.Where(f => f.ConcelhoId == concelhoId).OrderBy(f => f.Nome) : Enumerable.Empty<Freguesia>(),
-                "Id", "Nome", imovel?.FreguesiaId);
+                "Id", "Nome", freguesiaId);
 
             ViewBag.GruposComCaracteristicas = _context.GruposCaracteristicas.Include(g => g.Caracteristicas).ToList();
             ViewBag.CaracteristicasAtuais = selectedCaracteristicas ?? new List<int>();

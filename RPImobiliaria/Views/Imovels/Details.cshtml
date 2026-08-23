@@ -5,12 +5,16 @@
     var referencia = Model.Referencia ?? Model.Id.ToString();
     var precoM2 = Model.AreaUtil > 0 ? Model.Preco / (decimal)Model.AreaUtil : 0;
 
-    var localizacao = string.Join(", ", new[] {
-        Model.Freguesia?.Nome,
-        Model.Freguesia?.Concelho?.Nome,
-        Model.Freguesia?.Concelho?.Distrito?.Nome
-    }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    var nomeFreguesia = Model.Freguesia?.Nome;
+    var nomeConcelho = Model.Concelho?.Nome ?? Model.Freguesia?.Concelho?.Nome;
+    var nomeDistrito = Model.Distrito?.Nome ?? Model.Freguesia?.Concelho?.Distrito?.Nome;
 
+    var locParts = new List<string>();
+    if (!string.IsNullOrWhiteSpace(nomeFreguesia)) locParts.Add(nomeFreguesia);
+    if (!string.IsNullOrWhiteSpace(nomeConcelho)) locParts.Add(nomeConcelho);
+    if (!string.IsNullOrWhiteSpace(nomeDistrito)) locParts.Add(nomeDistrito);
+
+    var localizacao = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização por indicar";
     var caracteristicas = Model.Caracteristicas?
             .Where(c => c.Caracteristica?.GrupoCaracteristica is not null)
             .GroupBy(c => c.Caracteristica!.GrupoCaracteristica!.Nome)

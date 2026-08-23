@@ -154,7 +154,16 @@ else
         @foreach (var imovel in Model.Imoveis)
         {
             var fotoPrincipal = imovel.Fotos.OrderBy(f => f.Ordem).FirstOrDefault();
-            var localizacao = string.Join(", ", new[] { imovel.Freguesia?.Nome, imovel.Freguesia?.Concelho?.Nome }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            var nomeFreguesia = imovel.Freguesia?.Nome;
+            var nomeConcelho = imovel.Concelho?.Nome ?? imovel.Freguesia?.Concelho?.Nome;
+            var nomeDistrito = imovel.Distrito?.Nome ?? imovel.Freguesia?.Concelho?.Distrito?.Nome;
+
+            var locParts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(nomeFreguesia)) locParts.Add(nomeFreguesia);
+            if (!string.IsNullOrWhiteSpace(nomeConcelho)) locParts.Add(nomeConcelho);
+            if (!string.IsNullOrWhiteSpace(nomeDistrito)) locParts.Add(nomeDistrito);
+
+            var localizacao = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização por indicar";
             <div class="col-md-6 col-xl-4">
                 <article class="card imovel-card h-100 shadow-sm">
                     <a asp-action="Details" asp-route-id="@imovel.Id" class="text-decoration-none text-reset position-relative">
