@@ -1,10 +1,35 @@
 @page
 @model AccessDeniedModel
 @{
-    ViewData["Title"] = "Access denied";
+    ViewData["Title"] = "Acesso Negado";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">You do not have access to this resource.</p>
-</header>
+<div class="container mt-5 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 border-top border-5 border-danger shadow-lg bg-white">
+            <div class="card-body p-5 text-center bg-white">
+
+                <i class="bi bi-shield-lock-fill text-danger display-1 mb-4"></i>
+
+                <h1 class="fw-bold mb-3 text-dark">@ViewData["Title"]</h1>
+
+                <p class="fs-5 fw-medium mb-4" style="color: #6c757d;">
+                    Não tem permissões suficientes para aceder a este recurso.
+                </p>
+
+                <hr class="border-secondary-subtle mb-4" />
+
+                <p class="small text-dark mb-4">
+                    Se acha que isto é um erro, por favor contacte a administração do sistema ou tente iniciar sessão com uma conta diferente.
+                </p>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="~/" class="btn btn-outline-secondary btn-lg fw-bold px-4 shadow-sm">
+                        <i class="bi bi-house-door-fill me-2"></i> Voltar ao Início
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

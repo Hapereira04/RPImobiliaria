@@ -1,21 +1,33 @@
 @page
 @model LogoutModel
 @{
-    ViewData["Title"] = "Log out";
+    ViewData["Title"] = "Sessão Terminada";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
-        {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
-            </form>
-        }
-        else
-        {
-            <p>You have successfully logged out of the application.</p>
-        }
-    }
-</header>
+<div class="container mt-5 mb-5 d-flex justify-content-center">
+    <div class="col-md-8 col-lg-5">
+        <div class="card border-0 border-top border-5 border-success shadow-lg bg-white">
+            <div class="card-body p-5 text-center bg-white">
+
+                <i class="bi bi-door-closed-fill text-success display-1 mb-4"></i>
+
+                <h2 class="fw-bold mb-3 text-dark">Até breve!</h2>
+
+                <p class="fs-5 fw-medium mb-4 text-dark">
+                    A sua sessão foi terminada com sucesso.
+                </p>
+
+                <p class="small mb-4 fw-bold" style="color: #6c757d;">
+                    Obrigado por utilizar a nossa plataforma. Esperamos vê-lo novamente em breve.
+                </p>
+
+                <div class="d-grid gap-2">
+                    <a href="~/" class="btn btn-success btn-lg fw-bold px-4 shadow-sm">
+                        <i class="bi bi-house-door-fill me-2"></i> Voltar à Página Principal
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

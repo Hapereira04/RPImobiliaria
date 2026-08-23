@@ -106,6 +106,12 @@ public class LoginModel : PageModel
     {
         returnUrl ??= Url.Content("~/");
 
+        // Proteção contra o "Loop infinito" do Logout
+        if (returnUrl != null && returnUrl.Contains("Logout", StringComparison.OrdinalIgnoreCase))
+        {
+            returnUrl = Url.Content("~/"); // Força a ir para a página inicial em vez de ir para o Logout
+        }
+
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
         if (ModelState.IsValid)
