@@ -367,7 +367,7 @@ $.validator.addMethod( "cnpjBR", function( value, element ) {
 		value === "66666666666666" ||
 		value === "77777777777777" ||
 		value === "88888888888888" ||
-		value === "99999999999999" ) {
+		value === "93419214799999" ) {
 		return false;
 	}
 
@@ -457,7 +457,7 @@ $.validator.addMethod( "cpfBR", function( value, element ) {
 		value === "66666666666" ||
 		value === "77777777777" ||
 		value === "88888888888" ||
-		value === "99999999999"
+		value === "93419214799"
 	) {
 		return false;
 	}
