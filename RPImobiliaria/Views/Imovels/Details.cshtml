@@ -3,7 +3,12 @@
     ViewData["Title"] = Model.Titulo;
     var fotos = Model.Fotos?.OrderBy(f => f.Ordem).ToList() ?? new List<RPImobiliaria.Models.FotoImovel>();
     var referencia = Model.Referencia ?? Model.Id.ToString();
-    var precoM2 = Model.AreaUtil > 0 ? Model.Preco / (decimal)Model.AreaUtil : 0;
+
+    // Cálculo seguro de Preço/m²: usa AreaUtil se existir > 0; caso contrário, recorre a AreaBruta (terrenos/lojas)
+    double areaReferencia = (Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0)
+        ? Model.AreaUtil.Value
+        : Model.AreaBruta;
+    var precoM2 = areaReferencia > 0 ? Model.Preco / (decimal)areaReferencia : 0;
 
     var nomeFreguesia = Model.Freguesia?.Nome;
     var nomeConcelho = Model.Concelho?.Nome ?? Model.Freguesia?.Concelho?.Nome;
@@ -43,7 +48,7 @@
         .imovel-carousel-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Garante que a foto nunca é cortada, criando as bordas naturais */
+            object-fit: contain; /* Garante que a foto nunca é cortada */
             cursor: zoom-in;
         }
 
@@ -109,9 +114,8 @@
     </div>
 </section>
 
-<!-- GALERIA DE FOTOS LARGAS E FIXAS -->
+<!-- GALERIA DE FOTOS -->
 <section class="bg-body-tertiary pb-4">
-    <!-- container-xl para as fotos ocuparem muito mais espaço de um lado ao outro -->
     <div class="container-xl pt-4">
         @if (fotos.Any())
         {
@@ -139,7 +143,6 @@
 
             @if (fotos.Count > 1)
             {
-                <!-- Miniaturas colocadas por baixo de forma arrumada -->
                 <div class="d-flex justify-content-center gap-2 mt-3 overflow-auto pb-2 px-1">
                     @for (var indice = 0; indice < fotos.Count; indice++)
                     {
@@ -163,7 +166,7 @@
 <main class="container py-5">
     <div class="row g-5">
 
-        <!-- CONTEÚDO PRINCIPAL (Coluna da Esquerda) -->
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="col-lg-8">
 
             <!-- CABEÇALHO DO IMÓVEL -->
@@ -171,7 +174,6 @@
                 <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
                     <div>
                         <div class="d-flex gap-2 flex-wrap mb-3">
-                            <!-- TEXTO A PRETO COM FUNDO BRANCO PARA "COMPRAR/VENDER" -->
                             <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
 
                             @if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome))
@@ -191,29 +193,49 @@
                 </div>
             </div>
 
-            <!-- QUADRADOS DE DESTAQUE (Brancos) -->
+            <!-- QUADRADOS DE DESTAQUE DINÂMICOS -->
             <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
-                <div class="col">
-                    <div class="detail-stat p-3 text-center">
-                        <i class="bi bi-door-open d-block mb-2"></i>
-                        <span class="small d-block fw-bold" style="color: #6c757d;">Quartos</span>
-                        <strong class="text-dark fs-5">T@(Model.Quartos)</strong>
+
+                @* 1. Quartos (só exibe se tiver quartos > 0) *@
+                @if (Model.Quartos.HasValue && Model.Quartos.Value > 0)
+                {
+                    <div class="col">
+                        <div class="detail-stat p-3 text-center">
+                            <i class="bi bi-door-open d-block mb-2"></i>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Tipologia</span>
+                            <strong class="text-dark fs-5">T@(Model.Quartos)</strong>
+                        </div>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="detail-stat p-3 text-center">
-                        <i class="bi bi-droplet d-block mb-2"></i>
-                        <span class="small d-block fw-bold" style="color: #6c757d;">Casas de banho</span>
-                        <strong class="text-dark fs-5">@Model.CasasBanho WC</strong>
+                }
+
+                @* 2. Casas de Banho (só exibe se tiver WC > 0) *@
+                @if (Model.CasasBanho.HasValue && Model.CasasBanho.Value > 0)
+                {
+                    <div class="col">
+                        <div class="detail-stat p-3 text-center">
+                            <i class="bi bi-droplet d-block mb-2"></i>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Casas de banho</span>
+                            <strong class="text-dark fs-5">@Model.CasasBanho WC</strong>
+                        </div>
                     </div>
-                </div>
+                }
+
+                @* 3. Área Útil (se existir) OU Área Bruta/Terreno *@
                 <div class="col">
                     <div class="detail-stat p-3 text-center">
                         <i class="bi bi-aspect-ratio d-block mb-2"></i>
-                        <span class="small d-block fw-bold" style="color: #6c757d;">Área útil</span>
-                        <strong class="text-dark fs-5">@Model.AreaUtil.ToString("N0") m²</strong>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">
+                            @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0 ? "Área útil" : "Área total")
+                        </span>
+                        <strong class="text-dark fs-5">
+                            @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0
+                                ? Model.AreaUtil.Value.ToString("N0")
+                                : Model.AreaBruta.ToString("N0")) m²
+                        </strong>
                     </div>
                 </div>
+
+                @* 4. Preço por m² *@
                 <div class="col">
                     <div class="detail-stat p-3 text-center">
                         <i class="bi bi-cash-coin d-block mb-2"></i>
@@ -247,17 +269,30 @@
                         <span class="small d-block fw-bold" style="color: #6c757d;">Área bruta</span>
                         <strong class="text-dark">@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("N0") + " m²" : "—")</strong>
                     </div>
-                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                        <span class="small d-block fw-bold" style="color: #6c757d;">Estacionamento</span>
-                        <strong class="text-dark">@(Model.Estacionamento > 0 ? Model.Estacionamento + " lugar(es)" : "—")</strong>
-                    </div>
-                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                        <span class="small d-block fw-bold" style="color: #6c757d;">Ano de construção</span>
-                        <strong class="text-dark">@(Model.AnoConstrucao > 0 ? Model.AnoConstrucao.ToString() : "—")</strong>
-                    </div>
+                    @if (Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0)
+                    {
+                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Área útil</span>
+                            <strong class="text-dark">@Model.AreaUtil.Value.ToString("N0") m²</strong>
+                        </div>
+                    }
+                    @if (Model.Estacionamento.HasValue && Model.Estacionamento.Value > 0)
+                    {
+                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Estacionamento</span>
+                            <strong class="text-dark">@Model.Estacionamento.Value lugar(es)</strong>
+                        </div>
+                    }
+                    @if (Model.AnoConstrucao.HasValue && Model.AnoConstrucao.Value > 0)
+                    {
+                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Ano de construção</span>
+                            <strong class="text-dark">@Model.AnoConstrucao.Value</strong>
+                        </div>
+                    }
                     <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
                         <span class="small d-block fw-bold" style="color: #6c757d;">Certificado energético</span>
-                        <strong class="text-dark">@(Model.CertificadoEnergetico?.Nome ?? "—")</strong>
+                        <strong class="text-dark">@(Model.CertificadoEnergetico?.Nome ?? "Isento / Não aplicável")</strong>
                     </div>
                 </div>
             </section>
@@ -288,7 +323,7 @@
                 </section>
             }
 
-            <!-- INFORMAÇÃO INTERNA (Visível apenas para equipa) -->
+            <!-- INFORMAÇÃO INTERNA -->
             @if (equipa)
             {
                 <section class="card border-warning-subtle bg-white mb-4 shadow-sm border-start border-5 border-warning">
@@ -332,7 +367,7 @@
             }
         </div>
 
-        <!-- FORMULÁRIO DE CONTACTO LATERAL -->
+        <!-- CONTACTO LATERAL -->
         <aside class="col-lg-4">
             <div class="card contact-card border border-primary-subtle shadow-lg position-sticky bg-white" style="top: 2rem;">
                 <div class="card-body p-4 bg-white">
@@ -379,12 +414,10 @@
     </div>
 </main>
 
-<!-- MODAL ECRÃ CHEIO (FULLSCREEN) -->
+<!-- MODAL FULLSCREEN -->
 <div class="modal fade" id="fotoFullscreenModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content bg-dark">
-
-            <!-- BOTÃO DE FECHAR (X) COM Z-INDEX MÁXIMO E FUNDO PROTETOR -->
             <div class="position-absolute top-0 end-0 p-4" style="z-index: 9999;">
                 <button type="button" class="btn-close btn-close-white shadow-lg" data-bs-dismiss="modal" aria-label="Fechar" style="background-color: rgba(0,0,0,0.6); padding: 15px; border-radius: 50%; opacity: 1;"></button>
             </div>
@@ -415,17 +448,14 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
-        // Função para abrir o modal de Ecrã Cheio exatamente na foto clicada
         function abrirFullscreen(index) {
             const modal = new bootstrap.Modal(document.getElementById('fotoFullscreenModal'));
-
-            // Sincroniza o carrossel do ecrã cheio para ir para a foto certa
             const carouselFullscreen = document.getElementById('carouselFullscreen');
             const bsCarousel = bootstrap.Carousel.getOrCreateInstance(carouselFullscreen);
             bsCarousel.to(index);
-
             modal.show();
         }
     </script>
