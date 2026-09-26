@@ -79,6 +79,10 @@ namespace RPImobiliaria.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal? ValorComissao { get; set; }
 
+        [Display(Name = "Comissão (%)")]
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? PercentagemComissao { get; set; }
+
         [Display(Name = "Data de Registo")]
         public DateTime DataRegisto { get; set; } = DateTime.Now;
 

@@ -206,6 +206,7 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.Consultor)
                 .Include(i => i.Fotos)
                 .Include(i => i.Documentos)
+                .Include(i => i.Proprietarios).ThenInclude(p => p.Cliente) // <-- ADICIONADO
                 .Include(i => i.Distrito)
                 .Include(i => i.Concelho)
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
@@ -233,7 +234,13 @@ namespace RPImobiliaria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Create([Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel, int? clienteProprietarioId, List<int> selectedCaracteristicas, List<IFormFile> fotosUpload, List<IFormFile> documentosUpload)
+        public async Task<IActionResult> Create(
+            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] 
+            Imovel imovel, 
+            int? clienteProprietarioId, 
+            List<int> selectedCaracteristicas, 
+            List<IFormFile> fotosUpload, 
+            List<IFormFile> documentosUpload)
         {
             ModelState.Remove("ConsultorId");
 
@@ -299,7 +306,13 @@ namespace RPImobiliaria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] Imovel imovel, List<int> selectedCaracteristicas, List<IFormFile> novasFotos, List<IFormFile> documentosUpload, List<int> documentosRemover, int? clienteProprietarioId)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] 
+            Imovel imovel, 
+            List<int> selectedCaracteristicas, 
+            List<IFormFile> novasFotos, 
+            List<IFormFile> documentosUpload, 
+            List<int> documentosRemover, 
+            int? clienteProprietarioId)
         {
             if (id != imovel.Id) return NotFound();
 

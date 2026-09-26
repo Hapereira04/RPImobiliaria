@@ -323,43 +323,107 @@
                 </section>
             }
 
-            <!-- INFORMAÇÃO INTERNA -->
+            <!-- INFORMAÇÃO INTERNA (Visível para a Equipa) -->
             @if (equipa)
             {
                 <section class="card border-warning-subtle bg-white mb-4 shadow-sm border-start border-5 border-warning">
-                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
-                        <i class="bi bi-shield-lock-fill text-warning me-2"></i>Informação Interna (Privada)
+                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-shield-lock-fill text-warning me-2"></i>Informação Interna (Privada)</span>
+                        <span class="badge bg-warning text-dark">Acesso Restrito</span>
                     </div>
                     <div class="card-body bg-white p-4">
                         <div class="row g-3">
+                            <!-- Morada Exata -->
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold" style="color: #6c757d;">Morada exata</span>
-                                <strong class="text-dark">@(Model.MoradaExata ?? "—")</strong>
+                                <span class="small d-block fw-bold text-muted">Morada Exata</span>
+                                <strong class="text-dark">@(string.IsNullOrWhiteSpace(Model.MoradaExata) ? "—" : Model.MoradaExata)</strong>
                             </div>
+
+                            <!-- Número de Contrato -->
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold" style="color: #6c757d;">Contrato</span>
-                                <strong class="text-dark">@(Model.NumeroContrato ?? "—")</strong>
+                                <span class="small d-block fw-bold text-muted">Número do Contrato</span>
+                                <strong class="text-dark">@(string.IsNullOrWhiteSpace(Model.NumeroContrato) ? "—" : Model.NumeroContrato)</strong>
                             </div>
+
+                            <!-- Comissão Prevista (% e €) -->
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold" style="color: #6c757d;">Comissão prevista</span>
-                                <strong class="text-success fs-5">@(Model.ValorComissao?.ToString("C0") ?? "—")</strong>
+                                <span class="small d-block fw-bold text-muted">Comissão Prevista</span>
+                                <strong class="text-success fs-5">
+                                    @{
+                                        decimal? perc = Model.PercentagemComissao;
+                                        // Se a BD ainda tiver percentagem a null, mas tiver valor e preço, calcula na hora
+                                        if ((!perc.HasValue || perc.Value <= 0) && Model.ValorComissao.HasValue && Model.Preco > 0)
+                                        {
+                                            perc = (Model.ValorComissao.Value / Model.Preco) * 100m;
+                                        }
+                                    }
+
+                                    @if (Model.ValorComissao.HasValue && Model.ValorComissao.Value > 0)
+                                    {
+                                        @Model.ValorComissao.Value.ToString("N2") <text>€</text>
+                                        @if (perc.HasValue && perc.Value > 0)
+                                        {
+                                            <span class="fs-6 text-muted">(@perc.Value.ToString("0.##")%)</span>
+                                        }
+                                    }
+                                    else if (perc.HasValue && perc.Value > 0)
+                                    {
+                                        <span>@perc.Value.ToString("0.##")%</span>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </strong>
                             </div>
+
+                            <!-- Data de Registo -->
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold" style="color: #6c757d;">Notas internas</span>
-                                <strong class="text-dark">@(Model.ObservacoesInternas ?? "—")</strong>
+                                <span class="small d-block fw-bold text-muted">Data de Registo</span>
+                                <strong class="text-dark">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </div>
+
+                            <!-- Proprietário / Cliente Associado -->
+                            <div class="col-md-6">
+                                <span class="small d-block fw-bold text-muted">Proprietário(s)</span>
+                                @if (Model.Proprietarios != null && Model.Proprietarios.Any())
+                                {
+                                    @foreach (var p in Model.Proprietarios)
+                                    {
+                                        <span class="badge bg-light text-dark border me-1">
+                                            <i class="bi bi-person-fill text-primary me-1"></i>@(p.Cliente?.Nome ?? "Cliente #" + p.ClienteId)
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <strong class="text-dark">—</strong>
+                                }
+                            </div>
+
+                            <!-- Observações / Notas Internas -->
+                            <div class="col-12">
+                                <span class="small d-block fw-bold text-muted">Notas / Observações Internas</span>
+                                <p class="text-dark mb-0 fw-medium bg-light p-3 rounded border" style="white-space: pre-line;">
+                                    @(string.IsNullOrWhiteSpace(Model.ObservacoesInternas) ? "Sem observações internas registadas." : Model.ObservacoesInternas)
+                                </p>
                             </div>
                         </div>
+
+                        <!-- Documentos Privados -->
                         @if (Model.Documentos != null && Model.Documentos.Any())
                         {
-                            <hr class="border-secondary-subtle" />
-                            <div class="d-flex flex-wrap gap-2 mt-3">
-                                <span class="w-100 small fw-bold" style="color: #6c757d;">Documentos (PDF/DOC)</span>
-                                @foreach (var documento in Model.Documentos)
-                                {
-                                    <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark fw-bold shadow-sm">
-                                        <i class="bi bi-file-earmark-arrow-down-fill text-danger me-1"></i>@documento.NomeFicheiro
-                                    </a>
-                                }
+                            <hr class="border-secondary-subtle my-3" />
+                            <div>
+                                <span class="small d-block fw-bold text-muted mb-2"><i class="bi bi-file-earmark-pdf text-danger me-1"></i>Documentos Anexados (@Model.Documentos.Count)</span>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var documento in Model.Documentos)
+                                    {
+                                        <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark fw-bold shadow-sm">
+                                            <i class="bi bi-file-earmark-arrow-down-fill text-danger me-1"></i>@documento.NomeFicheiro
+                                        </a>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
@@ -435,11 +499,11 @@
                     @if (fotos.Count > 1)
                     {
                         <button class="carousel-control-prev" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="prev" style="z-index: 1050;">
-                            <span class="carousel-control-prev-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
                             <span class="visually-hidden">Anterior</span>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="next" style="z-index: 1050;">
-                            <span class="carousel-control-next-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
                             <span class="visually-hidden">Seguinte</span>
                         </button>
                     }

@@ -8,8 +8,8 @@
     .dropzone-area {
         border: 2px dashed var(--bs-primary);
         border-radius: 8px;
-        background-color: #ffffff; /* Fundo branco forçado */
-        color: #212529; /* Texto escuro forçado */
+        background-color: #ffffff;
+        color: #212529;
         padding: 40px 20px;
         text-align: center;
         cursor: pointer;
@@ -17,7 +17,7 @@
     }
 
         .dropzone-area:hover, .dropzone-area.dragover {
-            background-color: #f8f9fa; /* Cinza muito claro ao passar o rato */
+            background-color: #f8f9fa;
             border-color: var(--bs-success);
         }
 
@@ -113,8 +113,8 @@
                                 <label asp-for="Referencia" class="text-dark fw-bold">Referência (Ex: REF-001)</label>
                             </div>
                             <div class="col-md-8 form-floating">
-                                <input asp-for="Titulo" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Título" />
-                                <label asp-for="Titulo" class="text-dark fw-bold">Título do Anúncio</label>
+                                <input asp-for="Titulo" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Título" required />
+                                <label asp-for="Titulo" class="text-dark fw-bold">Título do Anúncio *</label>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -143,40 +143,53 @@
                     </div>
                 </div>
 
-                <!-- ÁREAS E DIVISÕES -->
-                <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                <!-- ÁREAS E DIVISÕES (Adapta-se ao tipo de imóvel) -->
+                <div class="card shadow-sm border-secondary-subtle bg-white mb-4" id="seccaoAreasDivisoes">
                     <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
                         <i class="bi bi-rulers text-primary me-1"></i> Áreas e Divisões
                     </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
-                            <div class="col-md-3 form-floating">
+                            <!-- Área Total / Bruta (Obrigatória em todos) -->
+                            <div class="col-md-3 form-floating" id="campoAreaBruta">
+                                <input asp-for="AreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" required />
+                                <label asp-for="AreaBruta" class="text-dark fw-bold" id="labelAreaBruta">Área Bruta / Total (m²) *</label>
+                            </div>
+
+                            <!-- Área Útil (Opcional ou irrelevante para terrenos) -->
+                            <div class="col-md-3 form-floating campo-residencial" id="campoAreaUtil">
                                 <input asp-for="AreaUtil" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Útil" />
                                 <label asp-for="AreaUtil" class="text-dark fw-bold">Área Útil (m²)</label>
                             </div>
-                            <div class="col-md-3 form-floating">
-                                <input asp-for="AreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" />
-                                <label asp-for="AreaBruta" class="text-dark fw-bold">Área Bruta (m²)</label>
-                            </div>
-                            <div class="col-md-3 form-floating">
+
+                            <!-- Quartos / Tipologia -->
+                            <div class="col-md-3 form-floating campo-habitacao" id="campoQuartos">
                                 <input asp-for="Quartos" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Quartos" />
-                                <label asp-for="Quartos" class="text-dark fw-bold">Quartos</label>
+                                <label asp-for="Quartos" class="text-dark fw-bold">Quartos / Tipologia</label>
                             </div>
-                            <div class="col-md-3 form-floating">
+
+                            <!-- WC -->
+                            <div class="col-md-3 form-floating campo-residencial" id="campoWC">
                                 <input asp-for="CasasBanho" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="WC" />
                                 <label asp-for="CasasBanho" class="text-dark fw-bold">WC</label>
                             </div>
-                            <div class="col-md-4 form-floating">
+
+                            <!-- Garagem -->
+                            <div class="col-md-4 form-floating campo-residencial" id="campoGaragem">
                                 <input asp-for="Estacionamento" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Garagem" />
-                                <label asp-for="Estacionamento" class="text-dark fw-bold">Garagem</label>
+                                <label asp-for="Estacionamento" class="text-dark fw-bold">Garagem / Estacionamento</label>
                             </div>
-                            <div class="col-md-4 form-floating">
+
+                            <!-- Piso / Andar -->
+                            <div class="col-md-4 form-floating campo-habitacao" id="campoPiso">
                                 <input asp-for="Piso" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Piso" />
-                                <label asp-for="Piso" class="text-dark fw-bold">Andar/Piso</label>
+                                <label asp-for="Piso" class="text-dark fw-bold">Andar / Piso</label>
                             </div>
-                            <div class="col-md-4 form-floating">
+
+                            <!-- Ano Construção -->
+                            <div class="col-md-4 form-floating campo-residencial" id="campoAno">
                                 <input asp-for="AnoConstrucao" class="form-control bg-white text-dark border-secondary-subtle" type="number" placeholder="Ano" />
-                                <label asp-for="AnoConstrucao" class="text-dark fw-bold">Construção</label>
+                                <label asp-for="AnoConstrucao" class="text-dark fw-bold">Ano Construção</label>
                             </div>
                         </div>
                     </div>
@@ -185,7 +198,7 @@
                 <!-- CARACTERÍSTICAS -->
                 @if (grupos != null && grupos.Any())
                 {
-                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
+                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4" id="seccaoCaracteristicas">
                         <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
                             <i class="bi bi-ui-checks-grid text-primary me-1"></i> Características
                         </div>
@@ -213,7 +226,7 @@
                     </div>
                 }
 
-                <!-- DADOS PRIVADOS -->
+                <!-- DADOS PRIVADOS (Com cálculo automático da Comissão % e €) -->
                 <div class="card shadow-sm bg-white border-start border-5 border-warning mb-4">
                     <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
                         <i class="bi bi-eye-slash-fill text-warning me-1"></i> Dados Privados (Equipa)
@@ -223,16 +236,26 @@
                             <input asp-for="MoradaExata" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Morada" />
                             <label asp-for="MoradaExata" class="text-dark fw-bold">Morada Exata</label>
                         </div>
+
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6 form-floating">
+                            <div class="col-md-4 form-floating">
                                 <input asp-for="NumeroContrato" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Contrato" />
                                 <label asp-for="NumeroContrato" class="text-dark fw-bold">Nº Contrato</label>
                             </div>
-                            <div class="col-md-6 form-floating">
-                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" style="color: #198754 !important;" type="number" step="0.01" placeholder="Comissão" />
+
+                            <!-- COMISSÃO EM % -->
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="PercentagemComissao" class="form-control bg-white text-dark border-secondary-subtle" id="inputComissaoPercent" type="number" step="0.01" min="0" max="100" placeholder="%" />
+                                <label asp-for="PercentagemComissao" class="text-dark fw-bold">Comissão (%)</label>
+                            </div>
+
+                            <!-- COMISSÃO EM € -->
+                            <div class="col-md-4 form-floating">
+                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" id="inputComissaoValor" style="color: #198754 !important;" type="number" step="0.01" placeholder="€" />
                                 <label asp-for="ValorComissao" class="text-dark fw-bold">Comissão Prevista (€)</label>
                             </div>
                         </div>
+
                         <div class="mb-3 p-3 border border-warning-subtle rounded bg-white">
                             <label class="form-label text-dark small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf text-warning me-1"></i> Documentos Privados (PDF, DOC)</label>
                             <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-white text-dark border-warning-subtle" />
@@ -251,7 +274,7 @@
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
                         <div class="input-group input-group-lg mb-4">
-                            <input asp-for="Preco" type="number" step="0.01" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" />
+                            <input asp-for="Preco" id="inputPrecoImovel" type="number" step="0.01" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" required />
                             <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
                         </div>
 
@@ -260,13 +283,19 @@
                             <select asp-for="TipoNegocioId" class="form-select form-select-sm mb-3 bg-white text-dark border-primary" asp-items="ViewBag.TipoNegocioId"></select>
 
                             <label asp-for="CategoriaImovelId" class="form-label small fw-bold text-dark">Categoria</label>
-                            <select asp-for="CategoriaImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CategoriaImovelId"></select>
+                            <select asp-for="CategoriaImovelId" id="selectCategoriaImovel" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CategoriaImovelId"></select>
 
-                            <label asp-for="EstadoImovelId" class="form-label small fw-bold text-dark">Estado</label>
-                            <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.EstadoImovelId"></select>
+                            <div id="blocoEstado">
+                                <label asp-for="EstadoImovelId" class="form-label small fw-bold text-dark">Estado</label>
+                                <select asp-for="EstadoImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.EstadoImovelId"></select>
+                            </div>
 
-                            <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold text-dark">Cl. Energética</label>
-                            <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CertificadoEnergeticoId"></select>
+                            <div id="blocoCertificado">
+                                <label asp-for="CertificadoEnergeticoId" class="form-label small fw-bold text-dark">Cl. Energética</label>
+                                <select asp-for="CertificadoEnergeticoId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.CertificadoEnergeticoId">
+                                    <option value="">-- Isento / Não Aplicável --</option>
+                                </select>
+                            </div>
 
                             <label asp-for="StatusImovelId" class="form-label small fw-bold text-dark">Status do Anúncio</label>
                             <select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.StatusImovelId"></select>
@@ -284,7 +313,7 @@
     </form>
 </div>
 
-<!-- MODAL ZOOM E SCRIPT DE FOTOS -->
+<!-- MODAL ZOOM -->
 <div class="modal fade" id="fotoZoomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
@@ -301,20 +330,205 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        let ficheirosEmMemoria = []; let fotoIdCounter = 0;
-        const dropzone = document.getElementById('dropzone'); const inputReal = document.getElementById('fotosInputReal'); const gallery = document.getElementById('gallery'); const form = document.getElementById('imovelForm'); const zoomImagem = document.getElementById('zoomImagem'); const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
+        // ==========================================
+        // 1. GESTÃO DE FOTOS E ARRASTAR
+        // ==========================================
+        let ficheirosEmMemoria = [];
+        let fotoIdCounter = 0;
+        const dropzone = document.getElementById('dropzone');
+        const inputReal = document.getElementById('fotosInputReal');
+        const gallery = document.getElementById('gallery');
+        const form = document.getElementById('imovelForm');
+        const zoomImagem = document.getElementById('zoomImagem');
+        const zoomModal = new bootstrap.Modal(document.getElementById('fotoZoomModal'));
+
         dropzone.addEventListener('click', () => inputReal.click());
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }); dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); processarFicheiros(e.dataTransfer.files); });
-        inputReal.addEventListener('change', (e) => { processarFicheiros(e.target.files); inputReal.value = ''; });
-        function processarFicheiros(files) { Array.from(files).forEach(file => { if (file.type.startsWith("image/")) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (e) => { ficheirosEmMemoria.push({ id: fotoIdCounter++, file: file, dataUrl: e.target.result }); desenharGaleria(); }; } }); }
-        function desenharGaleria() { gallery.innerHTML = ''; ficheirosEmMemoria.forEach((item, index) => { const thumb = document.createElement('div'); thumb.className = 'photo-thumbnail'; thumb.draggable = true; thumb.dataset.id = item.id; const badgeText = index === 0 ? '<i class="bi bi-star-fill text-warning"></i> Capa' : (index + 1); thumb.innerHTML = `<div class="photo-badge">${badgeText}</div><img src="${item.dataUrl}"><div class="photo-actions"><button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button><button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button></div>`; thumb.addEventListener('dragstart', handleDragStart); thumb.addEventListener('dragover', handleDragOver); thumb.addEventListener('dragleave', handleDragLeave); thumb.addEventListener('drop', handleDrop); thumb.addEventListener('dragend', handleDragEnd); gallery.appendChild(thumb); }); }
-        function removerFoto(id) { ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id); desenharGaleria(); } function abrirZoom(srcData) { zoomImagem.src = srcData; zoomModal.show(); }
-        let itemArrastado = null; function handleDragStart(e) { itemArrastado = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; } function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (itemArrastado !== this) { this.classList.add('drag-over'); } return false; } function handleDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleDrop(e) { e.stopPropagation(); this.classList.remove('drag-over'); if (itemArrastado !== this) { const idArrastado = parseInt(itemArrastado.dataset.id); const idAlvo = parseInt(this.dataset.id); const indexArrastado = ficheirosEmMemoria.findIndex(f => f.id === idArrastado); const indexAlvo = ficheirosEmMemoria.findIndex(f => f.id === idAlvo); const ficheiroMover = ficheirosEmMemoria.splice(indexArrastado, 1)[0]; ficheirosEmMemoria.splice(indexAlvo, 0, ficheiroMover); desenharGaleria(); } return false; }
-        function handleDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over')); }
-        form.addEventListener('submit', (e) => { const dt = new DataTransfer(); ficheirosEmMemoria.forEach(item => dt.items.add(item.file)); inputReal.files = dt.files; });
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            processarFicheiros(e.dataTransfer.files);
+        });
+
+        inputReal.addEventListener('change', (e) => {
+            processarFicheiros(e.target.files);
+            inputReal.value = '';
+        });
+
+        function processarFicheiros(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e) => {
+                        ficheirosEmMemoria.push({ id: fotoIdCounter++, file: file, dataUrl: e.target.result });
+                        desenharGaleria();
+                    };
+                }
+            });
+        }
+
+        function desenharGaleria() {
+            gallery.innerHTML = '';
+            ficheirosEmMemoria.forEach((item, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-thumbnail';
+                thumb.draggable = true;
+                thumb.dataset.id = item.id;
+                const badgeText = index === 0 ? '<i class="bi bi-star-fill text-warning"></i> Capa' : (index + 1);
+                thumb.innerHTML = `
+                            <div class="photo-badge">${badgeText}</div>
+                            <img src="${item.dataUrl}">
+                            <div class="photo-actions">
+                                <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button>
+                                <button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button>
+                            </div>`;
+                thumb.addEventListener('dragstart', handleDragStart);
+                thumb.addEventListener('dragover', handleDragOver);
+                thumb.addEventListener('dragleave', handleDragLeave);
+                thumb.addEventListener('drop', handleDrop);
+                thumb.addEventListener('dragend', handleDragEnd);
+                gallery.appendChild(thumb);
+            });
+        }
+
+        function removerFoto(id) {
+            ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id);
+            desenharGaleria();
+        }
+
+        function abrirZoom(srcData) {
+            zoomImagem.src = srcData;
+            zoomModal.show();
+        }
+
+        let itemArrastado = null;
+        function handleDragStart(e) {
+            itemArrastado = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (itemArrastado !== this) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            if (itemArrastado !== this) {
+                const idArrastado = parseInt(itemArrastado.dataset.id);
+                const idAlvo = parseInt(this.dataset.id);
+                const indexArrastado = ficheirosEmMemoria.findIndex(f => f.id === idArrastado);
+                const indexAlvo = ficheirosEmMemoria.findIndex(f => f.id === idAlvo);
+                const ficheiroMover = ficheirosEmMemoria.splice(indexArrastado, 1)[0];
+                ficheirosEmMemoria.splice(indexAlvo, 0, ficheiroMover);
+                desenharGaleria();
+            }
+            return false;
+        }
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        form.addEventListener('submit', (e) => {
+            const dt = new DataTransfer();
+            ficheirosEmMemoria.forEach(item => dt.items.add(item.file));
+            inputReal.files = dt.files;
+        });
+
+        // ==========================================
+        // 2. CÁLCULO BIDIRECIONAL DE COMISSÃO (% <-> €)
+        // ==========================================
+        const inputPreco = document.getElementById('inputPrecoImovel');
+        const inputPercent = document.getElementById('inputComissaoPercent');
+        const inputValor = document.getElementById('inputComissaoValor');
+
+        function parseNum(val) {
+            let n = parseFloat(val.toString().replace(',', '.'));
+            return isNaN(n) ? 0 : n;
+        }
+
+        if (inputPreco && inputPercent && inputValor) {
+            inputPercent.addEventListener('input', function() {
+                const p = parseNum(inputPreco.value);
+                const pct = parseNum(this.value);
+                if (pct > 0 && p > 0) {
+                    inputValor.value = ((p * pct) / 100.0).toFixed(2);
+                } else if (this.value === '') {
+                    inputValor.value = '';
+                }
+            });
+
+            inputValor.addEventListener('input', function() {
+                const p = parseNum(inputPreco.value);
+                const v = parseNum(this.value);
+                if (v > 0 && p > 0) {
+                    inputPercent.value = ((v / p) * 100.0).toFixed(2);
+                } else if (this.value === '') {
+                    inputPercent.value = '';
+                }
+            });
+
+            inputPreco.addEventListener('input', function() {
+                const p = parseNum(this.value);
+                const pct = parseNum(inputPercent.value);
+                if (pct > 0 && p > 0) {
+                    inputValor.value = ((p * pct) / 100.0).toFixed(2);
+                }
+            });
+        }
+
+        // ==========================================
+        // 3. ADAPTAÇÃO DINÂMICA CONFORME CATEGORIA (Terreno vs Loja vs Habitação)
+        // ==========================================
+        const selectCategoria = document.getElementById('selectCategoriaImovel');
+        const camposHabitacao = document.querySelectorAll('.campo-habitacao');
+        const camposResidenciais = document.querySelectorAll('.campo-residencial');
+        const blocoCertificado = document.getElementById('blocoCertificado');
+        const labelAreaBruta = document.getElementById('labelAreaBruta');
+
+        function atualizarFormularioPorCategoria() {
+            if (!selectCategoria) return;
+            const texto = selectCategoria.options[selectCategoria.selectedIndex]?.text.toLowerCase() || '';
+
+            const isTerreno = texto.includes('terreno') || texto.includes('lote');
+            const isLojaComercio = texto.includes('loja') || texto.includes('armazém') || texto.includes('armazem') || texto.includes('comércio') || texto.includes('negócio') || texto.includes('trespasse');
+
+            if (isTerreno) {
+                // Terreno: Oculta quartos, wc, ano, garagem, andar e certificado energético
+                camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
+                camposResidenciais.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
+                if (blocoCertificado) blocoCertificado.style.display = 'none';
+                if (labelAreaBruta) labelAreaBruta.innerText = 'Área Total do Terreno (m²) *';
+            }
+            else if (isLojaComercio) {
+                // Loja/Comércio: Não tem quartos nem piso residencial, mas tem WC, Áreas e Certificado
+                camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
+                camposResidenciais.forEach(el => el.style.display = '');
+                if (blocoCertificado) blocoCertificado.style.display = '';
+                if (labelAreaBruta) labelAreaBruta.innerText = 'Área Bruta (m²) *';
+            }
+            else {
+                // Apartamento / Moradia / Outros residenciais: mostra tudo
+                camposHabitacao.forEach(el => el.style.display = '');
+                camposResidenciais.forEach(el => el.style.display = '');
+                if (blocoCertificado) blocoCertificado.style.display = '';
+                if (labelAreaBruta) labelAreaBruta.innerText = 'Área Bruta / Total (m²) *';
+            }
+        }
+
+        if (selectCategoria) {
+            selectCategoria.addEventListener('change', atualizarFormularioPorCategoria);
+            atualizarFormularioPorCategoria(); // Executa no carregamento
+        }
     </script>
-    <!-- NOTA: Se você tiver o "_LocalizacaoSelector.cshtml" num script externo, lembre-se de o manter carregado abaixo! -->
-    <!-- <script src="~/js/localizacao-cascas.js"></script> -->
 }
