@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using QRCoder;
 
 namespace RPImobiliaria.Controllers
 {
@@ -591,6 +592,45 @@ namespace RPImobiliaria.Controllers
                 }
             }
             await _context.SaveChangesAsync();
+        }
+
+        [Authorize(Roles = "Admin,Consultor")]
+        public async Task<IActionResult> FichaImovel(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var imovel = await _context.Imoveis
+                .Include(i => i.CategoriaImovel)
+                .Include(i => i.EstadoImovel)
+                .Include(i => i.TipoNegocio)
+                .Include(i => i.StatusImovel)
+                .Include(i => i.CertificadoEnergetico)
+                .Include(i => i.Consultor)
+                .Include(i => i.Fotos)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
+                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
+                .Include(i => i.Caracteristicas).ThenInclude(ic => ic.Caracteristica)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (imovel == null) return NotFound();
+
+            // 1. Gera o URL absoluto da página pública de detalhes deste imóvel
+            string urlPublico = Url.Action("Details", "Imovels", new { id = imovel.Id }, Request.Scheme)
+                ?? $"{Request.Scheme}://{Request.Host}/Imovels/Details/{imovel.Id}";
+
+            // 2. Cria o QR Code em Base64
+            using (var qrGenerator = new QRCodeGenerator())
+            {
+                var qrCodeData = qrGenerator.CreateQrCode(urlPublico, QRCodeGenerator.ECCLevel.Q);
+                var qrCode = new PngByteQRCode(qrCodeData);
+                byte[] qrCodeBytes = qrCode.GetGraphic(20);
+                ViewBag.QrCodeBase64 = Convert.ToBase64String(qrCodeBytes);
+            }
+
+            ViewBag.UrlPublico = urlPublico;
+
+            return View(imovel);
         }
     }
 }

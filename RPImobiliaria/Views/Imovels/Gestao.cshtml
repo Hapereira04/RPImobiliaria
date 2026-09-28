@@ -103,6 +103,10 @@
                                 <td class="pe-4 text-end bg-white">
                                     <div class="d-flex justify-content-end gap-1 shadow-sm">
 
+                                        <a asp-action="FichaImovel" asp-route-id="@imovel.Id" target="_blank" class="btn btn-sm btn-outline-dark" title="Gerar Ficha com QR Code">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Ficha
+                                        </a>
+
                                         <!-- BOTÃO DE DESTAQUE (Estrela Amarela ou Cinzenta) -->
                                         <form asp-action="AlternarDestaque" asp-route-id="@imovel.Id" method="post" class="m-0">
                                             <button type="submit" class="btn btn-sm @(imovel.EmDestaque ? "btn-warning text-dark" : "btn-outline-secondary")" title="@(imovel.EmDestaque ? "Remover Destaque" : "Destacar Imóvel (Máx 3)")">

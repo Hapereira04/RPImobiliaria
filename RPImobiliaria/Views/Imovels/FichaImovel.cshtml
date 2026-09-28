@@ -1,0 +1,235 @@
+﻿@model RPImobiliaria.Models.Imovel
+@{
+    Layout = null; // Ficha limpa sem menus de navegação
+    ViewData["Title"] = "Ficha - " + (Model.Referencia ?? Model.Id.ToString());
+
+    var fotoCapa = Model.Fotos.OrderBy(f => f.Ordem).FirstOrDefault()?.CaminhoImagem;
+    var fotosGaleria = Model.Fotos.OrderBy(f => f.Ordem).Skip(1).Take(3).ToList();
+
+    var nomeFreguesia = Model.Freguesia?.Nome;
+    var nomeConcelho = Model.Concelho?.Nome ?? Model.Freguesia?.Concelho?.Nome;
+    var nomeDistrito = Model.Distrito?.Nome ?? Model.Freguesia?.Concelho?.Distrito?.Nome;
+
+    var locParts = new List<string>();
+    if (!string.IsNullOrWhiteSpace(nomeFreguesia)) locParts.Add(nomeFreguesia);
+    if (!string.IsNullOrWhiteSpace(nomeConcelho)) locParts.Add(nomeConcelho);
+    if (!string.IsNullOrWhiteSpace(nomeDistrito)) locParts.Add(nomeDistrito);
+
+    var localizacao = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização por indicar";
+}
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #212529;
+        }
+
+        .sheet {
+            background: #ffffff;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .img-capa {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .img-sub {
+            width: 100%;
+            height: 85px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .qr-box img {
+            width: 110px;
+            height: 110px;
+        }
+
+        .stat-badge {
+            background-color: #f1f3f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* Estilos específicos para a impressão/PDF */
+        @@media print {
+            body {
+                background: none;
+                margin: 0;
+            }
+            .sheet {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: 100vh;
+                padding: 10mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+            @@page {
+                size: A4;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BOTÕES DE AÇÃO (Não aparecem no papel/PDF) -->
+    <div class="container text-center my-3 no-print">
+        <button class="btn btn-primary px-4 fw-bold shadow-sm" onclick="window.print()">
+            <i class="bi bi-printer me-2"></i>Imprimir / Guardar em PDF
+        </button>
+        <button class="btn btn-outline-secondary px-3 ms-2" onclick="window.close()">
+            Fechar
+        </button>
+    </div>
+
+    <!-- FOLHA A4 -->
+    <div class="sheet d-flex flex-column justify-content-between">
+        <div>
+            <!-- CABEÇALHO DA AGÊNCIA -->
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div>
+                    <h3 class="fw-bold mb-0 text-primary">RP Mediação Imobiliária</h3>
+                    <small class="text-muted">AMI: 12345 | Ovar, Aveiro</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-dark fs-6 px-3 py-2">Ref. @(Model.Referencia ?? Model.Id.ToString())</span>
+                </div>
+            </div>
+
+            <!-- TÍTULO E PREÇO -->
+            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                <div>
+                    <h2 class="h4 fw-bold mb-1">@Model.Titulo</h2>
+                    <p class="text-muted mb-0 small"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@localizacao</p>
+                </div>
+                <div class="text-end">
+                    <span class="h3 fw-bold text-success mb-0">@Model.Preco.ToString("N0") €</span>
+                    <span class="d-block text-muted small">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
+                </div>
+            </div>
+
+            <!-- FOTOGRAFIAS -->
+            <div class="row g-2 mb-3">
+                <div class="@(fotosGaleria.Any() ? "col-8" : "col-12")">
+                    @if (!string.IsNullOrEmpty(fotoCapa))
+                    {
+                        <img src="@fotoCapa" class="img-capa shadow-sm" alt="Foto principal" />
+                    }
+                    else
+                    {
+                        <div class="img-capa bg-light d-flex align-items-center justify-content-center text-muted">Sem Imagem</div>
+                    }
+                </div>
+                @if (fotosGaleria.Any())
+                {
+                    <div class="col-4 d-flex flex-column justify-content-between">
+                        @foreach (var f in fotosGaleria)
+                        {
+                            <img src="@f.CaminhoImagem" class="img-sub shadow-sm" alt="Foto de detalhe" />
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- CARACTERÍSTICAS EM DESTAQUE -->
+            <div class="row g-2 mb-3">
+                @if (Model.Quartos.HasValue && Model.Quartos.Value > 0)
+                {
+                    <div class="col">
+                        <div class="stat-badge">
+                            <span class="small d-block text-muted">Tipologia</span>
+                            <strong>T@(Model.Quartos)</strong>
+                        </div>
+                    </div>
+                }
+                @if (Model.CasasBanho.HasValue && Model.CasasBanho.Value > 0)
+                {
+                    <div class="col">
+                        <div class="stat-badge">
+                            <span class="small d-block text-muted">WC</span>
+                            <strong>@Model.CasasBanho</strong>
+                        </div>
+                    </div>
+                }
+                <div class="col">
+                    <div class="stat-badge">
+                        <span class="small d-block text-muted">
+                            @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0 ? "Área Útil" : "Área Total")
+                        </span>
+                        <strong>
+                            @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0 
+                                ? Model.AreaUtil.Value.ToString("N0") 
+                                : Model.AreaBruta.ToString("N0")) m²
+                        </strong>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="stat-badge">
+                        <span class="small d-block text-muted">Cert. Energético</span>
+                        <strong>@(Model.CertificadoEnergetico?.Nome ?? "Isento")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESCRIÇÃO -->
+            <div class="mb-3">
+                <h6 class="fw-bold border-bottom pb-1 mb-2 text-uppercase small text-muted">Descrição</h6>
+                <p class="small text-secondary" style="line-height: 1.5; white-space: pre-line; max-height: 180px; overflow: hidden;">
+                    @(string.IsNullOrWhiteSpace(Model.Descricao) ? "Consulte-nos para mais detalhes sobre este imóvel." : Model.Descricao)
+                </p>
+            </div>
+        </div>
+
+        <!-- RODAPÉ: QR CODE + CONSULTOR RESPONSÁVEL -->
+        <div class="border-top pt-3 mt-2">
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Informações do Consultor / Contactos -->
+                <div>
+                    <span class="small text-muted d-block text-uppercase fw-bold">Consultor Responsável</span>
+                    <strong class="d-block fs-6">@(Model.Consultor?.Nome ?? "RP Mediação Imobiliária")</strong>
+                    <span class="small text-secondary"><i class="bi bi-telephone me-1"></i>@(Model.Consultor?.Telemovel ?? "+351 999 999 999")</span><br />
+                    <span class="small text-secondary"><i class="bi bi-envelope me-1"></i>@(Model.Consultor?.Email ?? "geral@rpimobiliaria.pt")</span>
+                </div>
+
+                <!-- Bloco do QR Code -->
+                <div class="text-center qr-box">
+                    @if (ViewBag.QrCodeBase64 != null)
+                    {
+                        <img src="data:image/png;base64,@ViewBag.QrCodeBase64" class="border p-1 bg-white rounded shadow-sm" alt="QR Code do Imóvel" />
+                        <span class="d-block small text-muted mt-1 fw-bold" style="font-size: 0.7rem;">Aceda ao anúncio</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Dispara o diálogo de Guardar em PDF / Imprimir mal a página e as imagens carreguem
+        window.addEventListener('load', function () {
+            window.print();
+        });
+    </script>
+</body>
+</html>
