@@ -12,6 +12,10 @@ namespace RPImobiliaria.Models
 
         public bool EmDestaque { get; set; } = false;
 
+        // Ocultar da listagem geral/pesquisa (visível apenas através do link direto)
+        [Display(Name = "Ocultar do Catálogo")]
+        public bool OcultoDoCatalogo { get; set; } = false;
+
         // --- DADOS PÚBLICOS ---
         [Required(ErrorMessage = "O título é obrigatório.")]
         [StringLength(150, ErrorMessage = "O título não pode exceder 150 caracteres.")]
@@ -37,6 +41,17 @@ namespace RPImobiliaria.Models
 
         [Display(Name = "Área Útil (m²)")]
         public double? AreaUtil { get; set; }
+
+        // --- TERRENOS (URBANO / RÚSTICO / MISTO) ---
+        [Display(Name = "Classificação do Terreno")]
+        [StringLength(20)]
+        public string? TipoTerreno { get; set; } // "Urbano", "Rústico", "Misto"
+
+        [Display(Name = "Área Urbana (m²)")]
+        public double? AreaUrbana { get; set; }
+
+        [Display(Name = "Área Rústica (m²)")]
+        public double? AreaRustica { get; set; }
 
         // Área Total ou Bruta (obrigatória em habitações, lojas e terrenos)
         [Required(ErrorMessage = "A área bruta / total do terreno é obrigatória.")]
@@ -82,6 +97,9 @@ namespace RPImobiliaria.Models
         [Display(Name = "Comissão (%)")]
         [Column(TypeName = "decimal(5,2)")]
         public decimal? PercentagemComissao { get; set; }
+
+        [Display(Name = "Comissão inclui IVA")]
+        public bool ComissaoComIva { get; set; } = false;
 
         [Display(Name = "Data de Registo")]
         public DateTime DataRegisto { get; set; } = DateTime.Now;

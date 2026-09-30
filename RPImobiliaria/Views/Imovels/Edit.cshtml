@@ -157,10 +157,34 @@
                         <i class="bi bi-rulers text-primary me-1"></i> Áreas e Divisões
                     </div>
                     <div class="card-body p-4">
+
+                        <!-- BLOCO ESPECÍFICO DE TERRENO (Rústico / Urbano / Misto) -->
+                        <div id="blocoCamposTerreno" class="row g-3 mb-3 p-3 bg-light rounded border" style="display: none;">
+                            <div class="col-md-4 form-floating">
+                                <select asp-for="TipoTerreno" id="selectTipoTerreno" class="form-select bg-white text-dark border-secondary-subtle">
+                                    <option value="">-- Selecione --</option>
+                                    <option value="Urbano">Urbano</option>
+                                    <option value="Rústico">Rústico</option>
+                                    <option value="Misto">Misto</option>
+                                </select>
+                                <label asp-for="TipoTerreno" class="text-dark fw-bold">Classificação do Solo</label>
+                            </div>
+
+                            <div class="col-md-4 form-floating" id="campoAreaUrbana" style="display: none;">
+                                <input asp-for="AreaUrbana" id="inputAreaUrbana" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Urbana" />
+                                <label asp-for="AreaUrbana" class="text-dark fw-bold">Área Urbana (m²)</label>
+                            </div>
+
+                            <div class="col-md-4 form-floating" id="campoAreaRustica" style="display: none;">
+                                <input asp-for="AreaRustica" id="inputAreaRustica" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Rústica" />
+                                <label asp-for="AreaRustica" class="text-dark fw-bold">Área Rústica (m²)</label>
+                            </div>
+                        </div>
+
                         <div class="row g-3">
                             <!-- Área Total / Bruta -->
                             <div class="col-md-3 form-floating" id="campoAreaBruta">
-                                <input asp-for="AreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" required />
+                                <input asp-for="AreaBruta" id="inputAreaBruta" class="form-control bg-white text-dark border-secondary-subtle" type="number" step="0.01" placeholder="Área Bruta" required />
                                 <label asp-for="AreaBruta" class="text-dark fw-bold" id="labelAreaBruta">Área Bruta / Total (m²) *</label>
                             </div>
 
@@ -235,7 +259,7 @@
                     </div>
                 }
 
-                <!-- DADOS PRIVADOS (Comissão em % e €) -->
+                <!-- DADOS PRIVADOS (Comissão em % / € e Switch de IVA) -->
                 <div class="card shadow-sm bg-white border-start border-5 border-warning mb-4">
                     <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3">
                         <i class="bi bi-eye-slash-fill text-warning me-1"></i> Dados Privados (Equipa)
@@ -246,21 +270,29 @@
                             <label asp-for="MoradaExata" class="text-dark fw-bold">Morada Exata</label>
                         </div>
                         <div class="row g-3 mb-3">
-                            <div class="col-md-4 form-floating">
+                            <div class="col-md-3 form-floating">
                                 <input asp-for="NumeroContrato" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Contrato" />
                                 <label asp-for="NumeroContrato" class="text-dark fw-bold">Nº Contrato</label>
                             </div>
 
                             <!-- COMISSÃO % -->
-                            <div class="col-md-4 form-floating">
+                            <div class="col-md-3 form-floating">
                                 <input asp-for="PercentagemComissao" class="form-control bg-white text-dark border-secondary-subtle" id="inputComissaoPercent" type="number" step="0.01" min="0" max="100" placeholder="%" />
                                 <label asp-for="PercentagemComissao" class="text-dark fw-bold">Comissão (%)</label>
                             </div>
 
                             <!-- COMISSÃO € -->
-                            <div class="col-md-4 form-floating">
+                            <div class="col-md-3 form-floating">
                                 <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" id="inputComissaoValor" style="color: #198754 !important;" type="number" step="0.01" placeholder="Comissão" />
                                 <label asp-for="ValorComissao" class="text-dark fw-bold">Comissão Prevista (€)</label>
+                            </div>
+
+                            <!-- CHECKBOX IVA -->
+                            <div class="col-md-3 d-flex align-items-center">
+                                <div class="form-check form-switch ps-4">
+                                    <input class="form-check-input" type="checkbox" asp-for="ComissaoComIva" id="checkComissaoIva" />
+                                    <label class="form-check-label text-dark fw-bold small" for="checkComissaoIva">Comissão inclui IVA (23%)</label>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3 p-3 border border-warning-subtle rounded bg-white">
@@ -308,9 +340,17 @@
                             <select asp-for="StatusImovelId" class="form-select form-select-sm mb-3 bg-white text-dark border-secondary-subtle" asp-items="ViewBag.StatusImovelId"></select>
 
                             <label class="form-label small fw-bold text-dark">Proprietário (Cliente)</label>
-                            <select name="clienteProprietarioId" class="form-select form-select-sm bg-white text-dark border-success" asp-items="ViewBag.ListaClientes">
+                            <select name="clienteProprietarioId" class="form-select form-select-sm mb-3 bg-white text-dark border-success" asp-items="ViewBag.ListaClientes">
                                 <option value="">-- Opcional --</option>
                             </select>
+
+                            <!-- CHECKBOX OCULTAR DO CATÁLOGO -->
+                            <div class="form-check form-switch p-2 bg-light rounded border">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" asp-for="OcultoDoCatalogo" id="checkOculto" />
+                                <label class="form-check-label text-dark fw-bold small" for="checkOculto">
+                                    <i class="bi bi-eye-slash me-1"></i> Ocultar do catálogo (apenas link)
+                                </label>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Guardar Alterações</button>
                     </div>
@@ -344,12 +384,12 @@
             @if (Model.Fotos != null)
             {
                 int idFalso = -1000;
-                            foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
+                foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
                 {
                     <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
-                            }
+                }
             }
-                ];
+        ];
 
         let fotosRemovidasIds = [];
         let fotoIdCounter = 0;
@@ -397,12 +437,12 @@
                 thumb.dataset.id = item.id;
                 const badgeText = index === 0 ? '<i class="bi bi-star-fill text-warning"></i> Capa' : (index + 1);
                 thumb.innerHTML = `
-                            <div class="photo-badge">${badgeText}</div>
-                            <img src="${item.dataUrl}">
-                            <div class="photo-actions">
-                                <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button>
-                                <button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button>
-                            </div>`;
+                    <div class="photo-badge">${badgeText}</div>
+                    <img src="${item.dataUrl}">
+                    <div class="photo-actions">
+                        <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="abrirZoom('${item.dataUrl}')"><i class="bi bi-search"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger rounded-circle" onclick="removerFoto(${item.id})"><i class="bi bi-trash"></i></button>
+                    </div>`;
                 thumb.addEventListener('dragstart', handleDragStart);
                 thumb.addEventListener('dragover', handleDragOver);
                 thumb.addEventListener('dragleave', handleDragLeave);
@@ -500,7 +540,6 @@
         }
 
         if (inputPreco && inputPercent && inputValor) {
-            // Se já vier com valor ou percentagem do servidor, calcula o outro no arranque
             const pInicial = parseNum(inputPreco.value);
             const pctInicial = parseNum(inputPercent.value);
             const vInicial = parseNum(inputValor.value);
@@ -513,7 +552,7 @@
                 }
             }
 
-            inputPercent.addEventListener('input', function() {
+            inputPercent.addEventListener('input', function () {
                 const p = parseNum(inputPreco.value);
                 const pct = parseNum(this.value);
                 if (pct > 0 && p > 0) {
@@ -523,7 +562,7 @@
                 }
             });
 
-            inputValor.addEventListener('input', function() {
+            inputValor.addEventListener('input', function () {
                 const p = parseNum(inputPreco.value);
                 const v = parseNum(this.value);
                 if (v > 0 && p > 0) {
@@ -533,7 +572,7 @@
                 }
             });
 
-            inputPreco.addEventListener('input', function() {
+            inputPreco.addEventListener('input', function () {
                 const p = parseNum(this.value);
                 const pct = parseNum(inputPercent.value);
                 if (pct > 0 && p > 0) {
@@ -543,13 +582,21 @@
         }
 
         // ==========================================
-        // 3. ADAPTAÇÃO DINÂMICA CONFORME CATEGORIA
+        // 3. ADAPTAÇÃO DINÂMICA DE TERRENOS E CATEGORIAS
         // ==========================================
         const selectCategoria = document.getElementById('selectCategoriaImovel');
         const camposHabitacao = document.querySelectorAll('.campo-habitacao');
         const camposResidenciais = document.querySelectorAll('.campo-residencial');
         const blocoCertificado = document.getElementById('blocoCertificado');
         const labelAreaBruta = document.getElementById('labelAreaBruta');
+
+        const blocoCamposTerreno = document.getElementById('blocoCamposTerreno');
+        const selectTipoTerreno = document.getElementById('selectTipoTerreno');
+        const campoAreaUrbana = document.getElementById('campoAreaUrbana');
+        const campoAreaRustica = document.getElementById('campoAreaRustica');
+        const inputAreaUrbana = document.getElementById('inputAreaUrbana');
+        const inputAreaRustica = document.getElementById('inputAreaRustica');
+        const inputAreaBruta = document.getElementById('inputAreaBruta');
 
         function atualizarFormularioPorCategoria() {
             if (!selectCategoria) return;
@@ -563,26 +610,62 @@
                 camposResidenciais.forEach(el => el.style.display = 'none');
                 if (blocoCertificado) blocoCertificado.style.display = 'none';
                 if (labelAreaBruta) labelAreaBruta.innerText = 'Área Total do Terreno (m²) *';
-            }
+                if (blocoCamposTerreno) blocoCamposTerreno.style.display = '';
+                atualizarCamposTerreno();
+            } 
             else if (isLojaComercio) {
                 camposHabitacao.forEach(el => el.style.display = 'none');
                 camposResidenciais.forEach(el => el.style.display = '');
                 if (blocoCertificado) blocoCertificado.style.display = '';
                 if (labelAreaBruta) labelAreaBruta.innerText = 'Área Bruta (m²) *';
-            }
+                if (blocoCamposTerreno) blocoCamposTerreno.style.display = 'none';
+            } 
             else {
                 camposHabitacao.forEach(el => el.style.display = '');
                 camposResidenciais.forEach(el => el.style.display = '');
                 if (blocoCertificado) blocoCertificado.style.display = '';
                 if (labelAreaBruta) labelAreaBruta.innerText = 'Área Bruta / Total (m²) *';
+                if (blocoCamposTerreno) blocoCamposTerreno.style.display = 'none';
             }
         }
 
-        if (selectCategoria) {
-            selectCategoria.addEventListener('change', atualizarFormularioPorCategoria);
+        function atualizarCamposTerreno() {
+            const tipo = selectTipoTerreno?.value;
+            if (tipo === 'Misto') {
+                campoAreaUrbana.style.display = '';
+                campoAreaRustica.style.display = '';
+            } else if (tipo === 'Urbano') {
+                campoAreaUrbana.style.display = '';
+                campoAreaRustica.style.display = 'none';
+            } else if (tipo === 'Rústico') {
+                campoAreaUrbana.style.display = 'none';
+                campoAreaRustica.style.display = '';
+            } else {
+                campoAreaUrbana.style.display = 'none';
+                campoAreaRustica.style.display = 'none';
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        function somarAreasMisto() {
+            const tipo = selectTipoTerreno?.value;
+            const u = parseNum(inputAreaUrbana?.value);
+            const r = parseNum(inputAreaRustica?.value);
+
+            if (tipo === 'Misto' && (u > 0 || r > 0)) {
+                inputAreaBruta.value = (u + r).toFixed(2);
+            } else if (tipo === 'Urbano' && u > 0) {
+                inputAreaBruta.value = u.toFixed(2);
+            } else if (tipo === 'Rústico' && r > 0) {
+                inputAreaBruta.value = r.toFixed(2);
+            }
+        }
+
+        if (selectCategoria) selectCategoria.addEventListener('change', atualizarFormularioPorCategoria);
+        if (selectTipoTerreno) selectTipoTerreno.addEventListener('change', () => { atualizarCamposTerreno(); somarAreasMisto(); });
+        if (inputAreaUrbana) inputAreaUrbana.addEventListener('input', somarAreasMisto);
+        if (inputAreaRustica) inputAreaRustica.addEventListener('input', somarAreasMisto);
+
+        document.addEventListener("DOMContentLoaded", function () {
             desenharGaleria();
             atualizarFormularioPorCategoria();
         });

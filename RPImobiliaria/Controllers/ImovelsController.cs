@@ -49,6 +49,9 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
                 .AsQueryable();
 
+            // FILTRO: Esconde imóveis não listados do catálogo público
+            query = query.Where(i => !i.OcultoDoCatalogo);
+
             if (!string.IsNullOrWhiteSpace(filtros.Pesquisa))
             {
                 var pesquisa = filtros.Pesquisa.Trim();
@@ -124,10 +127,6 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho)
                 .AsQueryable();
 
-            // RESTRIÇÃO REMOVIDA! 
-            // Apagámos o bloco 'if (!User.IsInRole("Admin"))' que impedia
-            // os consultores de verem os imóveis dos colegas. Agora todos vêem e editam tudo.
-
             return View(await query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id).ToListAsync());
         }
 
@@ -139,7 +138,7 @@ namespace RPImobiliaria.Controllers
             var imovel = await _context.Imoveis.FindAsync(id);
             if (imovel == null) return NotFound();
 
-            if (!imovel.EmDestaque) // Se está a tentar DESTACAR o imóvel
+            if (!imovel.EmDestaque)
             {
                 var destaquesAtuais = await _context.Imoveis.CountAsync(i => i.EmDestaque);
                 if (destaquesAtuais >= 3)
@@ -150,7 +149,7 @@ namespace RPImobiliaria.Controllers
                 imovel.EmDestaque = true;
                 TempData["MensagemSucesso"] = $"O imóvel {imovel.Referencia ?? imovel.Id.ToString()} foi colocado em destaque na página inicial!";
             }
-            else // Se está a tentar REMOVER o destaque
+            else
             {
                 imovel.EmDestaque = false;
                 TempData["MensagemSucesso"] = $"O destaque do imóvel {imovel.Referencia ?? imovel.Id.ToString()} foi removido.";
@@ -207,7 +206,7 @@ namespace RPImobiliaria.Controllers
                 .Include(i => i.Consultor)
                 .Include(i => i.Fotos)
                 .Include(i => i.Documentos)
-                .Include(i => i.Proprietarios).ThenInclude(p => p.Cliente) // <-- ADICIONADO
+                .Include(i => i.Proprietarios).ThenInclude(p => p.Cliente)
                 .Include(i => i.Distrito)
                 .Include(i => i.Concelho)
                 .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
@@ -236,11 +235,11 @@ namespace RPImobiliaria.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Create(
-            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] 
-            Imovel imovel, 
-            int? clienteProprietarioId, 
-            List<int> selectedCaracteristicas, 
-            List<IFormFile> fotosUpload, 
+            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")]
+            Imovel imovel,
+            int? clienteProprietarioId,
+            List<int> selectedCaracteristicas,
+            List<IFormFile> fotosUpload,
             List<IFormFile> documentosUpload)
         {
             ModelState.Remove("ConsultorId");
@@ -307,12 +306,14 @@ namespace RPImobiliaria.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")] 
-            Imovel imovel, 
-            List<int> selectedCaracteristicas, 
-            List<IFormFile> novasFotos, 
-            List<IFormFile> documentosUpload, 
-            List<int> documentosRemover, 
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,DataRegisto,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")]
+            Imovel imovel,
+            List<int> selectedCaracteristicas,
+            List<IFormFile> novasFotos,
+            List<IFormFile> documentosUpload,
+            List<int> documentosRemover,
             int? clienteProprietarioId)
         {
             if (id != imovel.Id) return NotFound();
@@ -513,12 +514,10 @@ namespace RPImobiliaria.Controllers
             ViewData["ListaClientes"] = new SelectList(_context.Clientes, "Id", "Nome", clienteProprietarioId);
             ViewData["ConsultorId"] = new SelectList(_context.Consultores, "Id", "Nome", imovel?.ConsultorId);
 
-            // 1. Lê diretamente das novas gavetas da Base de Dados
             int? distritoId = imovel?.DistritoId;
             int? concelhoId = imovel?.ConcelhoId;
             int? freguesiaId = imovel?.FreguesiaId;
 
-            // 2. Sistema de "Auto-cura" para imóveis antigos (que só tinham Freguesia preenchida)
             if (distritoId == null && concelhoId == null && freguesiaId != null)
             {
                 var locAntiga = await _context.Freguesias.Include(f => f.Concelho).FirstOrDefaultAsync(f => f.Id == freguesiaId);
@@ -529,7 +528,6 @@ namespace RPImobiliaria.Controllers
                 }
             }
 
-            // 3. Preenche as Dropdowns com base na informação correta
             ViewBag.DistritoId = new SelectList(_context.Distritos.OrderBy(d => d.Nome), "Id", "Nome", distritoId);
 
             ViewBag.ConcelhoId = new SelectList(
@@ -615,11 +613,9 @@ namespace RPImobiliaria.Controllers
 
             if (imovel == null) return NotFound();
 
-            // 1. Gera o URL absoluto da página pública de detalhes deste imóvel
             string urlPublico = Url.Action("Details", "Imovels", new { id = imovel.Id }, Request.Scheme)
                 ?? $"{Request.Scheme}://{Request.Host}/Imovels/Details/{imovel.Id}";
 
-            // 2. Cria o QR Code em Base64
             using (var qrGenerator = new QRCodeGenerator())
             {
                 var qrCodeData = qrGenerator.CreateQrCode(urlPublico, QRCodeGenerator.ECCLevel.Q);
