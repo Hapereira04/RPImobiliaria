@@ -26,6 +26,13 @@
             .OrderBy(g => g.Key) ?? Enumerable.Empty<IGrouping<string, RPImobiliaria.Models.ImovelCaracteristica>>();
 
     var equipa = User.IsInRole("Admin") || User.IsInRole("Consultor");
+
+    // ==========================================
+    // FORÇAR PONTOS NOS MILHARES E VÍRGULAS NAS DECIMAIS
+    // ==========================================
+    var culturaPT = new System.Globalization.CultureInfo("pt-PT");
+    culturaPT.NumberFormat.NumberGroupSeparator = ".";
+    culturaPT.NumberFormat.NumberDecimalSeparator = ",";
 }
 
 <style>
@@ -39,19 +46,19 @@
         touch-action: pan-y pinch-zoom;
     }
 
-    .imovel-carousel-wrapper .carousel-inner,
-    .imovel-carousel-wrapper .carousel-item {
-        height: 100%;
-        width: 100%;
-    }
+        .imovel-carousel-wrapper .carousel-inner,
+        .imovel-carousel-wrapper .carousel-item {
+            height: 100%;
+            width: 100%;
+        }
 
-    /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
-    .imovel-carousel-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        cursor: zoom-in;
-    }
+        /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
+        .imovel-carousel-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: zoom-in;
+        }
 
     /* Miniaturas na base */
     .gallery-thumb {
@@ -65,10 +72,10 @@
         transition: all 0.2s ease;
     }
 
-    .gallery-thumb.active, .gallery-thumb:hover {
-        border-color: var(--bs-primary);
-        opacity: 1;
-    }
+        .gallery-thumb.active, .gallery-thumb:hover {
+            border-color: var(--bs-primary);
+            opacity: 1;
+        }
 
     /* Cartões de estatísticas forçados a Branco/Preto */
     .detail-stat {
@@ -79,10 +86,10 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
     }
 
-    .detail-stat i {
-        color: var(--bs-primary);
-        font-size: 1.3rem;
-    }
+        .detail-stat i {
+            color: var(--bs-primary);
+            font-size: 1.3rem;
+        }
 
     .contact-card {
         top: 1.25rem;
@@ -170,7 +177,7 @@
         <!-- CONTEÚDO PRINCIPAL -->
         <div class="col-lg-8">
 
-            <!-- AVISO DE IMÓVEL OCULTO DO CATÁLOGO (Apenas Equipa vê) -->
+            <!-- AVISO DE IMÓVEL OCULTO DO CATÁLOGO -->
             @if (Model.OcultoDoCatalogo && equipa)
             {
                 <div class="alert alert-warning border-warning d-flex align-items-center mb-4 py-2 px-3 fw-bold small rounded-3 shadow-sm">
@@ -192,71 +199,60 @@
                             }
                         </div>
                         <h1 class="display-6 fw-bold mb-2 text-dark">@Model.Titulo</h1>
-                        <p class="mb-0 fw-bold text-secondary">
+                        <p class="mb-0 fw-bold" style="color: #6c757d;">
                             <i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)
                         </p>
                     </div>
                     <div class="text-lg-end">
-                        <div class="display-6 fw-bold" style="color: #198754 !important;">@Model.Preco.ToString("N0") €</div>
-                        <span class="small fw-bold text-secondary">Ref. @referencia</span>
+                        <div class="display-6 fw-bold" style="color: #198754 !important;">@Model.Preco.ToString("#,##0.00", culturaPT) €</div>
+                        <span class="small fw-bold" style="color: #6c757d;">Ref. @referencia</span>
                     </div>
                 </div>
             </div>
 
             <!-- QUADRADOS DE DESTAQUE DINÂMICOS -->
             <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
-
-                @* 1. Quartos (só exibe se > 0) *@
                 @if (Model.Quartos.HasValue && Model.Quartos.Value > 0)
                 {
                     <div class="col">
                         <div class="detail-stat p-3 text-center">
                             <i class="bi bi-door-open d-block mb-2"></i>
-                            <span class="small d-block fw-bold text-secondary">Tipologia</span>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Tipologia</span>
                             <strong class="text-dark fs-5">T@(Model.Quartos)</strong>
                         </div>
                     </div>
                 }
 
-                @* 2. Casas de Banho (só exibe se > 0) *@
                 @if (Model.CasasBanho.HasValue && Model.CasasBanho.Value > 0)
                 {
                     <div class="col">
                         <div class="detail-stat p-3 text-center">
                             <i class="bi bi-droplet d-block mb-2"></i>
-                            <span class="small d-block fw-bold text-secondary">Casas de banho</span>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Casas de banho</span>
                             <strong class="text-dark fs-5">@Model.CasasBanho WC</strong>
                         </div>
                     </div>
                 }
 
-                @* 3. Área Total / Útil com detalhe para terreno misto *@
                 <div class="col">
                     <div class="detail-stat p-3 text-center">
                         <i class="bi bi-aspect-ratio d-block mb-2"></i>
-                        <span class="small d-block fw-bold text-secondary">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">
                             @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0 ? "Área útil" : "Área total")
                         </span>
                         <strong class="text-dark fs-5">
                             @(Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0
-                                ? Model.AreaUtil.Value.ToString("N0")
-                                : Model.AreaBruta.ToString("N0")) m²
+                                ? Model.AreaUtil.Value.ToString("#,##0", culturaPT)
+                                : Model.AreaBruta.ToString("#,##0", culturaPT)) m²
                         </strong>
-                        @if (Model.TipoTerreno == "Misto" && Model.AreaUrbana > 0 && Model.AreaRustica > 0)
-                        {
-                            <span class="d-block text-secondary small fw-bold mt-1" style="font-size: 0.72rem;">
-                                (@Model.AreaUrbana?.ToString("N0")m² urb. / @Model.AreaRustica?.ToString("N0")m² rús.)
-                            </span>
-                        }
                     </div>
                 </div>
 
-                @* 4. Preço por m² *@
                 <div class="col">
                     <div class="detail-stat p-3 text-center">
                         <i class="bi bi-cash-coin d-block mb-2"></i>
-                        <span class="small d-block fw-bold text-secondary">Preço / m²</span>
-                        <strong class="text-dark fs-5">@(precoM2 > 0 ? precoM2.ToString("N0") + " €" : "—")</strong>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Preço / m²</span>
+                        <strong class="text-dark fs-5">@(precoM2 > 0 ? precoM2.ToString("#,##0.00", culturaPT) + " €" : "—")</strong>
                     </div>
                 </div>
             </div>
@@ -274,83 +270,42 @@
                 <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Detalhes</h2>
                 <div class="row g-0 border border-secondary-subtle rounded overflow-hidden">
                     <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                        <span class="small d-block fw-bold text-secondary">Tipo de imóvel</span>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Tipo de imóvel</span>
                         <strong class="text-dark">@(Model.CategoriaImovel?.Nome ?? "—")</strong>
                     </div>
-
-                    @* Classificação do Terreno (se for terreno) *@
-                    @if (!string.IsNullOrWhiteSpace(Model.TipoTerreno))
-                    {
-                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Classificação do Terreno</span>
-                            <strong class="text-dark">Terreno @Model.TipoTerreno</strong>
-                        </div>
-                    }
-
                     <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                        <span class="small d-block fw-bold text-secondary">Área total</span>
-                        <strong class="text-dark">@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("N0") + " m²" : "—")</strong>
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Estado</span>
+                        <strong class="text-dark">@(Model.EstadoImovel?.Nome ?? "—")</strong>
                     </div>
-
-                    @* Detalhe de parcelas se for Misto *@
-                    @if (Model.TipoTerreno == "Misto")
-                    {
-                        @if (Model.AreaUrbana.HasValue && Model.AreaUrbana.Value > 0)
-                        {
-                            <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                                <span class="small d-block fw-bold text-secondary">Parcela Urbana</span>
-                                <strong class="text-primary">@Model.AreaUrbana.Value.ToString("N0") m²</strong>
-                            </div>
-                        }
-                        @if (Model.AreaRustica.HasValue && Model.AreaRustica.Value > 0)
-                        {
-                            <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                                <span class="small d-block fw-bold text-secondary">Parcela Rústica</span>
-                                <strong class="text-success">@Model.AreaRustica.Value.ToString("N0") m²</strong>
-                            </div>
-                        }
-                    }
-
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Área bruta</span>
+                        <strong class="text-dark">@(Model.AreaBruta > 0 ? Model.AreaBruta.ToString("#,##0", culturaPT) + " m²" : "—")</strong>
+                    </div>
                     @if (Model.AreaUtil.HasValue && Model.AreaUtil.Value > 0)
                     {
                         <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Área útil</span>
-                            <strong class="text-dark">@Model.AreaUtil.Value.ToString("N0") m²</strong>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Área útil</span>
+                            <strong class="text-dark">@Model.AreaUtil.Value.ToString("#,##0", culturaPT) m²</strong>
                         </div>
                     }
-
-                    @if (Model.EstadoImovel != null && !string.IsNullOrWhiteSpace(Model.EstadoImovel.Nome))
-                    {
-                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Estado</span>
-                            <strong class="text-dark">@Model.EstadoImovel.Nome</strong>
-                        </div>
-                    }
-
                     @if (Model.Estacionamento.HasValue && Model.Estacionamento.Value > 0)
                     {
                         <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Estacionamento</span>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Estacionamento</span>
                             <strong class="text-dark">@Model.Estacionamento.Value lugar(es)</strong>
                         </div>
                     }
-
                     @if (Model.AnoConstrucao.HasValue && Model.AnoConstrucao.Value > 0)
                     {
                         <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Ano de construção</span>
+                            <span class="small d-block fw-bold" style="color: #6c757d;">Ano de construção</span>
                             <strong class="text-dark">@Model.AnoConstrucao.Value</strong>
                         </div>
                     }
-
-                    @* SÓ MOSTRA SE TIVER PREENCHIDO (Se for "Isento", mostra "Isento"; se não preencher, oculta) *@
-                    @if (Model.CertificadoEnergetico != null && !string.IsNullOrWhiteSpace(Model.CertificadoEnergetico.Nome))
-                    {
-                        <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
-                            <span class="small d-block fw-bold text-secondary">Certificado energético</span>
-                            <strong class="text-dark">@Model.CertificadoEnergetico.Nome</strong>
-                        </div>
-                    }
+                    <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
+                        <span class="small d-block fw-bold" style="color: #6c757d;">Certificado energético</span>
+                        <strong class="text-dark">@(Model.CertificadoEnergetico?.Nome ?? "Isento / Não aplicável")</strong>
+                    </div>
                 </div>
             </section>
 
@@ -380,7 +335,7 @@
                 </section>
             }
 
-            <!-- INFORMAÇÃO INTERNA (Visível apenas para a Equipa) -->
+            <!-- INFORMAÇÃO INTERNA -->
             @if (equipa)
             {
                 <section class="card border-warning-subtle bg-white mb-4 shadow-sm border-start border-5 border-warning">
@@ -391,17 +346,17 @@
                     <div class="card-body bg-white p-4">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold text-secondary">Morada exata</span>
+                                <span class="small d-block fw-bold text-muted">Morada Exata</span>
                                 <strong class="text-dark">@(string.IsNullOrWhiteSpace(Model.MoradaExata) ? "—" : Model.MoradaExata)</strong>
                             </div>
+
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold text-secondary">Contrato</span>
+                                <span class="small d-block fw-bold text-muted">Número do Contrato</span>
                                 <strong class="text-dark">@(string.IsNullOrWhiteSpace(Model.NumeroContrato) ? "—" : Model.NumeroContrato)</strong>
                             </div>
 
-                            <!-- COMISSÃO PREVISTA (% E € COM INDICAÇÃO DE IVA) -->
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold text-secondary">Comissão prevista</span>
+                                <span class="small d-block fw-bold text-muted">Comissão Prevista</span>
                                 <strong class="text-success fs-5">
                                     @{
                                         decimal? perc = Model.PercentagemComissao;
@@ -413,18 +368,15 @@
 
                                     @if (Model.ValorComissao.HasValue && Model.ValorComissao.Value > 0)
                                     {
-                                        @Model.ValorComissao.Value.ToString("N2") <text>€</text>
+                                        @Model.ValorComissao.Value.ToString("#,##0.00", culturaPT) <text>€</text>
                                         @if (perc.HasValue && perc.Value > 0)
                                         {
-                                            <span class="fs-6 text-muted">(@perc.Value.ToString("0.##")%)</span>
+                                            <span class="fs-6 text-muted">(@perc.Value.ToString("0.##", culturaPT)%)</span>
                                         }
-                                        <span class="badge @(Model.ComissaoComIva ? "bg-success-subtle text-success" : "bg-secondary-subtle text-secondary") border ms-1 fs-6">
-                                            @(Model.ComissaoComIva ? "IVA Incluído" : "+ IVA")
-                                        </span>
                                     }
                                     else if (perc.HasValue && perc.Value > 0)
                                     {
-                                        <span>@perc.Value.ToString("0.##")%</span>
+                                        <span>@perc.Value.ToString("0.##", culturaPT)%</span>
                                     }
                                     else
                                     {
@@ -434,12 +386,12 @@
                             </div>
 
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold text-secondary">Data de Registo</span>
+                                <span class="small d-block fw-bold text-muted">Data de Registo</span>
                                 <strong class="text-dark">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")</strong>
                             </div>
 
                             <div class="col-md-6">
-                                <span class="small d-block fw-bold text-secondary">Proprietário(s)</span>
+                                <span class="small d-block fw-bold text-muted">Proprietário(s)</span>
                                 @if (Model.Proprietarios != null && Model.Proprietarios.Any())
                                 {
                                     @foreach (var p in Model.Proprietarios)
@@ -456,19 +408,18 @@
                             </div>
 
                             <div class="col-12">
-                                <span class="small d-block fw-bold text-secondary">Notas / Observações Internas</span>
+                                <span class="small d-block fw-bold text-muted">Notas / Observações Internas</span>
                                 <p class="text-dark mb-0 fw-medium bg-light p-3 rounded border" style="white-space: pre-line;">
                                     @(string.IsNullOrWhiteSpace(Model.ObservacoesInternas) ? "Sem observações internas registadas." : Model.ObservacoesInternas)
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Documentos Privados -->
                         @if (Model.Documentos != null && Model.Documentos.Any())
                         {
                             <hr class="border-secondary-subtle my-3" />
                             <div>
-                                <span class="small d-block fw-bold text-secondary mb-2"><i class="bi bi-file-earmark-pdf text-danger me-1"></i>Documentos Anexados (@Model.Documentos.Count)</span>
+                                <span class="small d-block fw-bold text-muted mb-2"><i class="bi bi-file-earmark-pdf text-danger me-1"></i>Documentos Anexados (@Model.Documentos.Count)</span>
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach (var documento in Model.Documentos)
                                     {
@@ -499,7 +450,7 @@
                             </div>
                             <div>
                                 <strong class="d-block text-dark">@Model.Consultor.Nome</strong>
-                                <a href="tel:@Model.Consultor.Telemovel" class="small text-decoration-none fw-bold text-secondary">
+                                <a href="tel:@Model.Consultor.Telemovel" class="small text-decoration-none fw-bold" style="color: #6c757d;">
                                     <i class="bi bi-telephone-fill text-success me-1"></i> @Model.Consultor.Telemovel
                                 </a>
                             </div>
@@ -508,7 +459,6 @@
 
                     <form asp-controller="Home" asp-action="EnviarContacto" method="post">
                         <input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" />
-
                         <div class="form-floating mb-2">
                             <input name="Nome" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Nome" required />
                             <label class="text-dark fw-bold">O seu nome</label>
@@ -540,7 +490,7 @@
             </div>
 
             <div class="modal-body d-flex align-items-center justify-content-center p-0">
-                <div id="carouselFullscreen" class="carousel slide w-100 h-100" data-bs-ride="false" data-bs-touch="true">
+                <div id="carouselFullscreen" class="carousel slide w-100 h-100" data-bs-ride="false">
                     <div class="carousel-inner w-100 h-100 d-flex align-items-center">
                         @for (var i = 0; i < fotos.Count; i++)
                         {
@@ -552,11 +502,11 @@
                     @if (fotos.Count > 1)
                     {
                         <button class="carousel-control-prev" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="prev" style="z-index: 1050;">
-                            <span class="carousel-control-prev-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
                             <span class="visually-hidden">Anterior</span>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="next" style="z-index: 1050;">
-                            <span class="carousel-control-next-icon" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
                             <span class="visually-hidden">Seguinte</span>
                         </button>
                     }
@@ -575,27 +525,5 @@
             bsCarousel.to(index);
             modal.show();
         }
-
-        // SUPORTE AO GESTO DE TOQUE (SWIPE) PARA TELEMÓVEIS E TABLETS
-        function ativarSwipeTouch(idElemento) {
-            const el = document.getElementById(idElemento);
-            if (!el) return;
-            let startX = 0;
-            let endX = 0;
-            el.addEventListener('touchstart', e => {
-                startX = e.changedTouches[0].screenX;
-            }, { passive: true });
-            el.addEventListener('touchend', e => {
-                endX = e.changedTouches[0].screenX;
-                const bsCarousel = bootstrap.Carousel.getOrCreateInstance(el);
-                if (startX - endX > 45) bsCarousel.next();
-                if (endX - startX > 45) bsCarousel.prev();
-            }, { passive: true });
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            ativarSwipeTouch('imovelCarousel');
-            ativarSwipeTouch('carouselFullscreen');
-        });
     </script>
 }

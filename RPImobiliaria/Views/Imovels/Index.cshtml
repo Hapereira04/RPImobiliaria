@@ -4,6 +4,13 @@
     var filtrosAvancadosAtivos = Model.EstadoId.HasValue || Model.StatusId.HasValue || Model.CertificadoId.HasValue ||
         Model.CasasBanho.HasValue || Model.Estacionamento.HasValue || Model.AreaMin.HasValue || Model.AreaMax.HasValue ||
         Model.AnoConstrucaoMin.HasValue || Model.CaracteristicasIds.Any();
+
+    // ==========================================
+    // FORÇAR PONTOS NOS MILHARES E VÍRGULAS NAS DECIMAIS
+    // ==========================================
+    var culturaPT = new System.Globalization.CultureInfo("pt-PT");
+    culturaPT.NumberFormat.NumberGroupSeparator = ".";
+    culturaPT.NumberFormat.NumberDecimalSeparator = ",";
 }
 
 <section class="catalogo-hero py-5">
@@ -288,13 +295,13 @@
                                 <span>
                                     <i class="bi bi-aspect-ratio me-1"></i>
                                     @(imovel.AreaUtil.HasValue && imovel.AreaUtil.Value > 0
-                                        ? imovel.AreaUtil.Value.ToString("N0")
-                                        : imovel.AreaBruta.ToString("N0")) m²
+                                        ? imovel.AreaUtil.Value.ToString("#,##0", culturaPT)
+                                        : imovel.AreaBruta.ToString("#,##0", culturaPT)) m²
                                 </span>
                             </div>
 
                             <div class="mt-auto d-flex align-items-center justify-content-between border-top pt-3">
-                                <strong class="fs-4 text-primary">@imovel.Preco.ToString("N0") €</strong>
+                                <strong class="fs-4 text-primary">@imovel.Preco.ToString("#,##0.00", culturaPT) €</strong>
                                 <a asp-action="Details" asp-route-id="@imovel.Id" class="btn btn-outline-primary rounded-pill px-3">
                                     Ver imóvel <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
