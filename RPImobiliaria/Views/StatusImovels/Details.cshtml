@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Detalhes do Estado do Imóvel";
+    var corEtiqueta = string.IsNullOrWhiteSpace(Model?.CorHex) ? "#fd7e14" : Model.CorHex;
 }
 
 <div class="container mt-4 mb-5 d-flex justify-content-center">
@@ -17,16 +18,50 @@
         <div class="card shadow-sm border-0 border-top border-5 border-primary">
             <div class="card-body p-4 p-md-5">
 
-                <div class="bg-white p-4 rounded border border-secondary-subtle mb-4">
+                <div class="bg-white p-4 rounded border border-secondary-subtle mb-4 shadow-sm">
+                    <!-- ID -->
                     <div class="mb-3 border-bottom border-secondary-subtle pb-3">
                         <h6 class="text-dark fw-bold text-uppercase small mb-1">Identificador (ID)</h6>
                         <p class="fs-5 fw-mono text-primary mb-0">#@Model?.Id</p>
                     </div>
 
-                    <div>
+                    <!-- Nome do Estado -->
+                    <div class="mb-3 border-bottom border-secondary-subtle pb-3">
                         <h6 class="text-dark fw-bold text-uppercase small mb-1">Nome do Estado</h6>
                         <p class="fs-4 fw-bold text-dark mb-0">@Model?.Nome</p>
                     </div>
+
+                    <!-- Configuração da Etiqueta / Faixa -->
+                    <div class="mb-3 border-bottom border-secondary-subtle pb-3">
+                        <h6 class="text-dark fw-bold text-uppercase small mb-1">Etiqueta Visual nos Anúncios</h6>
+                        @if (Model != null && Model.TemEtiqueta)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-bold">
+                                <i class="bi bi-check-circle-fill me-1"></i> Ativa
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 fw-bold">
+                                <i class="bi bi-slash-circle me-1"></i> Sem Etiqueta
+                            </span>
+                        }
+                    </div>
+
+                    <!-- Amostra da Cor (se tiver etiqueta ativa) -->
+                    @if (Model != null && Model.TemEtiqueta)
+                    {
+                        <div>
+                            <h6 class="text-dark fw-bold text-uppercase small mb-2">Cor Configurada & Pré-visualização</h6>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="d-inline-block rounded border border-secondary shadow-sm" style="width: 32px; height: 32px; background-color: @corEtiqueta;"></span>
+                                <code class="fs-6 text-dark fw-bold text-uppercase">@corEtiqueta</code>
+                                <span class="badge px-3 py-2 text-white shadow-sm fw-bold ms-auto" style="background-color: @corEtiqueta;">
+                                    @Model.Nome
+                                </span>
+                            </div>
+                        </div>
+                    }
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">

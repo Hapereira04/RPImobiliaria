@@ -11,7 +11,7 @@
             <h2 class="fw-bold mb-1 text-body-emphasis">
                 <i class="bi bi-building-check text-primary me-2"></i> @ViewData["Title"]
             </h2>
-            <p class="text-body-secondary mb-0">Gestão dos estados e disponibilidades dos imóveis</p>
+            <p class="text-body-secondary mb-0">Gestão dos estados, etiquetas e disponibilidades dos anúncios</p>
         </div>
         <div>
             <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm px-3 py-2">
@@ -20,6 +20,7 @@
         </div>
     </div>
 
+    <!-- BARRA DE PESQUISA -->
     <div class="card shadow-sm border-0 border-secondary-subtle mb-4 bg-white">
         <div class="card-body p-3 bg-white rounded">
             <form asp-action="Index" method="get">
@@ -38,26 +39,28 @@
         </div>
     </div>
 
+    <!-- TABELA -->
     <div class="card shadow-sm border-0 border-secondary-subtle overflow-hidden bg-white">
         <div class="table-responsive">
             <table class="table align-middle mb-0 bg-white text-dark">
                 <thead class="bg-light border-bottom border-secondary-subtle">
                     <tr>
-                        <th class="py-3 px-4 text-dark text-uppercase small fw-bold" style="width: 100px;">ID</th>
+                        <th class="py-3 px-4 text-dark text-uppercase small fw-bold" style="width: 90px;">ID</th>
                         <th class="py-3 px-4 text-dark text-uppercase small fw-bold">
                             <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-decoration-none text-dark fw-bold d-inline-flex align-items-center gap-1">
                                 Nome do Estado
                                 <i class="bi bi-arrow-down-up opacity-50 ms-1"></i>
                             </a>
                         </th>
-                        <th class="py-3 pe-4 text-dark text-uppercase small fw-bold text-end" style="width: 180px;">Ações</th>
+                        <th class="py-3 px-4 text-dark text-uppercase small fw-bold" style="width: 240px;">Etiqueta / Faixa</th>
+                        <th class="py-3 pe-4 text-dark text-uppercase small fw-bold text-end" style="width: 170px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
                     @if (Model == null || !Model.Any())
                     {
                         <tr>
-                            <td colspan="3" class="text-center py-5 text-dark bg-white">
+                            <td colspan="4" class="text-center py-5 text-dark bg-white">
                                 <i class="bi bi-inbox fs-2 mb-2 d-block opacity-50"></i>
                                 Nenhum estado de imóvel encontrado.
                             </td>
@@ -67,12 +70,30 @@
                     {
                         @foreach (var item in Model)
                         {
+                            var cor = string.IsNullOrWhiteSpace(item.CorHex) ? "#fd7e14" : item.CorHex;
                             <tr class="border-bottom border-secondary-subtle bg-white">
                                 <td class="px-4 fw-mono bg-white">
                                     <span class="badge bg-dark text-white border border-secondary">#@item.Id</span>
                                 </td>
                                 <td class="px-4 fw-bold text-dark bg-white">
                                     @item.Nome
+                                </td>
+                                <td class="px-4 bg-white">
+                                    @if (item.TemEtiqueta)
+                                    {
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <span class="badge text-white shadow-sm fw-bold px-3 py-2" style="background-color: @cor;">
+                                                <i class="bi bi-tag-fill me-1"></i> @item.Nome
+                                            </span>
+                                            <code class="small text-secondary fw-bold text-uppercase">@cor</code>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-secondary border border-secondary-subtle px-2 py-1">
+                                            Sem Etiqueta
+                                        </span>
+                                    }
                                 </td>
                                 <td class="pe-4 text-end bg-white">
                                     <div class="btn-group shadow-sm" role="group">
@@ -94,5 +115,4 @@
             </table>
         </div>
     </div>
-
 </div>

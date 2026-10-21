@@ -21,7 +21,7 @@ namespace RPImobiliaria.Controllers
             _context = context;
         }
 
-        // GET: Disponibilidades
+        // GET: StatusImovels
         public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
@@ -59,7 +59,9 @@ namespace RPImobiliaria.Controllers
             }
 
             var statusImovel = await _context.StatusImoveis
+                .Include(s => s.Imoveis)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (statusImovel == null)
             {
                 return NotFound();
@@ -75,12 +77,16 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: StatusImovels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome")] StatusImovel statusImovel)
+        public async Task<IActionResult> Create([Bind("Id,Nome,TemEtiqueta,CorHex")] StatusImovel statusImovel)
         {
+            // Se o utilizador desmarcar a etiqueta, podemos garantir uma cor predefinida limpa
+            if (!statusImovel.TemEtiqueta && string.IsNullOrWhiteSpace(statusImovel.CorHex))
+            {
+                statusImovel.CorHex = "#fd7e14";
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(statusImovel);
@@ -107,15 +113,18 @@ namespace RPImobiliaria.Controllers
         }
 
         // POST: StatusImovels/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome")] StatusImovel statusImovel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,TemEtiqueta,CorHex")] StatusImovel statusImovel)
         {
             if (id != statusImovel.Id)
             {
                 return NotFound();
+            }
+
+            if (!statusImovel.TemEtiqueta && string.IsNullOrWhiteSpace(statusImovel.CorHex))
+            {
+                statusImovel.CorHex = "#fd7e14";
             }
 
             if (ModelState.IsValid)
@@ -168,13 +177,23 @@ namespace RPImobiliaria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var statusImovel = await _context.StatusImoveis.FindAsync(id);
+            var statusImovel = await _context.StatusImoveis
+                .Include(m => m.Imoveis)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (statusImovel != null)
             {
+                // Bloqueio de segurança: não permite apagar se tiver imóveis associados
+                if (statusImovel.Imoveis != null && statusImovel.Imoveis.Any())
+                {
+                    TempData["MensagemErro"] = "Não é possível eliminar este estado porque existem imóveis associados a ele.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.StatusImoveis.Remove(statusImovel);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
