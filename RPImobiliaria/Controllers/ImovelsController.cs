@@ -83,10 +83,11 @@ namespace RPImobiliaria.Controllers
             foreach (var caracteristicaId in filtros.CaracteristicasIds.Distinct())
                 query = query.Where(i => i.Caracteristicas.Any(ic => ic.CaracteristicaId == caracteristicaId));
 
+            // CORRIGIDO: Cast para (double) para suportar o ORDER BY no SQLite
             switch (filtros.OrdenarPor)
             {
-                case "preco_asc": query = query.OrderBy(i => i.Preco); break;
-                case "preco_desc": query = query.OrderByDescending(i => i.Preco); break;
+                case "preco_asc": query = query.OrderBy(i => (double)i.Preco); break;
+                case "preco_desc": query = query.OrderByDescending(i => (double)i.Preco); break;
                 case "area_desc": query = query.OrderByDescending(i => i.AreaUtil); break;
                 case "titulo": query = query.OrderBy(i => i.Titulo); break;
                 default: query = query.OrderByDescending(i => i.DataRegisto).ThenByDescending(i => i.Id); break;

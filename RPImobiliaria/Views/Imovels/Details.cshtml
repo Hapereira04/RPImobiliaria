@@ -28,6 +28,12 @@
     var equipa = User.IsInRole("Admin") || User.IsInRole("Consultor");
 
     // ==========================================
+    // ETIQUETA E COR DINÂMICA
+    // ==========================================
+    var temEtiqueta = Model.StatusImovel != null && Model.StatusImovel.TemEtiqueta;
+    var corEtiqueta = (Model.StatusImovel != null && !string.IsNullOrWhiteSpace(Model.StatusImovel.CorHex)) ? Model.StatusImovel.CorHex : "#fd7e14";
+
+    // ==========================================
     // FORÇAR PONTOS NOS MILHARES E VÍRGULAS NAS DECIMAIS
     // ==========================================
     var culturaPT = new System.Globalization.CultureInfo("pt-PT");
@@ -44,21 +50,22 @@
         width: 100%;
         background-color: var(--bs-body-bg);
         touch-action: pan-y pinch-zoom;
+        position: relative;
     }
 
-        .imovel-carousel-wrapper .carousel-inner,
-        .imovel-carousel-wrapper .carousel-item {
-            height: 100%;
-            width: 100%;
-        }
+    .imovel-carousel-wrapper .carousel-inner,
+    .imovel-carousel-wrapper .carousel-item {
+        height: 100%;
+        width: 100%;
+    }
 
-        /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
-        .imovel-carousel-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            cursor: zoom-in;
-        }
+    /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
+    .imovel-carousel-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        cursor: zoom-in;
+    }
 
     /* Miniaturas na base */
     .gallery-thumb {
@@ -72,24 +79,24 @@
         transition: all 0.2s ease;
     }
 
-        .gallery-thumb.active, .gallery-thumb:hover {
-            border-color: var(--bs-primary);
-            opacity: 1;
-        }
+    .gallery-thumb.active, .gallery-thumb:hover {
+        border-color: var(--bs-primary);
+        opacity: 1;
+    }
 
-    /* Cartões de estatísticas forçados a Branco/Preto */
+    /* CARTÕES DE ESTATÍSTICAS RETOS (SEM BORDAS REDONDAS) */
     .detail-stat {
-        border-radius: 1rem;
+        border-radius: 0 !important; /* Sem cantos redondos */
         background: #ffffff;
         border: 1px solid #dee2e6;
         height: 100%;
         box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
     }
 
-        .detail-stat i {
-            color: var(--bs-primary);
-            font-size: 1.3rem;
-        }
+    .detail-stat i {
+        color: var(--bs-primary);
+        font-size: 1.3rem;
+    }
 
     .contact-card {
         top: 1.25rem;
@@ -99,6 +106,24 @@
 
     .spec-row:last-child {
         border-bottom: 0 !important;
+    }
+
+    /* FAIXA / ETIQUETA SOBRE A FOTOGRAFIA (SEM ÍCONE) */
+    .badge-status-ribbon-details {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        z-index: 10;
+        padding: 8px 22px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        pointer-events: none;
     }
 </style>
 
@@ -122,12 +147,21 @@
     </div>
 </section>
 
-<!-- GALERIA DE FOTOS COM SUPORTE A SWIPE -->
+<!-- GALERIA DE FOTOS COM SUPORTE A SWIPE E ETIQUETA -->
 <section class="bg-body-tertiary pb-4">
     <div class="container-xl pt-4">
         @if (fotos.Any())
         {
             <div id="imovelCarousel" class="carousel slide bg-body rounded-4 shadow-sm overflow-hidden imovel-carousel-wrapper" data-bs-ride="false" data-bs-touch="true">
+                
+                <!-- ETIQUETA / FAIXA NA FOTO DO DETALHE (SE TIVER ETIQUETA ATIVA) -->
+                @if (temEtiqueta)
+                {
+                    <div class="badge-status-ribbon-details" style="background-color: @corEtiqueta !important;">
+                        @Model.StatusImovel!.Nome
+                    </div>
+                }
+
                 <div class="carousel-inner">
                     @for (var indice = 0; indice < fotos.Count; indice++)
                     {
@@ -164,6 +198,12 @@
         else
         {
             <div class="d-flex flex-column gap-2 align-items-center justify-content-center bg-body rounded-4 shadow-sm text-muted imovel-carousel-wrapper">
+                @if (temEtiqueta)
+                {
+                    <div class="badge-status-ribbon-details" style="background-color: @corEtiqueta !important;">
+                        @Model.StatusImovel!.Nome
+                    </div>
+                }
                 <i class="bi bi-house display-3 opacity-50"></i>
                 <span class="fw-bold">Fotografias disponíveis brevemente</span>
             </div>
@@ -190,10 +230,17 @@
             <div class="bg-white p-4 rounded-4 shadow-sm border border-secondary-subtle mb-4">
                 <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
                     <div>
-                        <div class="d-flex gap-2 flex-wrap mb-3">
+                        <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
                             <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
 
-                            @if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome))
+                            <!-- CRACHÁ DO ESTADO JUNTO AO TÍTULO -->
+                            @if (temEtiqueta)
+                            {
+                                <span class="badge px-3 py-2 text-white shadow-sm fw-bold" style="background-color: @corEtiqueta !important;">
+                                    @Model.StatusImovel!.Nome
+                                </span>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome))
                             {
                                 <span class="badge bg-white text-dark border border-secondary-subtle shadow-sm px-3 py-2 fw-bold">@Model.StatusImovel.Nome</span>
                             }
@@ -210,7 +257,7 @@
                 </div>
             </div>
 
-            <!-- QUADRADOS DE DESTAQUE DINÂMICOS -->
+            <!-- QUADRADOS DE DESTAQUE DINÂMICOS (CANTOS RETOS) -->
             <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
                 @if (Model.Quartos.HasValue && Model.Quartos.Value > 0)
                 {
@@ -459,6 +506,7 @@
 
                     <form asp-controller="Home" asp-action="EnviarContacto" method="post">
                         <input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" />
+
                         <div class="form-floating mb-2">
                             <input name="Nome" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Nome" required />
                             <label class="text-dark fw-bold">O seu nome</label>

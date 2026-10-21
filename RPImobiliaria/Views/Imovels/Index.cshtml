@@ -13,6 +13,26 @@
     culturaPT.NumberFormat.NumberDecimalSeparator = ",";
 }
 
+<style>
+    /* Faixa de destaque sobre a fotografia do imóvel */
+    .badge-status-ribbon {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        z-index: 5;
+        padding: 5px 14px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #ffffff !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        pointer-events: none;
+    }
+</style>
+
 <section class="catalogo-hero py-5">
     <div class="container py-lg-3">
         <div class="row align-items-end g-3">
@@ -251,9 +271,22 @@
 
                 var localizacao = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização por indicar";
 
+                // Leitura das propriedades de etiqueta e cor do StatusImovel
+                var temEtiqueta = imovel.StatusImovel != null && imovel.StatusImovel.TemEtiqueta;
+                var corEtiqueta = (imovel.StatusImovel != null && !string.IsNullOrWhiteSpace(imovel.StatusImovel.CorHex)) ? imovel.StatusImovel.CorHex : "#fd7e14";
+
                 <div class="col-md-6 col-xl-4">
                     <article class="card imovel-card h-100 shadow-sm">
                         <a asp-action="Details" asp-route-id="@imovel.Id" class="text-decoration-none text-reset position-relative">
+                            
+                            <!-- ETIQUETA / FAIXA COLORIDA DINÂMICA (SEM ÍCONE) -->
+                            @if (temEtiqueta)
+                            {
+                                <div class="badge-status-ribbon" style="background-color: @corEtiqueta !important;">
+                                    @imovel.StatusImovel!.Nome
+                                </div>
+                            }
+
                             <div class="imovel-photo">
                                 @if (fotoPrincipal is not null)
                                 {
@@ -266,12 +299,17 @@
                                     </div>
                                 }
                             </div>
-                            <span class="badge bg-primary position-absolute top-0 start-0 m-3 shadow-sm">@(imovel.TipoNegocio?.Nome ?? "Imóvel")</span>
-                            @if (!string.IsNullOrWhiteSpace(imovel.StatusImovel?.Nome))
+                            
+                            <!-- Tipo de Negócio (canto inferior esquerdo da foto) -->
+                            <span class="badge bg-primary position-absolute bottom-0 start-0 m-3 shadow-sm">@(imovel.TipoNegocio?.Nome ?? "Imóvel")</span>
+                            
+                            <!-- Se NÃO tiver etiqueta ativa, exibe o crachá discreto superior -->
+                            @if (!temEtiqueta && !string.IsNullOrWhiteSpace(imovel.StatusImovel?.Nome))
                             {
                                 <span class="badge text-bg-light position-absolute top-0 end-0 m-3 shadow-sm">@imovel.StatusImovel.Nome</span>
                             }
                         </a>
+                        
                         <div class="card-body d-flex flex-column p-4">
                             <p class="small text-body-secondary mb-2 text-truncate">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>@(string.IsNullOrWhiteSpace(localizacao) ? "Localização por indicar" : localizacao)
