@@ -143,19 +143,12 @@
 </style>
 
 <!-- 1. ZONA DO VÍDEO (HERO) -->
-<section class="hero-section">
-    <!-- VÍDEO MP4 -->
-    <video autoplay loop muted playsinline id="bg-video">
-        <source src="~/videos/ovar-zoom.mp4" type="video/mp4">
-    </video>
-
-    <div class="hero-overlay"></div>
-
-    <div class="hero-content">
-        <h1 class="hero-title">Ovar é a nossa Casa</h1>
-        <p class="hero-subtitle">Encontre o imóvel dos seus sonhos com a RP Mediação Imobiliária.</p>
-
-        <div class="d-flex gap-3 justify-content-center mt-4">
+<section class="hero-banner-imobiliaria text-center text-white py-5 mb-5 shadow">
+    <div class="container hero-content py-5">
+        <h1 class="display-4 fw-bold mb-3">Encontre o seu imóvel de sonho</h1>
+        <p class="lead mb-4 text-white-50">Confiança, rigor e serenidade no mercado imobiliário.</p>
+        
+        <div class="d-flex gap-3 justify-content-center">
             <a asp-controller="Imovels" asp-action="Index" asp-route-NegocioId="1" class="btn btn-primary btn-lg fw-bold px-4 rounded-pill shadow">
                 Comprar <i class="bi bi-house-door-fill ms-2"></i>
             </a>

@@ -702,3 +702,30 @@ input[type="submit"].btn-primary {
     background-color: #00d0ec !important;
     color: #121820 !important;
 }
+
+/* =========================================================
+   HERO COM IMAGEM DE FUNDO
+   ========================================================= */
+.hero-banner-imobiliaria {
+    position: relative;
+    min-height: 520px;
+    background: url('/images/hero-bg.jpg') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /* Camada escura por cima da foto para garantir leitura do texto e botões */
+    .hero-banner-imobiliaria::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(18, 24, 32, 0.55) 0%, rgba(18, 24, 32, 0.75) 100%);
+        z-index: 1;
+    }
+
+    .hero-banner-imobiliaria .hero-content {
+        position: relative;
+        z-index: 2;
+    }
