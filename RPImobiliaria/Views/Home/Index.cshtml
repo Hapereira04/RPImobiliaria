@@ -156,10 +156,10 @@
         <p class="hero-subtitle">Encontre o imóvel dos seus sonhos com a RP Mediação Imobiliária.</p>
 
         <div class="d-flex gap-3 justify-content-center mt-4">
-            <a href="/Imovels?negocio=comprar" class="btn btn-primary btn-lg fw-bold px-4 rounded-pill shadow">
+            <a asp-controller="Imovels" asp-action="Index" asp-route-NegocioId="1" class="btn btn-primary btn-lg fw-bold px-4 rounded-pill shadow">
                 Comprar <i class="bi bi-house-door-fill ms-2"></i>
             </a>
-            <a href="/Imovels?negocio=arrendar" class="btn btn-outline-light btn-lg fw-bold px-4 rounded-pill">
+            <a asp-controller="Imovels" asp-action="Index" asp-route-NegocioId="2" class="btn btn-outline-light btn-lg fw-bold px-4 rounded-pill">
                 Arrendar <i class="bi bi-key-fill ms-2"></i>
             </a>
         </div>

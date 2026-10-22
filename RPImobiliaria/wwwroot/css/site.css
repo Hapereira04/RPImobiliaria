@@ -1,27 +1,115 @@
+/* =========================================================
+   1. DEFINIÇÃO GLOBAL DE CORES: AZUL/CIANO (#00d0ec)
+   ========================================================= */
+:root {
+    --bs-primary: #00d0ec;
+    --bs-primary-rgb: 0, 208, 236;
+    --bs-primary-hover: #00b4cc;
+    --bs-primary-active: #009cb0;
+    --bs-primary-bg-subtle: rgba(0, 208, 236, 0.15);
+    --bs-primary-border-subtle: rgba(0, 208, 236, 0.45);
+    --bs-link-color: #008fa3;
+    --bs-link-hover-color: #006b7a;
+}
+
+[data-bs-theme="dark"] {
+    --bs-link-color: #00d0ec;
+    --bs-link-hover-color: #5ce4f7;
+    --bs-primary-border-subtle: rgba(0, 208, 236, 0.35);
+}
+
+/* =========================================================
+   2. BOTÕES BOOTSTRAP E CONTROLOS
+   ========================================================= */
+.btn-primary {
+    --bs-btn-bg: #00d0ec;
+    --bs-btn-border-color: #00d0ec;
+    --bs-btn-color: #121820; /* Texto escuro garante contraste no ciano */
+    --bs-btn-hover-bg: #00b4cc;
+    --bs-btn-hover-border-color: #00b4cc;
+    --bs-btn-hover-color: #000000;
+    --bs-btn-active-bg: #009cb0;
+    --bs-btn-active-border-color: #009cb0;
+    --bs-btn-active-color: #000000;
+    --bs-btn-disabled-bg: #00d0ec;
+    --bs-btn-disabled-border-color: #00d0ec;
+    --bs-btn-disabled-color: #495057;
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #008fa3;
+    --bs-btn-border-color: #00d0ec;
+    --bs-btn-hover-bg: #00d0ec;
+    --bs-btn-hover-border-color: #00d0ec;
+    --bs-btn-hover-color: #121820;
+    --bs-btn-active-bg: #009cb0;
+    --bs-btn-active-border-color: #009cb0;
+    --bs-btn-active-color: #000000;
+}
+
+[data-bs-theme="dark"] .btn-outline-primary {
+    --bs-btn-color: #00d0ec;
+}
+
+/* Efeito de foco padronizado com anel #00d0ec */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(0, 208, 236, 0.45) !important;
+    border-color: #00d0ec !important;
+}
+
+/* Auxiliares de cor */
+.text-primary {
+    color: #008fa3 !important;
+}
+
+[data-bs-theme="dark"] .text-primary {
+    color: #00d0ec !important;
+}
+
+.bg-primary {
+    background-color: #00d0ec !important;
+    color: #121820 !important;
+}
+
+.border-primary {
+    border-color: #00d0ec !important;
+}
+
+/* =========================================================
+   3. BASE E ESTRUTURA
+   ========================================================= */
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
-/* --- CORREÇÕES DATATABLES: MODO ESCURO E PAGINAÇÃO --- */
+/* =========================================================
+   4. DATATABLES: MODO ESCURO E PAGINAÇÃO
+   ========================================================= */
 .dataTables_wrapper .form-select,
 .dataTables_wrapper .form-control {
     background-color: var(--bs-body-bg);
@@ -35,19 +123,19 @@ body {
         color: var(--bs-body-color);
     }
 
-/* Paginação com aspeto Bootstrap 5 moderno */
 .dataTables_wrapper .page-link {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
     border-color: var(--bs-border-color);
     border-radius: 4px;
-    margin: 0 8px; /* Dá um espacinho elegante entre os botões de paginação */
+    margin: 0 8px;
 }
 
 .dataTables_wrapper .page-item.active .page-link {
-    background-color: var(--bs-primary);
-    color: #fff;
-    border-color: var(--bs-primary);
+    background-color: #00d0ec !important;
+    color: #121820 !important;
+    border-color: #00d0ec !important;
+    font-weight: bold;
 }
 
 .dataTables_wrapper .page-item.disabled .page-link {
@@ -56,43 +144,19 @@ body {
     border-color: var(--bs-border-color);
 }
 
-/* Força as Labels (como o "Procurar") e o texto de Rodapé a herdarem a cor do Tema do Cartão */
 .dataTables_wrapper .dataTables_filter label,
 .dataTables_wrapper .dataTables_length label,
 .dataTables_wrapper .dataTables_info {
     color: inherit !important;
 }
 
-/* =========================================================
-   BADGE PERSONALIZADO (AMI) - Para garantir leitura
-   ========================================================= */
-
-/* MODO CLARO (Onde estava o problema) */
-.badge-ami {
-    background-color: #cfe2ff; /* Fundo Azul Bebé */
-    color: #0a58ca; /* Texto Azul Forte (Alto Contraste) */
-    border: 1px solid #9ec5fe;
-}
-
-/* MODO ESCURO (Adaptação automática) */
-[data-bs-theme="dark"] .badge-ami {
-    background-color: #031633; /* Fundo Azul Noite */
-    color: #6ea8fe; /* Texto Azul Neon */
-    border-color: #084298;
-}
-
-/* =========================================================
-   FORÇAR TABELA SEM SCROLL (LAYOUT FIXO)
-   ========================================================= */
-
-/* 1. Obriga a tabela a respeitar a largura do ecrã */
+/* Tabela Sem Scroll / Layout Fixo */
 table.dataTable {
     width: 100% !important;
     margin: 0 !important;
-    table-layout: fixed !important; /* O Segredo: Colunas fixas */
+    table-layout: fixed !important;
 }
 
-    /* 2. Obriga o texto a partir para a linha de baixo (ex: emails longos) */
     table.dataTable td,
     table.dataTable th {
         white-space: normal !important;
@@ -100,12 +164,29 @@ table.dataTable {
         overflow-wrap: break-word !important;
     }
 
-/* 3. Garante que o contentor não cria barra de scroll */
 .dataTables_wrapper {
     width: 100%;
     overflow-x: hidden;
 }
 
+/* =========================================================
+   5. BADGE AMI
+   ========================================================= */
+.badge-ami {
+    background-color: rgba(0, 208, 236, 0.15);
+    color: #006b7a;
+    border: 1px solid rgba(0, 208, 236, 0.4);
+}
+
+[data-bs-theme="dark"] .badge-ami {
+    background-color: rgba(0, 208, 236, 0.15);
+    color: #00d0ec;
+    border-color: #00d0ec;
+}
+
+/* =========================================================
+   6. HEADER E CHAVE REALISTA
+   ========================================================= */
 header {
     position: relative;
     z-index: 1050 !important;
@@ -122,89 +203,6 @@ header {
     filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
 }
 
-/* Novo formato para as fotos nos cartões (Página Imóveis) */
-.imovel-img-wrapper {
-    height: 280px; /* Mais altura! */
-    background-color: var(--bs-secondary-bg); /* Fundo suave se a imagem não preencher tudo */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-    .imovel-img-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain; /* Contém a foto (adiciona bordas) em vez de esticar ou cortar */
-        transition: transform 0.3s ease;
-    }
-
-/* FIX DE LAYOUT */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
-/* MODOS CLARO / ESCURO */
-[data-bs-theme="light"] body {
-    background-color: #ffffff !important;
-    color: #212529;
-}
-
-[data-bs-theme="light"] .key-bg-head::after {
-    background-color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] body {
-    background-color: #2b2d31 !important;
-    color: #f2f3f5;
-}
-
-[data-bs-theme="dark"] .key-bg-head::after {
-    background-color: #2b2d31 !important;
-}
-
-[data-bs-theme="dark"] .modal-content {
-    background-color: #2b2d31;
-    color: #f2f3f5;
-}
-
-    [data-bs-theme="dark"] .modal-content .text-muted {
-        color: #adb5bd !important;
-    }
-
-    [data-bs-theme="dark"] .modal-content .form-control {
-        background-color: #1e1f22;
-        border-color: #444;
-        color: #f2f3f5;
-    }
-
-        [data-bs-theme="dark"] .modal-content .form-control:focus {
-            background-color: #2b2d31;
-            border-color: #0d6efd;
-            color: #fff;
-        }
-
-    [data-bs-theme="dark"] .modal-content .form-floating label {
-        color: #888;
-    }
-
-/* ====================================================
-           A CHAVE REALISTA (Baseada na tua Imagem!)
-           ==================================================== */
-.key-nav-wrapper {
-    position: relative;
-    max-width: 1050px;
-    margin: 20px auto 40px auto;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
-}
-
-/* O FUNDO DA CHAVE */
 .key-bg {
     position: absolute;
     inset: 0;
@@ -244,7 +242,6 @@ html, body {
     clip-path: polygon(0 25%, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%);
 }
 
-/* O Bico da chave (menos agressivo para proteger os botões) */
 .key-bg-shaft {
     position: absolute;
     left: 130px;
@@ -255,7 +252,6 @@ html, body {
     clip-path: polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%);
 }
 
-/* DENTES RETANGULARES VARIADOS (Como uma chave de casa verdadeira) */
 .key-bg-teeth {
     position: absolute;
     right: 100px;
@@ -263,25 +259,21 @@ html, body {
     width: 160px;
     height: 25px;
     background-color: #111111;
-    /* Cortes a 90 graus (retângulos com alturas sortidas) */
     clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
 }
 
-/* ====================================================
-           O CONTEÚDO (MENUS NO CENTRO, BOTÕES PROTEGIDOS)
-           ==================================================== */
 .key-content {
     position: relative;
     z-index: 2;
     width: 100%;
     display: flex;
     align-items: center;
-    padding-left: 140px; /* Barreira da argola redonda */
-    padding-right: 75px; /* BARREIRA DO BICO - Protege os botões para nunca saírem para fora! */
+    padding-left: 140px;
+    padding-right: 75px;
 }
 
 .key-links {
-    margin: 0 auto; /* Magia para centrar perfeitamente no espaço sobrante */
+    margin: 0 auto;
     display: flex;
     gap: 20px;
     align-items: center;
@@ -298,19 +290,16 @@ html, body {
     }
 
         .key-links .nav-link:hover {
-            color: #ffc107 !important;
+            color: #00d0ec !important;
         }
 
 .key-actions {
     display: flex;
     align-items: center;
     gap: 15px;
-    /* Empurrado naturalmente para a direita pelo 'margin: 0 auto' dos links */
 }
 
-/* ====================================================
-           ADAPTAÇÃO MOBILE (ESCADINHA DE RETÂNGULOS)
-           ==================================================== */
+/* Responsividade Chave */
 @media (max-width: 991px) {
     .key-nav-wrapper {
         height: 80px;
@@ -348,10 +337,9 @@ html, body {
         top: 59px;
         width: 110px;
         height: 18px;
-        /* MOBILE: Retângulos em escadinha! */
         clip-path: polygon( 0 0, 100% 0, 100% 30%, 92% 30%, 92% 10%, 84% 10%, 84% 90%, 74% 90%, 74% 10%, 66% 10%, 66% 50%, 56% 50%, 56% 10%, 48% 10%, 48% 100%, 38% 100%, 38% 10%, 30% 10%, 30% 70%, 20% 70%, 20% 10%, 12% 10%, 12% 80%, 2% 80%, 2% 10%, 0 10% );
     }
-    /* Ajustes de Padding no Mobile para proteger os botões */
+
     .key-content {
         padding-left: 90px;
         padding-right: 40px;
@@ -396,9 +384,112 @@ html, body {
     }
 }
 
-/* ====================================================
-           RODAPÉ E BOTÕES GLOBAIS
-           ==================================================== */
+/* =========================================================
+   7. MODOS CLARO / ESCURO
+   ========================================================= */
+[data-bs-theme="light"] body {
+    background-color: #ffffff !important;
+    color: #212529;
+}
+
+[data-bs-theme="light"] .key-bg-head::after {
+    background-color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] body {
+    background-color: #2b2d31 !important;
+    color: #f2f3f5;
+}
+
+[data-bs-theme="dark"] .key-bg-head::after {
+    background-color: #2b2d31 !important;
+}
+
+[data-bs-theme="dark"] .modal-content {
+    background-color: #2b2d31;
+    color: #f2f3f5;
+}
+
+    [data-bs-theme="dark"] .modal-content .text-muted {
+        color: #adb5bd !important;
+    }
+
+    [data-bs-theme="dark"] .modal-content .form-control {
+        background-color: #1e1f22;
+        border-color: #444;
+        color: #f2f3f5;
+    }
+
+        [data-bs-theme="dark"] .modal-content .form-control:focus {
+            background-color: #2b2d31;
+            border-color: #00d0ec !important;
+            color: #fff;
+        }
+
+    [data-bs-theme="dark"] .modal-content .form-floating label {
+        color: #888;
+    }
+
+/* Modo escuro nativo */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #18191c;
+    --bs-body-color: #f2f3f5;
+    --bs-tertiary-bg: #2b2d31;
+    --bs-secondary-bg: #1e1f22;
+    --bs-border-color: #383a40;
+}
+
+    [data-bs-theme="dark"] .card {
+        --bs-card-bg: #1e1f22;
+        --bs-card-border-color: #383a40;
+        --bs-card-color: #f2f3f5;
+    }
+
+    [data-bs-theme="dark"] .table {
+        --bs-table-color: #f2f3f5;
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #383a40;
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+        --bs-table-hover-color: #ffffff;
+    }
+
+    [data-bs-theme="dark"] .alert-success {
+        --bs-alert-color: #75b798;
+        --bs-alert-bg: #0f291e;
+        --bs-alert-border-color: #198754;
+    }
+
+    [data-bs-theme="dark"] .alert-danger {
+        --bs-alert-color: #ea868f;
+        --bs-alert-bg: #2c0b0e;
+        --bs-alert-border-color: #dc3545;
+    }
+
+    [data-bs-theme="dark"] .alert-warning {
+        --bs-alert-color: #ffda6a;
+        --bs-alert-bg: #332701;
+        --bs-alert-border-color: #ffc107;
+    }
+
+/* =========================================================
+   8. COMPONENTES: CATÁLOGO, CONFIG E RODAPÉ
+   ========================================================= */
+.imovel-img-wrapper {
+    height: 280px;
+    background-color: var(--bs-secondary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+    .imovel-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
 .btn-floating-contact {
     position: fixed;
     bottom: 25px;
@@ -436,12 +527,9 @@ html, body {
 }
 
     .footer-link:hover {
-        color: #ffffff;
+        color: #00d0ec;
     }
 
-/* ====================================================
-   PÁGINA DE CATÁLOGO DE IMÓVEIS (Views/Imovels/Index)
-   ==================================================== */
 .catalogo-hero {
     background: linear-gradient(135deg, #082f49 0%, #0f766e 100%);
     color: #fff;
@@ -498,34 +586,27 @@ html, body {
     color: var(--bs-secondary-color);
 }
 
-/* ====================================================\
-   PÁGINA DE CONFIGURAÇÃO - MODOS CLARO E ESCURO
-   ==================================================== */
-
-/* Ícone */
+/* Configurações */
 .config-icon {
     width: 48px;
     height: 48px;
     flex-shrink: 0;
 }
 
-/* Cartões de Localização */
 .config-card {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
     border-radius: 1rem;
-    /* Corta qualquer animação herdada */
     transition: none !important;
     transform: none !important;
 }
 
     .config-card:hover {
-        border-color: var(--bs-primary-border-subtle);
+        border-color: rgba(0, 208, 236, 0.45);
         box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15) !important;
-        transform: none !important; /* Garante que não sobe */
+        transform: none !important;
     }
 
-/* Botões dos Catálogos */
 .btn-config-catalog {
     background-color: var(--bs-tertiary-bg);
     border: 1px solid var(--bs-border-color);
@@ -533,7 +614,6 @@ html, body {
     padding: 0.6rem 1rem;
     border-radius: 0.5rem;
     font-weight: 500;
-    /* Sombra leve estática para o Modo Claro */
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: none !important;
     transform: none !important;
@@ -541,14 +621,12 @@ html, body {
 
     .btn-config-catalog:hover {
         background-color: var(--bs-secondary-bg);
-        border-color: var(--bs-primary);
-        color: var(--bs-primary);
-        /* Sombra um pouco mais forte ao passar o rato no Modo Claro */
+        border-color: #00d0ec;
+        color: #008fa3;
         box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
         transform: none !important;
     }
 
-/* Regras específicas para Modo Escuro */
 [data-bs-theme="dark"] .config-card {
     background-color: #1e1f22;
     border-color: #333438;
@@ -558,80 +636,69 @@ html, body {
     background-color: #1e1f22;
     border-color: #333438;
     color: #e3e5e8;
-    /* Removemos as sombras no Modo Escuro para manter o aspeto "flat" */
     box-shadow: none !important;
 }
 
     [data-bs-theme="dark"] .btn-config-catalog:hover {
         background-color: #2b2d31;
-        border-color: #0d6efd;
-        color: #ffffff;
-        /* Garante que continua sem sombra no hover do Modo Escuro */
+        border-color: #00d0ec !important;
+        color: #00d0ec !important;
         box-shadow: none !important;
     }
 
-/* Regras específicas para Modo Escuro */
-[data-bs-theme="dark"] .config-card {
-    background-color: #1e1f22;
-    border-color: #333438;
+/* =========================================================
+   FORÇAR AZUL / CIANO (#00d0ec) NOS BOTÕES E COMPONENTES
+   ========================================================= */
+
+/* 1. Botão Principal (.btn-primary) */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary {
+    background-color: #00d0ec !important;
+    border-color: #00d0ec !important;
+    color: #121820 !important; /* Texto escuro para manter leitura nítida */
+    font-weight: 600;
 }
 
-[data-bs-theme="dark"] .btn-config-catalog {
-    background-color: #1e1f22;
-    border-color: #333438;
-    color: #e3e5e8;
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active,
+    button.btn-primary:hover,
+    a.btn-primary:hover {
+        background-color: #00b4cc !important;
+        border-color: #00b4cc !important;
+        color: #000000 !important;
+    }
+
+/* 2. Botão de Contorno (.btn-outline-primary) */
+.btn-outline-primary {
+    border-color: #00d0ec !important;
+    color: #008fa3 !important;
 }
 
-    [data-bs-theme="dark"] .btn-config-catalog:hover {
-        background-color: #2b2d31;
-        border-color: #0d6efd;
-        color: #ffffff;
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active {
+        background-color: #00d0ec !important;
+        border-color: #00d0ec !important;
+        color: #121820 !important;
     }
 
-/* ====================================================
-   MODO ESCURO NATIVO (SEM !IMPORTANT)
-   ==================================================== */
-
-/* Redefinição das variáveis de tema do Bootstrap */
-[data-bs-theme="dark"] {
-    --bs-body-bg: #18191c;
-    --bs-body-color: #f2f3f5;
-    --bs-tertiary-bg: #2b2d31;
-    --bs-secondary-bg: #1e1f22;
-    --bs-border-color: #383a40;
+[data-bs-theme="dark"] .btn-outline-primary {
+    color: #00d0ec !important;
 }
 
-    /* Cartões (Cards) */
-    [data-bs-theme="dark"] .card {
-        --bs-card-bg: #1e1f22;
-        --bs-card-border-color: #383a40;
-        --bs-card-color: #f2f3f5;
-    }
+/* 3. Paginação Ativa nas Tabelas */
+.page-item.active .page-link,
+.dataTables_wrapper .page-item.active .page-link {
+    background-color: #00d0ec !important;
+    border-color: #00d0ec !important;
+    color: #121820 !important;
+}
 
-    /* Tabela da página Index */
-    [data-bs-theme="dark"] .table {
-        --bs-table-color: #f2f3f5;
-        --bs-table-bg: transparent;
-        --bs-table-border-color: #383a40;
-        --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
-        --bs-table-hover-color: #ffffff;
-    }
-
-    /* Alertas da página Delete */
-    [data-bs-theme="dark"] .alert-success {
-        --bs-alert-color: #75b798;
-        --bs-alert-bg: #0f291e;
-        --bs-alert-border-color: #198754;
-    }
-
-    [data-bs-theme="dark"] .alert-danger {
-        --bs-alert-color: #ea868f;
-        --bs-alert-bg: #2c0b0e;
-        --bs-alert-border-color: #dc3545;
-    }
-
-    [data-bs-theme="dark"] .alert-warning {
-        --bs-alert-color: #ffda6a;
-        --bs-alert-bg: #332701;
-        --bs-alert-border-color: #ffc107;
-    }
+/* 4. Badges com cor Primary */
+.badge.bg-primary {
+    background-color: #00d0ec !important;
+    color: #121820 !important;
+}
