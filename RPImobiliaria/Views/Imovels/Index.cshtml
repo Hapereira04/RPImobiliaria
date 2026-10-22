@@ -279,11 +279,11 @@
                     <article class="card imovel-card h-100 shadow-sm">
                         <a asp-action="Details" asp-route-id="@imovel.Id" class="text-decoration-none text-reset position-relative">
                             
-                            <!-- ETIQUETA / FAIXA COLORIDA DINÂMICA (SEM ÍCONE) -->
+                            <!-- ETIQUETA / FAIXA COLORIDA DINÂMICA -->
                             @if (temEtiqueta)
                             {
                                 <div class="badge-status-ribbon" style="background-color: @corEtiqueta !important;">
-                                    @imovel.StatusImovel!.Nome
+                                    <i class="bi bi-tag-fill me-1"></i> @imovel.StatusImovel!.Nome
                                 </div>
                             }
 
@@ -339,7 +339,13 @@
                             </div>
 
                             <div class="mt-auto d-flex align-items-center justify-content-between border-top pt-3">
-                                <strong class="fs-4 text-primary">@imovel.Preco.ToString("#,##0.00", culturaPT) €</strong>
+                                <div>
+                                    @if (imovel.PrecoDesde)
+                                    {
+                                        <small class="d-block text-secondary text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Desde</small>
+                                    }
+                                    <strong class="fs-4 text-primary">@imovel.Preco.ToString("#,##0.00", culturaPT) €</strong>
+                                </div>
                                 <a asp-action="Details" asp-route-id="@imovel.Id" class="btn btn-outline-primary rounded-pill px-3">
                                     Ver imóvel <i class="bi bi-arrow-right ms-1"></i>
                                 </a>

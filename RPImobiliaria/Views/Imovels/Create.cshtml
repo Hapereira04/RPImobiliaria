@@ -1,7 +1,8 @@
 ﻿@model RPImobiliaria.Models.Imovel
 @{
-    ViewData["Title"] = "Angariar Novo Imóvel";
+    ViewData["Title"] = "Editar Imóvel - " + Model.Titulo;
     var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
+    var caracteristicasAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
 }
 
 <style>
@@ -71,11 +72,18 @@
 
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-house-add-fill text-primary me-2"></i> @ViewData["Title"]</h2>
+        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-pencil-square text-primary me-2"></i> Editar Imóvel</h2>
         <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <form asp-action="Create" enctype="multipart/form-data" id="imovelForm">
+    <form asp-action="Edit" enctype="multipart/form-data" id="imovelForm">
+
+        <!-- CAMPOS OCULTOS -->
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="DataRegisto" />
+        <input type="hidden" asp-for="ConsultorId" />
+        <input type="hidden" id="fotosRemovidasInput" name="FotosRemovidasIds" value="" />
+
         <div class="row">
             <!-- COLUNA PRINCIPAL -->
             <div class="col-lg-8">
@@ -113,10 +121,10 @@
                         <i class="bi bi-camera text-primary me-1"></i> Galeria de Fotografias
                     </div>
                     <div class="card-body p-4">
-                        <input type="file" id="fotosInputReal" name="fotosUpload" multiple accept="image/*" class="d-none" />
+                        <input type="file" id="fotosInputReal" name="novasFotos" multiple accept="image/*" class="d-none" />
                         <div id="dropzone" class="dropzone-area">
                             <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
-                            <h5 class="mt-2 text-dark fw-bold">Clique ou arraste as fotos</h5>
+                            <h5 class="mt-2 text-dark fw-bold">Clique ou arraste novas fotos</h5>
                         </div>
                         <div id="gallery" class="gallery-container"></div>
                     </div>
@@ -129,7 +137,6 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
-                            <!-- Tipo de Terreno -->
                             <div class="col-md-6 col-lg-3 form-floating" id="blocoCamposTerreno" style="display: none;">
                                 <select asp-for="TipoTerreno" id="selectTipoTerreno" class="form-select bg-white text-dark border-secondary-subtle">
                                     <option value="">-- Selecione --</option>
@@ -137,7 +144,7 @@
                                     <option value="Rústico">Rústico</option>
                                     <option value="Misto">Misto</option>
                                 </select>
-                                <label asp-for="TipoTerreno" class="text-dark fw-bold text-truncate">Tipo de Terreno</label>
+                                <label asp-for="TipoTerreno" class="text-dark fw-bold text-truncate">Tipo Terreno</label>
                             </div>
 
                             <div class="col-md-6 col-lg-3 form-floating" id="campoAreaUrbana" style="display: none;">
@@ -191,7 +198,7 @@
                 <!-- CARACTERÍSTICAS -->
                 @if (grupos != null && grupos.Any())
                 {
-                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4" id="seccaoCaracteristicas">
+                    <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
                         <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
                             <i class="bi bi-ui-checks-grid text-primary me-1"></i> Características
                         </div>
@@ -204,9 +211,10 @@
                                         <div class="row">
                                             @foreach (var carac in grupo.Caracteristicas)
                                             {
+                                                var marcada = caracteristicasAtuais.Contains(carac.Id);
                                                 <div class="col-12 mb-2">
                                                     <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id">
+                                                        <input class="form-check-input" type="checkbox" name="selectedCaracteristicas" value="@carac.Id" id="carac_@carac.Id" @(marcada ? "checked" : "")>
                                                         <label class="form-check-label text-dark fw-medium" for="carac_@carac.Id">@carac.Nome</label>
                                                     </div>
                                                 </div>
@@ -229,7 +237,6 @@
                             <input asp-for="MoradaExata" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Morada" />
                             <label asp-for="MoradaExata" class="text-dark fw-bold">Morada Exata</label>
                         </div>
-                        
                         <div class="row g-3 mb-3">
                             <div class="col-md-3 form-floating">
                                 <input asp-for="NumeroContrato" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Contrato" />
@@ -242,7 +249,7 @@
                             </div>
 
                             <div class="col-md-3 form-floating">
-                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" id="inputComissaoValor" style="color: #198754 !important;" type="number" step="0.01" placeholder="€" />
+                                <input asp-for="ValorComissao" class="form-control bg-white text-dark fw-bold border-secondary-subtle" id="inputComissaoValor" style="color: #198754 !important;" type="number" step="0.01" placeholder="Comissão" />
                                 <label asp-for="ValorComissao" class="text-dark fw-bold">Comissão Prevista (€)</label>
                             </div>
 
@@ -253,9 +260,8 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="mb-3 p-3 border border-warning-subtle rounded bg-white">
-                            <label class="form-label text-dark small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf text-warning me-1"></i> Documentos Privados (PDF, DOC)</label>
+                            <label class="form-label text-dark small text-uppercase fw-bold"><i class="bi bi-file-earmark-pdf text-warning me-1"></i> Novos Docs Privados (Opcional)</label>
                             <input type="file" name="documentosUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="form-control bg-white text-dark border-warning-subtle" />
                         </div>
                         <div class="form-floating">
@@ -271,15 +277,20 @@
                 <div class="card shadow-lg border-primary mb-4 position-sticky" style="top: 1rem;">
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
-                        
+
                         <!-- PREÇO FORMATADO COM MÁSCARA -->
-                        <div class="input-group input-group-lg mb-4">
-                            <!-- Input oculto que envia o valor para o servidor C# -->
-                            <input type="hidden" name="Preco" id="inputPrecoImovel" value="@(Model?.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0")" />
-    
-                            <!-- Input visível formatado -->
+                        <div class="input-group input-group-lg mb-2">
+                            <input type="hidden" name="Preco" id="inputPrecoImovel" data-valor="@(Model.Preco.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))" value="@Model.Preco" />
                             <input type="text" id="inputPrecoFormatado" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" placeholder="0,00" autocomplete="off" required />
                             <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
+                        </div>
+
+                        <!-- SWITCH PREÇO DESDE -->
+                        <div class="form-check form-switch p-2 bg-light rounded border text-start mb-4">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" asp-for="PrecoDesde" id="checkPrecoDesde" />
+                            <label class="form-check-label text-dark fw-bold small" for="checkPrecoDesde">
+                                <i class="bi bi-tag-fill text-primary me-1"></i> Preço "Desde" (Prédio / Empreendimento)
+                            </label>
                         </div>
 
                         <div class="bg-white rounded p-3 text-start text-dark mb-4 border border-secondary-subtle">
@@ -316,7 +327,7 @@
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-cloud-arrow-up-fill me-2"></i> Gravar Angariação</button>
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Guardar Alterações</button>
                     </div>
                 </div>
             </div>
@@ -337,57 +348,35 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            
+        document.addEventListener("DOMContentLoaded", function() {
+
             // ==========================================
-            // 1. MÁSCARA DO PREÇO (Forçar formato 100.000,00)
+            // 1. MÁSCARA DO PREÇO (100.000,00)
             // ==========================================
             const oculto = document.getElementById('inputPrecoImovel');
             const visual = document.getElementById('inputPrecoFormatado');
 
-            // Função que formata o número com PONTO nos milhares e VÍRGULA nas decimais
-            function formatarParaEurosVisuais(valorNumerico) {
-                if (!valorNumerico || isNaN(valorNumerico)) return '';
-                // O formato 'de-DE' garante 100.000,00 em qualquer navegador
-                return valorNumerico.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
-
             if (visual && oculto) {
-        
-                // 1. Arrancar a página (útil para o Edit)
-                let precoInicial = parseFloat(oculto.value);
-                if (!isNaN(precoInicial) && precoInicial > 0) {
-                    visual.value = formatarParaEurosVisuais(precoInicial);
-                    // Garante que o input escondido envia com vírgula para o C#
-                    oculto.value = precoInicial.toFixed(2).replace('.', ',');
+                const valorInicialRaw = parseFloat(oculto.getAttribute('data-valor'));
+                if (!isNaN(valorInicialRaw) && valorInicialRaw > 0) {
+                    visual.value = valorInicialRaw.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    oculto.value = valorInicialRaw.toFixed(2).replace('.', ',');
                 }
 
-                // 2. Quando o utilizador escreve
-                visual.addEventListener('input', function (e) {
-                    // Remove tudo o que não seja número (tira pontos, vírgulas, letras)
-                    let apenasNumeros = e.target.value.replace(/\D/g, ''); 
-            
+                visual.addEventListener('input', function(e) {
+                    let apenasNumeros = e.target.value.replace(/\D/g, '');
+
                     if (apenasNumeros === '') {
                         e.target.value = '';
                         oculto.value = '0,00';
-                        oculto.dispatchEvent(new Event('input')); // Avisa a comissão
+                        oculto.dispatchEvent(new Event('input'));
                         return;
                     }
 
-                    // Divide por 100 para transformar os últimos dois algarismos em cêntimos
                     let numeroReal = parseInt(apenasNumeros, 10) / 100;
-            
-                    // Coloca no ecrã bonito (100.000,00)
-                    e.target.value = formatarParaEurosVisuais(numeroReal);
-            
-                    // Grava no input escondido o valor nativo (100000,00) para o C# guardar na Base de Dados
+                    e.target.value = numeroReal.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     oculto.value = numeroReal.toFixed(2).replace('.', ',');
-            
-                    // Avisa a função das comissões para se atualizar
                     oculto.dispatchEvent(new Event('input'));
                 });
             }
@@ -405,7 +394,7 @@
             }
 
             if (oculto && inputPercent && inputValor) {
-                oculto.addEventListener('input', function () {
+                oculto.addEventListener('input', function() {
                     let p = converterParaNum(this.value);
                     let pct = converterParaNum(inputPercent.value);
                     if (pct > 0 && p > 0) {
@@ -413,7 +402,7 @@
                     }
                 });
 
-                inputPercent.addEventListener('input', function () {
+                inputPercent.addEventListener('input', function() {
                     let p = converterParaNum(oculto.value);
                     let pct = converterParaNum(this.value);
                     if (pct > 0 && p > 0) {
@@ -423,7 +412,7 @@
                     }
                 });
 
-                inputValor.addEventListener('input', function () {
+                inputValor.addEventListener('input', function() {
                     let p = converterParaNum(oculto.value);
                     let v = converterParaNum(this.value);
                     if (v > 0 && p > 0) {
@@ -454,18 +443,19 @@
             function atualizarFormularioPorCategoria() {
                 if (!selectCategoria) return;
                 const texto = selectCategoria.options[selectCategoria.selectedIndex]?.text.toLowerCase() || '';
+
                 const isTerreno = texto.includes('terreno') || texto.includes('lote');
                 const isLojaComercio = texto.includes('loja') || texto.includes('armazém');
 
                 if (isTerreno) {
-                    camposHabitacao.forEach(el => el.style.display = 'none');
-                    camposResidenciais.forEach(el => el.style.display = 'none');
+                    camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
+                    camposResidenciais.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
                     if (blocoCertificado) blocoCertificado.style.display = 'none';
                     if (labelAreaBruta) labelAreaBruta.innerText = 'Área Total (m²) *';
                     if (blocoCamposTerreno) blocoCamposTerreno.style.display = '';
                     atualizarCamposTerreno();
                 } else if (isLojaComercio) {
-                    camposHabitacao.forEach(el => el.style.display = 'none');
+                    camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
                     camposResidenciais.forEach(el => el.style.display = '');
                     if (blocoCertificado) blocoCertificado.style.display = '';
                     if (labelAreaBruta) labelAreaBruta.innerText = 'Área Bruta (m²) *';
@@ -519,7 +509,17 @@
             // ==========================================
             // 4. GESTÃO E ARRASTAR DE FOTOS
             // ==========================================
-            let ficheirosEmMemoria = [];
+            let ficheirosEmMemoria = [
+                @if (Model.Fotos != null)
+                {
+                    int idFalso = -1000;
+                    foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
+                    {
+                        <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
+                    }
+                }
+            ];
+            let fotosRemovidasIds = [];
             let fotoIdCounter = 0;
             const dropzone = document.getElementById('dropzone');
             const inputReal = document.getElementById('fotosInputReal');
@@ -575,11 +575,26 @@
                     thumb.addEventListener('dragend', handleDragEnd);
                     gallery.appendChild(thumb);
                 });
+
+                let orderInput = document.getElementById('existingPhotoOrder');
+                if (!orderInput) {
+                    orderInput = document.createElement('input');
+                    orderInput.type = 'hidden';
+                    orderInput.id = 'existingPhotoOrder';
+                    orderInput.name = 'existingPhotoOrder';
+                    form.appendChild(orderInput);
+                }
+                orderInput.value = ficheirosEmMemoria.map(f => f.isServer ? `old_${f.idServer}` : `new_${ficheirosEmMemoria.filter(x => !x.isServer).indexOf(f)}`).join(',');
             }
 
             window.removerFoto = function(id) {
                 const index = ficheirosEmMemoria.findIndex(f => f.id === id);
                 if (index > -1) {
+                    const fotoRemover = ficheirosEmMemoria[index];
+                    if (fotoRemover.isServer) {
+                        fotosRemovidasIds.push(fotoRemover.idServer);
+                        document.getElementById('fotosRemovidasInput').value = fotosRemovidasIds.join(',');
+                    }
                     ficheirosEmMemoria.splice(index, 1);
                     desenharGaleria();
                 }
@@ -614,6 +629,8 @@
                 ficheirosEmMemoria.forEach(item => { if (!item.isServer && item.file) dt.items.add(item.file); });
                 inputReal.files = dt.files;
             });
+
+            desenharGaleria();
         });
     </script>
 }

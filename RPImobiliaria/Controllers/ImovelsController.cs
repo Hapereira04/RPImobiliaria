@@ -83,7 +83,7 @@ namespace RPImobiliaria.Controllers
             foreach (var caracteristicaId in filtros.CaracteristicasIds.Distinct())
                 query = query.Where(i => i.Caracteristicas.Any(ic => ic.CaracteristicaId == caracteristicaId));
 
-            // CORRIGIDO: Cast para (double) para suportar o ORDER BY no SQLite
+            // Cast para (double) para suportar o ORDER BY no SQLite
             switch (filtros.OrdenarPor)
             {
                 case "preco_asc": query = query.OrderBy(i => (double)i.Preco); break;
@@ -236,7 +236,7 @@ namespace RPImobiliaria.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Create(
-            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")]
+            [Bind("Id,Referencia,Titulo,Preco,PrecoDesde,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")]
             Imovel imovel,
             int? clienteProprietarioId,
             List<int> selectedCaracteristicas,
@@ -309,7 +309,7 @@ namespace RPImobiliaria.Controllers
         [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("Id,Referencia,Titulo,Preco,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,DataRegisto,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")]
+            [Bind("Id,Referencia,Titulo,Preco,PrecoDesde,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,DataRegisto,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId,ConsultorId")]
             Imovel imovel,
             List<int> selectedCaracteristicas,
             List<IFormFile> novasFotos,

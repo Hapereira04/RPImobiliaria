@@ -86,7 +86,7 @@
 
     /* CARTÕES DE ESTATÍSTICAS RETOS (SEM BORDAS REDONDAS) */
     .detail-stat {
-        border-radius: 0 !important; /* Sem cantos redondos */
+        border-radius: 0 !important;
         background: #ffffff;
         border: 1px solid #dee2e6;
         height: 100%;
@@ -108,7 +108,7 @@
         border-bottom: 0 !important;
     }
 
-    /* FAIXA / ETIQUETA SOBRE A FOTOGRAFIA (SEM ÍCONE) */
+    /* FAIXA / ETIQUETA SOBRE A FOTOGRAFIA */
     .badge-status-ribbon-details {
         position: absolute;
         top: 20px;
@@ -154,7 +154,6 @@
         {
             <div id="imovelCarousel" class="carousel slide bg-body rounded-4 shadow-sm overflow-hidden imovel-carousel-wrapper" data-bs-ride="false" data-bs-touch="true">
                 
-                <!-- ETIQUETA / FAIXA NA FOTO DO DETALHE (SE TIVER ETIQUETA ATIVA) -->
                 @if (temEtiqueta)
                 {
                     <div class="badge-status-ribbon-details" style="background-color: @corEtiqueta !important;">
@@ -233,7 +232,6 @@
                         <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
                             <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
 
-                            <!-- CRACHÁ DO ESTADO JUNTO AO TÍTULO -->
                             @if (temEtiqueta)
                             {
                                 <span class="badge px-3 py-2 text-white shadow-sm fw-bold" style="background-color: @corEtiqueta !important;">
@@ -251,7 +249,13 @@
                         </p>
                     </div>
                     <div class="text-lg-end">
-                        <div class="display-6 fw-bold" style="color: #198754 !important;">@Model.Preco.ToString("#,##0.00", culturaPT) €</div>
+                        @if (Model.PrecoDesde)
+                        {
+                            <span class="small d-block fw-bold text-secondary text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Preço a partir de</span>
+                        }
+                        <div class="display-6 fw-bold" style="color: #198754 !important;">
+                            @Model.Preco.ToString("#,##0.00", culturaPT) €
+                        </div>
                         <span class="small fw-bold" style="color: #6c757d;">Ref. @referencia</span>
                     </div>
                 </div>
@@ -299,7 +303,16 @@
                     <div class="detail-stat p-3 text-center">
                         <i class="bi bi-cash-coin d-block mb-2"></i>
                         <span class="small d-block fw-bold" style="color: #6c757d;">Preço / m²</span>
-                        <strong class="text-dark fs-5">@(precoM2 > 0 ? precoM2.ToString("#,##0.00", culturaPT) + " €" : "—")</strong>
+                        <strong class="text-dark fs-5">
+                            @if (precoM2 > 0)
+                            {
+                                @(Model.PrecoDesde ? "Desde " : "")@precoM2.ToString("#,##0.00", culturaPT) <text>€</text>
+                            }
+                            else
+                            {
+                                <text>—</text>
+                            }
+                        </strong>
                     </div>
                 </div>
             </div>

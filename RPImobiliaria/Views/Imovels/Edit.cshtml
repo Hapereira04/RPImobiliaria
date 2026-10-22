@@ -299,12 +299,19 @@
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
 
-                        <!-- PREÇO FORMATADO COM MÁSCARA (Solução Blindada com pontos "de-DE") -->
-                        <div class="input-group input-group-lg mb-4">
-                            <!-- O campo invisível que o ASP.NET recebe. Removido o asp-for para não encravar -->
+                        <!-- PREÇO FORMATADO COM MÁSCARA -->
+                        <div class="input-group input-group-lg mb-2">
                             <input type="hidden" name="Preco" id="inputPrecoImovel" value="@(Model?.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0")" />
                             <input type="text" id="inputPrecoFormatado" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" placeholder="0,00" autocomplete="off" required />
                             <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
+                        </div>
+
+                        <!-- SWITCH PREÇO DESDE -->
+                        <div class="form-check form-switch p-2 bg-light rounded border text-start mb-4">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" asp-for="PrecoDesde" id="checkPrecoDesde" />
+                            <label class="form-check-label text-dark fw-bold small" for="checkPrecoDesde">
+                                <i class="bi bi-tag-fill text-primary me-1"></i> Preço "Desde" (Prédio / Empreendimento)
+                            </label>
                         </div>
 
                         <div class="bg-white rounded p-3 text-start text-dark mb-4 border border-secondary-subtle">
@@ -369,33 +376,26 @@
         document.addEventListener("DOMContentLoaded", function() {
 
             // ==========================================
-            // 1. MÁSCARA DO PREÇO (Forçar formato 100.000,00)
+            // 1. MÁSCARA DO PREÇO (100.000,00)
             // ==========================================
             const oculto = document.getElementById('inputPrecoImovel');
             const visual = document.getElementById('inputPrecoFormatado');
 
-            // Função que formata o número com PONTO nos milhares e VÍRGULA nas decimais
             function formatarParaEurosVisuais(valorNumerico) {
                 if (!valorNumerico || isNaN(valorNumerico)) return '';
-                // O formato 'de-DE' garante 100.000,00 em qualquer navegador
                 return valorNumerico.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
             if (visual && oculto) {
-                // 1. LER O PREÇO NO ARRANQUE
                 let precoStr = oculto.value;
-                // Caso o C# tenha devolvido com vírgula, trocamos por ponto para o Javascript conseguir ler
                 let precoInicial = parseFloat(precoStr.replace(',', '.'));
 
                 if (!isNaN(precoInicial) && precoInicial > 0) {
                     visual.value = formatarParaEurosVisuais(precoInicial);
-                    // Garante que o input escondido tem o formato que o C# quer: vírgula
                     oculto.value = precoInicial.toFixed(2).replace('.', ',');
                 }
 
-                // 2. UTILIZADOR DIGITA
                 visual.addEventListener('input', function(e) {
-                    // Remove tudo o que não seja número (tira pontos, vírgulas, letras)
                     let apenasNumeros = e.target.value.replace(/\D/g, '');
 
                     if (apenasNumeros === '') {
@@ -405,13 +405,8 @@
                         return;
                     }
 
-                    // Divide por 100 para ter cêntimos
                     let numeroReal = parseInt(apenasNumeros, 10) / 100;
-
-                    // Mostra visual
                     e.target.value = formatarParaEurosVisuais(numeroReal);
-
-                    // Grava oculto para BD (com vírgula)
                     oculto.value = numeroReal.toFixed(2).replace('.', ',');
                     oculto.dispatchEvent(new Event('input'));
                 });
@@ -548,11 +543,11 @@
             let ficheirosEmMemoria = [
                 @if (Model.Fotos != null)
                 {
-                        int idFalso = -1000;
-                        foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
-                        {
-                                <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
-                        }
+                    int idFalso = -1000;
+                    foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
+                    {
+                        <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
+                    }
                 }
             ];
             let fotosRemovidasIds = [];

@@ -26,6 +26,9 @@ namespace RPImobiliaria.Models
         [Display(Name = "Preço (€)")]
         public decimal Preco { get; set; }
 
+        [Display(Name = "Preço Desde")]
+        public bool PrecoDesde { get; set; } = false;
+
         [Display(Name = "Descrição")]
         public string? Descricao { get; set; }
 
