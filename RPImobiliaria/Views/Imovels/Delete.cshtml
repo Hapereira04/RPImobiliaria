@@ -16,27 +16,39 @@
             <div class="card-body p-5 text-center bg-white">
                 <h4 class="fw-bold mb-3 text-dark">Tem a certeza absoluta que deseja apagar este imóvel?</h4>
                 <p class="mb-4 fw-medium" style="color: #6c757d;">
-                    Esta ação é <strong class="text-danger">irreversível</strong>. Todas as fotografias, documentos e notas associadas serão eliminados permanentemente.[cite: 3]
+                    Esta ação é <strong class="text-danger">irreversível</strong>. Todas as fotografias, documentos e notas associadas serão eliminados permanentemente.
                 </p>
-
                 <!-- CAIXA DE RESUMO DO IMÓVEL -->
                 <div class="card border border-secondary-subtle bg-white text-start mb-4 shadow-sm">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <span class="badge bg-primary text-dark fw-bold fs-6 shadow-sm">
-                                Ref: @(Model.Referencia ?? Model.Id.ToString())[cite: 3]
+                                Ref: @(Model.Referencia ?? Model.Id.ToString())
                             </span>
                             <span class="badge bg-success fs-6 shadow-sm">
                                 @(Model.PrecoDesde ? "Desde " : "")@Model.Preco.ToString("#,##0", culturaPT) €
                             </span>
                         </div>
 
-                        <h5 class="fw-bold mt-3 text-dark">@Model.Titulo</h5>[cite: 3]
+                        <h5 class="fw-bold mt-3 text-dark">@Model.Titulo</h5>
+
+                        @{
+                            // Lógica robusta para apanhar a localização, seja qual for o nível preenchido
+                            var nomeFreguesia = Model.Freguesia?.Nome;
+                            var nomeConcelho = Model.Concelho?.Nome ?? Model.Freguesia?.Concelho?.Nome;
+                            var nomeDistrito = Model.Distrito?.Nome ?? Model.Freguesia?.Concelho?.Distrito?.Nome;
+            
+                            var locParts = new List<string>();
+                            if (!string.IsNullOrWhiteSpace(nomeFreguesia)) locParts.Add(nomeFreguesia);
+                            if (!string.IsNullOrWhiteSpace(nomeConcelho)) locParts.Add(nomeConcelho);
+                            if (!string.IsNullOrWhiteSpace(nomeDistrito)) locParts.Add(nomeDistrito);
+
+                            // Se não houver nada definido, mostra a mensagem
+                            var localizacaoFinal = locParts.Any() ? string.Join(", ", locParts.Distinct()) : "Localização não definida";
+                        }
 
                         <p class="small mb-2 fw-bold" style="color: #6c757d;">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>[cite: 3]
-                            @(Model.Freguesia != null ? Model.Freguesia.Nome : "Freguesia não definida"),[cite: 3]
-                            @(Model.Freguesia?.Concelho != null ? Model.Freguesia.Concelho.Nome : "Concelho não definido")[cite: 3]
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>@localizacaoFinal
                         </p>
                     </div>
                 </div>
@@ -45,10 +57,10 @@
                     <input type="hidden" asp-for="Id" />
                     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                         <a asp-action="Index" class="btn btn-outline-secondary btn-lg fw-bold px-4 shadow-sm">
-                            <i class="bi bi-arrow-left me-1"></i> Cancelar[cite: 3]
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-danger btn-lg fw-bold px-4 shadow">
-                            <i class="bi bi-trash3-fill me-2"></i> Apagar Imóvel[cite: 3]
+                            <i class="bi bi-trash3-fill me-2"></i> Apagar Imóvel
                         </button>
                     </div>
                 </form>

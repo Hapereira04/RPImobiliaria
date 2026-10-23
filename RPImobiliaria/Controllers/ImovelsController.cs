@@ -233,11 +233,11 @@ namespace RPImobiliaria.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Consultor")]
         public async Task<IActionResult> Create(
-    [Bind("Referencia,Titulo,Preco,PrecoDesde,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel,
-    int? clienteProprietarioId,
-    List<int> selectedCaracteristicas,
-    List<IFormFile> fotosUpload,
-    List<IFormFile> documentosUpload)
+        [Bind("Referencia,Titulo,Preco,PrecoDesde,Descricao,Quartos,CasasBanho,Estacionamento,AreaUtil,AreaBruta,TipoTerreno,AreaUrbana,AreaRustica,Piso,AnoConstrucao,NumeroFrentes,DistritoId,ConcelhoId,FreguesiaId,Zona,MoradaExata,NumeroContrato,ObservacoesInternas,ValorComissao,PercentagemComissao,ComissaoComIva,OcultoDoCatalogo,CategoriaImovelId,TipoNegocioId,EstadoImovelId,StatusImovelId,CertificadoEnergeticoId")] Imovel imovel,
+        int? clienteProprietarioId,
+        List<int> selectedCaracteristicas,
+        List<IFormFile> fotosUpload,
+        List<IFormFile> documentosUpload)
         {
             // Remove o Id (no Create é gerado pela BD)
             ModelState.Remove("Id");
@@ -546,7 +546,11 @@ namespace RPImobiliaria.Controllers
 
             var imovel = await _context.Imoveis
                 .Include(i => i.Consultor)
-                .Include(i => i.Freguesia).ThenInclude(f => f.Concelho).ThenInclude(c => c.Distrito)
+                .Include(i => i.Distrito)
+                .Include(i => i.Concelho)
+                .Include(i => i.Freguesia)
+                    .ThenInclude(f => f.Concelho)
+                        .ThenInclude(c => c.Distrito)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (imovel == null) return NotFound();
