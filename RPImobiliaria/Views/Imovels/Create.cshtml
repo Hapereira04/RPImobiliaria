@@ -1,6 +1,6 @@
 ﻿@model RPImobiliaria.Models.Imovel
 @{
-    ViewData["Title"] = "Editar Imóvel - " + Model.Titulo;
+    ViewData["Title"] = "Criar Imóvel";
     var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
     var caracteristicasAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
 }
