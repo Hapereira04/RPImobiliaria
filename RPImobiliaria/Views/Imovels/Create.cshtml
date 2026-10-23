@@ -3,6 +3,7 @@
     ViewData["Title"] = "Criar Imóvel";
     var grupos = ViewBag.GruposComCaracteristicas as List<RPImobiliaria.Models.GrupoCaracteristica>;
     var caracteristicasAtuais = ViewBag.CaracteristicasAtuais as List<int> ?? new List<int>();
+    decimal valorPrecoInicial = Model != null ? Model.Preco : 0m;
 }
 
 <style>
@@ -72,16 +73,15 @@
 
 <div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-pencil-square text-primary me-2"></i> Editar Imóvel</h2>
+        <h2 class="fw-bold text-body-emphasis"><i class="bi bi-plus-circle text-primary me-2"></i> Criar Imóvel</h2>
         <a asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
     </div>
 
-    <form asp-action="Edit" enctype="multipart/form-data" id="imovelForm">
+    <form asp-action="Create" enctype="multipart/form-data" id="imovelForm">
 
-        <!-- CAMPOS OCULTOS -->
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="DataRegisto" />
-        <input type="hidden" asp-for="ConsultorId" />
+        <div asp-validation-summary="All" class="alert alert-danger shadow-sm mb-4"></div>
+
+        <!-- CAMPOS OCULTOS (Sem o Id para não dar erro na criação) -->
         <input type="hidden" id="fotosRemovidasInput" name="FotosRemovidasIds" value="" />
 
         <div class="row">
@@ -115,13 +115,13 @@
                     </div>
                 </div>
 
-                <!-- GALERIA -->
+                <!-- GALERIA DE FOTOGRAFIAS -->
                 <div class="card shadow-sm border-secondary-subtle bg-white mb-4">
                     <div class="card-header bg-white border-bottom border-secondary-subtle py-3 fw-bold text-dark">
                         <i class="bi bi-camera text-primary me-1"></i> Galeria de Fotografias
                     </div>
                     <div class="card-body p-4">
-                        <input type="file" id="fotosInputReal" name="novasFotos" multiple accept="image/*" class="d-none" />
+                        <input type="file" id="fotosInputReal" name="fotosUpload" multiple accept="image/*" class="d-none" />
                         <div id="dropzone" class="dropzone-area">
                             <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem;"></i>
                             <h5 class="mt-2 text-dark fw-bold">Clique ou arraste novas fotos</h5>
@@ -278,9 +278,9 @@
                     <div class="card-body bg-primary text-white text-center rounded pb-4">
                         <h5 class="fw-bold mb-3">Preço de Venda</h5>
 
-                        <!-- PREÇO FORMATADO COM MÁSCARA -->
+                        <!-- PREÇO FORMATADO COM MÁSCARA (Envia com vírgula para pt-PT) -->
                         <div class="input-group input-group-lg mb-2">
-                            <input type="hidden" name="Preco" id="inputPrecoImovel" data-valor="@(Model.Preco.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))" value="@Model.Preco" />
+                            <input type="hidden" name="Preco" id="inputPrecoImovel" value="@(valorPrecoInicial > 0 ? valorPrecoInicial.ToString("0.00").Replace('.', ',') : "0,00")" />
                             <input type="text" id="inputPrecoFormatado" class="form-control fw-bold text-center bg-white text-dark border-0" style="color: #198754 !important;" placeholder="0,00" autocomplete="off" required />
                             <span class="input-group-text fw-bold bg-white border-0 text-dark">€</span>
                         </div>
@@ -327,7 +327,7 @@
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Guardar Alterações</button>
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow text-dark"><i class="bi bi-save-fill me-2"></i> Criar Imóvel</button>
                     </div>
                 </div>
             </div>
@@ -349,34 +349,47 @@
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
 
             // ==========================================
-            // 1. MÁSCARA DO PREÇO (100.000,00)
+            // 1. MÁSCARA DO PREÇO (Visual: 100.000,00 | BD pt-PT: 100000,00)
             // ==========================================
             const oculto = document.getElementById('inputPrecoImovel');
             const visual = document.getElementById('inputPrecoFormatado');
 
+            function limpaParaFloat(str) {
+                if (!str) return 0;
+                let limpo = str.toString().replace(/\./g, '').replace(',', '.');
+                let num = parseFloat(limpo);
+                return isNaN(num) ? 0 : num;
+            }
+
+            function formatarVisivel(num) {
+                if (!num || isNaN(num)) return '';
+                return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
             if (visual && oculto) {
-                const valorInicialRaw = parseFloat(oculto.getAttribute('data-valor'));
-                if (!isNaN(valorInicialRaw) && valorInicialRaw > 0) {
-                    visual.value = valorInicialRaw.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    oculto.value = valorInicialRaw.toFixed(2).replace('.', ',');
+                let precoInicial = limpaParaFloat(oculto.value);
+                if (precoInicial > 0) {
+                    visual.value = formatarVisivel(precoInicial);
+                    oculto.value = precoInicial.toFixed(2).replace('.', ',');
                 }
 
-                visual.addEventListener('input', function(e) {
-                    let apenasNumeros = e.target.value.replace(/\D/g, '');
+                visual.addEventListener('input', function (e) {
+                    let digitos = e.target.value.replace(/\D/g, '');
 
-                    if (apenasNumeros === '') {
+                    if (!digitos || digitos === '') {
                         e.target.value = '';
                         oculto.value = '0,00';
                         oculto.dispatchEvent(new Event('input'));
                         return;
                     }
 
-                    let numeroReal = parseInt(apenasNumeros, 10) / 100;
-                    e.target.value = numeroReal.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    oculto.value = numeroReal.toFixed(2).replace('.', ',');
+                    let real = parseInt(digitos, 10) / 100;
+                    e.target.value = formatarVisivel(real);
+                    // Envia com vírgula para o servidor pt-PT aceitar sem erros
+                    oculto.value = real.toFixed(2).replace('.', ',');
                     oculto.dispatchEvent(new Event('input'));
                 });
             }
@@ -387,51 +400,36 @@
             const inputPercent = document.getElementById('inputComissaoPercent');
             const inputValor = document.getElementById('inputComissaoValor');
 
-            function converterParaNum(stringValor) {
-                if (!stringValor) return 0;
-                let num = parseFloat(stringValor.toString().replace(/\./g, '').replace(',', '.'));
-                return isNaN(num) ? 0 : num;
-            }
-
             if (oculto && inputPercent && inputValor) {
-                oculto.addEventListener('input', function() {
-                    let p = converterParaNum(this.value);
-                    let pct = converterParaNum(inputPercent.value);
-                    if (pct > 0 && p > 0) {
-                        inputValor.value = ((p * pct) / 100.0).toFixed(2);
-                    }
+                oculto.addEventListener('input', function () {
+                    let p = limpaParaFloat(this.value);
+                    let pct = limpaParaFloat(inputPercent.value);
+                    if (pct > 0 && p > 0) inputValor.value = ((p * pct) / 100.0).toFixed(2);
                 });
 
-                inputPercent.addEventListener('input', function() {
-                    let p = converterParaNum(oculto.value);
-                    let pct = converterParaNum(this.value);
-                    if (pct > 0 && p > 0) {
-                        inputValor.value = ((p * pct) / 100.0).toFixed(2);
-                    } else if (this.value === '') {
-                        inputValor.value = '';
-                    }
+                inputPercent.addEventListener('input', function () {
+                    let p = limpaParaFloat(oculto.value);
+                    let pct = limpaParaFloat(this.value);
+                    if (pct > 0 && p > 0) inputValor.value = ((p * pct) / 100.0).toFixed(2);
+                    else if (this.value === '') inputValor.value = '';
                 });
 
-                inputValor.addEventListener('input', function() {
-                    let p = converterParaNum(oculto.value);
-                    let v = converterParaNum(this.value);
-                    if (v > 0 && p > 0) {
-                        inputPercent.value = ((v / p) * 100.0).toFixed(2);
-                    } else if (this.value === '') {
-                        inputPercent.value = '';
-                    }
+                inputValor.addEventListener('input', function () {
+                    let p = limpaParaFloat(oculto.value);
+                    let v = limpaParaFloat(this.value);
+                    if (v > 0 && p > 0) inputPercent.value = ((v / p) * 100.0).toFixed(2);
+                    else if (this.value === '') inputPercent.value = '';
                 });
             }
 
             // ==========================================
-            // 3. ADAPTAÇÃO DE TERRENOS E ÁREAS
+            // 3. CAMPOS DINÂMICOS TERRENO / COMÉRCIO
             // ==========================================
             const selectCategoria = document.getElementById('selectCategoriaImovel');
             const camposHabitacao = document.querySelectorAll('.campo-habitacao');
             const camposResidenciais = document.querySelectorAll('.campo-residencial');
             const blocoCertificado = document.getElementById('blocoCertificado');
             const labelAreaBruta = document.getElementById('labelAreaBruta');
-
             const blocoCamposTerreno = document.getElementById('blocoCamposTerreno');
             const selectTipoTerreno = document.getElementById('selectTipoTerreno');
             const campoAreaUrbana = document.getElementById('campoAreaUrbana');
@@ -440,12 +438,11 @@
             const inputAreaRustica = document.getElementById('inputAreaRustica');
             const inputAreaBruta = document.getElementById('inputAreaBruta');
 
-            function atualizarFormularioPorCategoria() {
+            function atualizarCategoria() {
                 if (!selectCategoria) return;
-                const texto = selectCategoria.options[selectCategoria.selectedIndex]?.text.toLowerCase() || '';
-
-                const isTerreno = texto.includes('terreno') || texto.includes('lote');
-                const isLojaComercio = texto.includes('loja') || texto.includes('armazém');
+                const txt = selectCategoria.options[selectCategoria.selectedIndex]?.text.toLowerCase() || '';
+                const isTerreno = txt.includes('terreno') || txt.includes('lote');
+                const isComercio = txt.includes('loja') || txt.includes('armazém') || txt.includes('armazem');
 
                 if (isTerreno) {
                     camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
@@ -454,7 +451,7 @@
                     if (labelAreaBruta) labelAreaBruta.innerText = 'Área Total (m²) *';
                     if (blocoCamposTerreno) blocoCamposTerreno.style.display = '';
                     atualizarCamposTerreno();
-                } else if (isLojaComercio) {
+                } else if (isComercio) {
                     camposHabitacao.forEach(el => { el.style.display = 'none'; const i = el.querySelector('input'); if (i) i.value = ''; });
                     camposResidenciais.forEach(el => el.style.display = '');
                     if (blocoCertificado) blocoCertificado.style.display = '';
@@ -486,59 +483,46 @@
                 }
             }
 
-            function somarAreasMisto() {
+            function somarAreas() {
                 const tipo = selectTipoTerreno?.value;
-                const u = converterParaNum(inputAreaUrbana?.value);
-                const r = converterParaNum(inputAreaRustica?.value);
-                if (tipo === 'Misto' && (u > 0 || r > 0)) {
-                    inputAreaBruta.value = (u + r).toFixed(2);
-                } else if (tipo === 'Urbano' && u > 0) {
-                    inputAreaBruta.value = u.toFixed(2);
-                } else if (tipo === 'Rústico' && r > 0) {
-                    inputAreaBruta.value = r.toFixed(2);
-                }
+                const u = limpaParaFloat(inputAreaUrbana?.value);
+                const r = limpaParaFloat(inputAreaRustica?.value);
+                if (tipo === 'Misto' && (u > 0 || r > 0)) inputAreaBruta.value = (u + r).toFixed(2);
+                else if (tipo === 'Urbano' && u > 0) inputAreaBruta.value = u.toFixed(2);
+                else if (tipo === 'Rústico' && r > 0) inputAreaBruta.value = r.toFixed(2);
             }
 
-            if (selectCategoria) selectCategoria.addEventListener('change', atualizarFormularioPorCategoria);
-            if (selectTipoTerreno) selectTipoTerreno.addEventListener('change', () => { atualizarCamposTerreno(); somarAreasMisto(); });
-            if (inputAreaUrbana) inputAreaUrbana.addEventListener('input', somarAreasMisto);
-            if (inputAreaRustica) inputAreaRustica.addEventListener('input', somarAreasMisto);
-
-            atualizarFormularioPorCategoria();
+            if (selectCategoria) selectCategoria.addEventListener('change', atualizarCategoria);
+            if (selectTipoTerreno) selectTipoTerreno.addEventListener('change', () => { atualizarCamposTerreno(); somarAreas(); });
+            if (inputAreaUrbana) inputAreaUrbana.addEventListener('input', somarAreas);
+            if (inputAreaRustica) inputAreaRustica.addEventListener('input', somarAreas);
+            atualizarCategoria();
 
             // ==========================================
-            // 4. GESTÃO E ARRASTAR DE FOTOS
+            // 4. GALERIA E ARRASTAR DE FOTOS (fotosUpload)
             // ==========================================
-            let ficheirosEmMemoria = [
-                @if (Model.Fotos != null)
-                {
-                    int idFalso = -1000;
-                    foreach (var f in Model.Fotos.OrderBy(x => x.Ordem))
-                    {
-                        <text>{id: @(idFalso--), idServer: @f.Id, isServer: true, dataUrl: '@f.CaminhoImagem' },</text>
-                    }
-                }
-            ];
-            let fotosRemovidasIds = [];
+            let ficheirosEmMemoria = [];
             let fotoIdCounter = 0;
             const dropzone = document.getElementById('dropzone');
             const inputReal = document.getElementById('fotosInputReal');
             const gallery = document.getElementById('gallery');
             const form = document.getElementById('imovelForm');
 
-            dropzone.addEventListener('click', () => inputReal.click());
-            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-            dropzone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropzone.classList.remove('dragover');
-                processarFicheiros(e.dataTransfer.files);
-            });
+            if (dropzone && inputReal) {
+                dropzone.addEventListener('click', () => inputReal.click());
+                dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+                dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+                dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('dragover');
+                    if (e.dataTransfer && e.dataTransfer.files) processarFicheiros(e.dataTransfer.files);
+                });
 
-            inputReal.addEventListener('change', (e) => {
-                processarFicheiros(e.target.files);
-                inputReal.value = '';
-            });
+                inputReal.addEventListener('change', (e) => {
+                    if (e.target.files) processarFicheiros(e.target.files);
+                    inputReal.value = '';
+                });
+            }
 
             function processarFicheiros(files) {
                 Array.from(files).forEach(file => {
@@ -546,7 +530,7 @@
                         const reader = new FileReader();
                         reader.readAsDataURL(file);
                         reader.onload = (e) => {
-                            ficheirosEmMemoria.push({ id: fotoIdCounter++, isServer: false, file: file, dataUrl: e.target.result });
+                            ficheirosEmMemoria.push({ id: fotoIdCounter++, file: file, dataUrl: e.target.result });
                             desenharGaleria();
                         };
                     }
@@ -554,6 +538,7 @@
             }
 
             function desenharGaleria() {
+                if (!gallery) return;
                 gallery.innerHTML = '';
                 ficheirosEmMemoria.forEach((item, index) => {
                     const thumb = document.createElement('div');
@@ -575,42 +560,25 @@
                     thumb.addEventListener('dragend', handleDragEnd);
                     gallery.appendChild(thumb);
                 });
-
-                let orderInput = document.getElementById('existingPhotoOrder');
-                if (!orderInput) {
-                    orderInput = document.createElement('input');
-                    orderInput.type = 'hidden';
-                    orderInput.id = 'existingPhotoOrder';
-                    orderInput.name = 'existingPhotoOrder';
-                    form.appendChild(orderInput);
-                }
-                orderInput.value = ficheirosEmMemoria.map(f => f.isServer ? `old_${f.idServer}` : `new_${ficheirosEmMemoria.filter(x => !x.isServer).indexOf(f)}`).join(',');
             }
 
-            window.removerFoto = function(id) {
-                const index = ficheirosEmMemoria.findIndex(f => f.id === id);
-                if (index > -1) {
-                    const fotoRemover = ficheirosEmMemoria[index];
-                    if (fotoRemover.isServer) {
-                        fotosRemovidasIds.push(fotoRemover.idServer);
-                        document.getElementById('fotosRemovidasInput').value = fotosRemovidasIds.join(',');
-                    }
-                    ficheirosEmMemoria.splice(index, 1);
-                    desenharGaleria();
-                }
-            }
+            window.removerFoto = function (id) {
+                ficheirosEmMemoria = ficheirosEmMemoria.filter(f => f.id !== id);
+                desenharGaleria();
+            };
 
-            window.abrirZoom = function(srcData) {
+            window.abrirZoom = function (srcData) {
                 document.getElementById('zoomImagem').src = srcData;
                 new bootstrap.Modal(document.getElementById('fotoZoomModal')).show();
-            }
+            };
 
             let itemArrastado = null;
             function handleDragStart(e) { itemArrastado = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
             function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (itemArrastado !== this) { this.classList.add('drag-over'); } return false; }
-            function handleDragLeave(e) { this.classList.remove('drag-over'); }
+            function handleDragLeave() { this.classList.remove('drag-over'); }
             function handleDrop(e) {
-                e.stopPropagation(); this.classList.remove('drag-over');
+                e.stopPropagation();
+                this.classList.remove('drag-over');
                 if (itemArrastado !== this) {
                     const idArrastado = parseInt(itemArrastado.dataset.id);
                     const idAlvo = parseInt(this.dataset.id);
@@ -624,13 +592,26 @@
             }
             function handleDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.photo-thumbnail').forEach(el => el.classList.remove('drag-over')); }
 
-            form.addEventListener('submit', (e) => {
-                const dt = new DataTransfer();
-                ficheirosEmMemoria.forEach(item => { if (!item.isServer && item.file) dt.items.add(item.file); });
-                inputReal.files = dt.files;
-            });
+            // ==========================================
+            // SUBMISSÃO DO FORMULÁRIO
+            // ==========================================
+            if (form) {
+                form.addEventListener('submit', () => {
+                    if (!oculto.value || oculto.value.trim() === '') {
+                        oculto.value = '0,00';
+                    } else {
+                        oculto.value = oculto.value.replace('.', ',');
+                    }
 
-            desenharGaleria();
+                    if (ficheirosEmMemoria.length > 0 && inputReal) {
+                        const dt = new DataTransfer();
+                        ficheirosEmMemoria.forEach(item => {
+                            if (item.file) dt.items.add(item.file);
+                        });
+                        inputReal.files = dt.files;
+                    }
+                });
+            }
         });
     </script>
 }

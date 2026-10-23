@@ -49,23 +49,25 @@
         max-height: 750px;
         width: 100%;
         background-color: var(--bs-body-bg);
-        touch-action: pan-y pinch-zoom;
+        touch-action: pan-x pan-y pinch-zoom;
         position: relative;
+        border-radius: 1rem !important;
+        overflow: hidden;
     }
 
-    .imovel-carousel-wrapper .carousel-inner,
-    .imovel-carousel-wrapper .carousel-item {
-        height: 100%;
-        width: 100%;
-    }
+        .imovel-carousel-wrapper .carousel-inner,
+        .imovel-carousel-wrapper .carousel-item {
+            height: 100%;
+            width: 100%;
+        }
 
-    /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
-    .imovel-carousel-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        cursor: zoom-in;
-    }
+        /* IMAGEM CENTRADA E COM PROPORÇÃO MANTIDA */
+        .imovel-carousel-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: zoom-in;
+        }
 
     /* Miniaturas na base */
     .gallery-thumb {
@@ -75,32 +77,47 @@
         object-fit: cover;
         opacity: 0.6;
         cursor: pointer;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: all 0.2s ease;
     }
 
-    .gallery-thumb.active, .gallery-thumb:hover {
-        border-color: var(--bs-primary);
-        opacity: 1;
-    }
+        .gallery-thumb.active, .gallery-thumb:hover {
+            border-color: var(--bs-primary);
+            opacity: 1;
+        }
 
-    /* CARTÕES DE ESTATÍSTICAS RETOS (SEM BORDAS REDONDAS) */
-    .detail-stat {
-        border-radius: 0 !important;
+    /* CARTÕES E SECÇÕES COM BORDAS REDONDAS (IGUAL AO FORMULÁRIO DE CONTACTO) */
+    .section-card {
+        border-radius: 1rem !important;
         background: #ffffff;
         border: 1px solid #dee2e6;
-        height: 100%;
+        overflow: hidden;
         box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
     }
 
-    .detail-stat i {
-        color: var(--bs-primary);
-        font-size: 1.3rem;
+    .detail-stat {
+        border-radius: 1rem !important;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        height: 100%;
+        overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
     }
+
+        .detail-stat i {
+            color: var(--bs-primary);
+            font-size: 1.3rem;
+        }
 
     .contact-card {
         top: 1.25rem;
-        border-radius: 1rem;
+        border-radius: 1rem !important;
+        overflow: hidden;
+    }
+
+    .spec-grid {
+        border-radius: 0.75rem !important;
+        border: 1px solid #dee2e6;
         overflow: hidden;
     }
 
@@ -121,8 +138,8 @@
         letter-spacing: 0.8px;
         color: #ffffff !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        border-top-right-radius: 6px;
-        border-bottom-right-radius: 6px;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
         pointer-events: none;
     }
 </style>
@@ -152,8 +169,8 @@
     <div class="container-xl pt-4">
         @if (fotos.Any())
         {
-            <div id="imovelCarousel" class="carousel slide bg-body rounded-4 shadow-sm overflow-hidden imovel-carousel-wrapper" data-bs-ride="false" data-bs-touch="true">
-                
+            <div id="imovelCarousel" class="carousel slide bg-body shadow-sm imovel-carousel-wrapper" data-bs-ride="false" data-bs-touch="true">
+
                 @if (temEtiqueta)
                 {
                     <div class="badge-status-ribbon-details" style="background-color: @corEtiqueta !important;">
@@ -196,7 +213,7 @@
         }
         else
         {
-            <div class="d-flex flex-column gap-2 align-items-center justify-content-center bg-body rounded-4 shadow-sm text-muted imovel-carousel-wrapper">
+            <div class="d-flex flex-column gap-2 align-items-center justify-content-center bg-body shadow-sm text-muted imovel-carousel-wrapper">
                 @if (temEtiqueta)
                 {
                     <div class="badge-status-ribbon-details" style="background-color: @corEtiqueta !important;">
@@ -219,28 +236,28 @@
             <!-- AVISO DE IMÓVEL OCULTO DO CATÁLOGO -->
             @if (Model.OcultoDoCatalogo && equipa)
             {
-                <div class="alert alert-warning border-warning d-flex align-items-center mb-4 py-2 px-3 fw-bold small rounded-3 shadow-sm">
+                <div class="alert alert-warning border-warning d-flex align-items-center mb-4 py-3 px-4 fw-bold small shadow-sm" style="border-radius: 1rem !important;">
                     <i class="bi bi-eye-slash-fill fs-5 me-2"></i>
                     Este imóvel está oculto do catálogo público. Apenas quem tem a ligação direta consegue aceder.
                 </div>
             }
 
-            <!-- CABEÇALHO DO IMÓVEL -->
-            <div class="bg-white p-4 rounded-4 shadow-sm border border-secondary-subtle mb-4">
+            <!-- 1. CABEÇALHO DO IMÓVEL (Comprar / Disponível / Título / Localização / Preço / Ref) -->
+            <div class="section-card p-4 mb-4">
                 <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
                     <div>
                         <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
-                            <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
+                            <span class="badge bg-white text-dark border border-secondary-subtle px-3 py-2 shadow-sm fw-bold rounded-pill">@(Model.TipoNegocio?.Nome ?? "Imóvel")</span>
 
                             @if (temEtiqueta)
                             {
-                                <span class="badge px-3 py-2 text-white shadow-sm fw-bold" style="background-color: @corEtiqueta !important;">
+                                <span class="badge px-3 py-2 text-white shadow-sm fw-bold rounded-pill" style="background-color: @corEtiqueta !important;">
                                     @Model.StatusImovel!.Nome
                                 </span>
                             }
                             else if (!string.IsNullOrWhiteSpace(Model.StatusImovel?.Nome))
                             {
-                                <span class="badge bg-white text-dark border border-secondary-subtle shadow-sm px-3 py-2 fw-bold">@Model.StatusImovel.Nome</span>
+                                <span class="badge bg-white text-dark border border-secondary-subtle shadow-sm px-3 py-2 fw-bold rounded-pill">@Model.StatusImovel.Nome</span>
                             }
                         </div>
                         <h1 class="display-6 fw-bold mb-2 text-dark">@Model.Titulo</h1>
@@ -261,7 +278,7 @@
                 </div>
             </div>
 
-            <!-- QUADRADOS DE DESTAQUE DINÂMICOS (CANTOS RETOS) -->
+            <!-- 2. QUADRADOS DE DESTAQUE DINÂMICOS (BORDAS REDONDAS) -->
             <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
                 @if (Model.Quartos.HasValue && Model.Quartos.Value > 0)
                 {
@@ -306,7 +323,8 @@
                         <strong class="text-dark fs-5">
                             @if (precoM2 > 0)
                             {
-                                @(Model.PrecoDesde ? "Desde " : "")@precoM2.ToString("#,##0.00", culturaPT) <text>€</text>
+                                @(Model.PrecoDesde ? "Desde " : "")
+                                @precoM2.ToString("#,##0.00", culturaPT) <text>€</text>
                             }
                             else
                             {
@@ -317,18 +335,18 @@
                 </div>
             </div>
 
-            <!-- DESCRIÇÃO -->
-            <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+            <!-- 3. SOBRE ESTE IMÓVEL (BORDAS REDONDAS) -->
+            <section class="section-card p-4 mb-5">
                 <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Sobre este imóvel</h2>
                 <p class="lh-lg text-dark mb-0 fw-medium" style="white-space: pre-line;">
                     @(string.IsNullOrWhiteSpace(Model.Descricao) ? "Contacte-nos para conhecer todos os detalhes deste imóvel." : Model.Descricao)
                 </p>
             </section>
 
-            <!-- DETALHES TÉCNICOS -->
-            <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+            <!-- 4. DETALHES TÉCNICOS (BORDAS REDONDAS) -->
+            <section class="section-card p-4 mb-5">
                 <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Detalhes</h2>
-                <div class="row g-0 border border-secondary-subtle rounded overflow-hidden">
+                <div class="row g-0 spec-grid">
                     <div class="col-md-6 p-3 border-bottom border-secondary-subtle spec-row">
                         <span class="small d-block fw-bold" style="color: #6c757d;">Tipo de imóvel</span>
                         <strong class="text-dark">@(Model.CategoriaImovel?.Nome ?? "—")</strong>
@@ -369,21 +387,21 @@
                 </div>
             </section>
 
-            <!-- CARACTERÍSTICAS -->
+            <!-- 5. CARACTERÍSTICAS (BORDAS REDONDAS) -->
             @if (caracteristicas.Any())
             {
-                <section class="mb-5 bg-white p-4 rounded-4 border border-secondary-subtle shadow-sm">
+                <section class="section-card p-4 mb-5">
                     <h2 class="h4 fw-bold border-bottom border-secondary-subtle pb-3 mb-3 text-dark">Características</h2>
                     <div class="row g-3">
                         @foreach (var grupo in caracteristicas)
                         {
                             <div class="col-md-6">
-                                <div class="border border-secondary-subtle rounded-4 h-100 p-3 bg-white">
+                                <div class="spec-grid h-100 p-3 bg-white">
                                     <h3 class="h6 fw-bold mb-3 text-dark">@grupo.Key</h3>
                                     <div class="d-flex flex-wrap gap-2">
                                         @foreach (var item in grupo)
                                         {
-                                            <span class="badge bg-white text-dark border border-secondary-subtle fw-bold shadow-sm">
+                                            <span class="badge bg-white text-dark border border-secondary-subtle fw-bold shadow-sm rounded-pill px-3 py-2">
                                                 <i class="bi bi-check-circle-fill text-success me-1"></i>@item.Caracteristica!.Nome
                                             </span>
                                         }
@@ -395,13 +413,13 @@
                 </section>
             }
 
-            <!-- INFORMAÇÃO INTERNA -->
+            <!-- 6. INFORMAÇÃO INTERNA (BORDAS REDONDAS) -->
             @if (equipa)
             {
-                <section class="card border-warning-subtle bg-white mb-4 shadow-sm border-start border-5 border-warning">
-                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3 d-flex justify-content-between align-items-center">
+                <section class="section-card border-warning-subtle bg-white mb-4 border-start border-5 border-warning">
+                    <div class="card-header bg-white border-bottom border-secondary-subtle fw-bold text-dark py-3 px-4 d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-shield-lock-fill text-warning me-2"></i>Informação Interna (Privada)</span>
-                        <span class="badge bg-warning text-dark">Acesso Restrito</span>
+                        <span class="badge bg-warning text-dark rounded-pill">Acesso Restrito</span>
                     </div>
                     <div class="card-body bg-white p-4">
                         <div class="row g-3">
@@ -456,7 +474,7 @@
                                 {
                                     @foreach (var p in Model.Proprietarios)
                                     {
-                                        <span class="badge bg-light text-dark border me-1">
+                                        <span class="badge bg-light text-dark border me-1 rounded-pill">
                                             <i class="bi bi-person-fill text-primary me-1"></i>@(p.Cliente?.Nome ?? "Cliente #" + p.ClienteId)
                                         </span>
                                     }
@@ -469,7 +487,7 @@
 
                             <div class="col-12">
                                 <span class="small d-block fw-bold text-muted">Notas / Observações Internas</span>
-                                <p class="text-dark mb-0 fw-medium bg-light p-3 rounded border" style="white-space: pre-line;">
+                                <p class="text-dark mb-0 fw-medium bg-light p-3 border" style="white-space: pre-line; border-radius: 0.75rem;">
                                     @(string.IsNullOrWhiteSpace(Model.ObservacoesInternas) ? "Sem observações internas registadas." : Model.ObservacoesInternas)
                                 </p>
                             </div>
@@ -483,7 +501,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach (var documento in Model.Documentos)
                                     {
-                                        <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark fw-bold shadow-sm">
+                                        <a href="@documento.CaminhoFicheiro" target="_blank" class="btn btn-sm btn-outline-dark fw-bold shadow-sm rounded-3">
                                             <i class="bi bi-file-earmark-arrow-down-fill text-danger me-1"></i>@documento.NomeFicheiro
                                         </a>
                                     }
@@ -521,18 +539,18 @@
                         <input type="hidden" name="Assunto" value="Pedido de informação — Ref. @referencia" />
 
                         <div class="form-floating mb-2">
-                            <input name="Nome" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Nome" required />
+                            <input name="Nome" class="form-control bg-white text-dark border-secondary-subtle fw-medium rounded-3" placeholder="Nome" required />
                             <label class="text-dark fw-bold">O seu nome</label>
                         </div>
                         <div class="form-floating mb-2">
-                            <input name="Contacto" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Telefone ou e-mail" required />
+                            <input name="Contacto" class="form-control bg-white text-dark border-secondary-subtle fw-medium rounded-3" placeholder="Telefone ou e-mail" required />
                             <label class="text-dark fw-bold">Telefone ou e-mail</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <textarea name="Mensagem" class="form-control bg-white text-dark border-secondary-subtle fw-medium" placeholder="Mensagem" style="height: 110px" required>Gostaria de receber mais informações sobre o imóvel Ref. @referencia.</textarea>
+                            <textarea name="Mensagem" class="form-control bg-white text-dark border-secondary-subtle fw-medium rounded-3" placeholder="Mensagem" style="height: 110px" required>Gostaria de receber mais informações sobre o imóvel Ref. @referencia.</textarea>
                             <label class="text-dark fw-bold">Mensagem</label>
                         </div>
-                        <button class="btn btn-primary w-100 fw-bold shadow-sm p-3" type="submit">
+                        <button class="btn btn-primary w-100 fw-bold shadow-sm p-3 rounded-3" type="submit">
                             Pedir contacto <i class="bi bi-send-fill ms-1"></i>
                         </button>
                     </form>
@@ -569,6 +587,7 @@
                         <button class="carousel-control-next" type="button" data-bs-target="#carouselFullscreen" data-bs-slide="next" style="z-index: 1050;">
                             <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true" style="opacity: 0.5;"></span>
                             <span class="visually-hidden">Seguinte</span>
+                        </button>
                         </button>
                     }
                 </div>
